@@ -95,6 +95,8 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
   }
 
   void _addNewSchool() {
+    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -102,27 +104,107 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
         String? address;
         String? phoneNumber;
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
           title: const Text('Nhập Thông Tin'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                TextFormField(
-                  decoration: const InputDecoration(hintText: 'Tên Trường'),
-                  onChanged: (value) {
-                    name = value;
-                  },
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(hintText: 'Địa Chỉ'),
-                  onChanged: (value) {
-                    address = value;
-                  },
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(hintText: 'Số Điện Thoại'),
-                  onChanged: (value) {
-                    phoneNumber = value;
-                  },
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Tên Trường', // Label text
+                          hintText: 'Nhập tên của trường', // Placeholder text
+                          floatingLabelBehavior:
+                              FloatingLabelBehavior.auto, // Label behavior
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                                4), // Rounded corners for the input field
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 2), // Blue border when focused
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.grey,
+                                width: 1), // Grey border by default
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          name = value; // Update the name variable on change
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Bắt buộc'; // Error message when the field is left empty
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 8), // Consistent spacing
+
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Địa chỉ', // Label text
+                          hintText: 'Nhập địa chỉ', // Placeholder text
+                          floatingLabelBehavior:
+                              FloatingLabelBehavior.auto, // Label behavior
+
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(4), // Rounded corners
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: AppColors.primary, width: 2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.grey, width: 1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onChanged: (value) =>
+                            address = value, // Update phone number
+                      ),
+                      const SizedBox(height: 8), // Consistent spacing
+
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Số điện thoại', // Label text
+                          hintText: 'Nhập số điện thoại', // Placeholder text
+                          floatingLabelBehavior:
+                              FloatingLabelBehavior.auto, // Label behavior
+
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(4), // Rounded corners
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: AppColors.primary, width: 2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.grey, width: 1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onChanged: (value) =>
+                            phoneNumber = value, // Update phone number
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -138,13 +220,14 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
               child: const Text('Lưu'),
               onPressed: () {
                 if (name != null && name!.isNotEmpty) {
-                  setState(() {
-                    schools.add({
-                      'name': name,
-                      'address': address,
-                      'phoneNumber': phoneNumber
-                    });
-                  });
+                  //call api tạo trường mới, reload
+                  // setState(() {
+                  //   schools.add({
+                  //     'name': name,
+                  //     'address': address,
+                  //     'phoneNumber': phoneNumber
+                  //   });
+                  // });
                   Navigator.of(context).pop();
                 }
               },
