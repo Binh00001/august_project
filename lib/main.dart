@@ -1,45 +1,61 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_project_august/features/auth/screens/login_screen.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
+import 'package:flutter_project_august/database/local_database.dart';
+import 'package:flutter_project_august/page/login_page/login_screen.dart';
+import 'package:flutter_project_august/network/dio.dart';
+import 'package:flutter_project_august/repo/auth_repo.dart';
+import 'package:flutter_project_august/repo/school_repo.dart';
 
-import 'product/constants/app/app_constants.dart';
-import 'product/cache/locale_manager.dart';
-import 'product/lang/language_manager.dart';
-import 'product/navigation/navigation_router.dart';
-import 'product/navigation/navigation_service.dart';
-import 'product/notifier/app_provider.dart';
-import 'product/theme/theme_notifier.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Dio dio = await DioClient.createDio();
 
-void main() {
-  LocaleManager.prefrencesInit();
-  runApp(
-    MultiProvider(
-      providers: [...ApplicationProvider.instance.dependItems],
-      child: EasyLocalization(
-        supportedLocales: LanguageManager.instance.supportedLocales,
-        path: ApplicationConstants.LANG_ASSET_PATH,
-        startLocale: LanguageManager.instance.enLocale,
-        child: const MyApp(),
-      ),
-    ),
-  );
+  LocalDatabase localDatabase =
+      LocalDatabase.instance; // Access the singleton instance of LocalDatabase
+
+  runApp(MyApp(
+    dio: dio,
+    localDatabase: localDatabase,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Dio dio;
+  final LocalDatabase localDatabase;
+  const MyApp({super.key, required this.dio, required this.localDatabase});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: context.localizationDelegates, // Localization
-      locale: LanguageManager.instance.enLocale,
-      supportedLocales: LanguageManager.instance.supportedLocales,
-      onGenerateRoute: NavigationRoute.instance.generateRoute,
-      navigatorKey: NavigationService.instance.navigatorKey,
-      theme: context.watch<ThemeNotifier>().currentTheme,
-      home: const LoginPage(),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AuthRepo>(
+          create: (_) => AuthRepositoryImpl(
+              dio), // Assuming AuthRepositoryImpl expects a Dio instance
+        ),
+        RepositoryProvider<SchoolRepo>(
+          create: (_) => SchoolRepo(
+              dio: dio,
+              localDatabase:
+                  localDatabase), // Create and provide SchoolRepo with Dio
+        ),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<SchoolBloc>(
+            create: (context) => SchoolBloc(
+              schoolRepo: context.read<
+                  SchoolRepo>(), // Now SchoolRepo is provided and can be read
+            ),
+          ),
+          // Include other BlocProviders if needed
+        ],
+        child: const MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: LoginPage(), // Ensure LoginPage is correctly implemented
+        ),
+      ),
     );
   }
 }
