@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/create_school/create_school_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/database/local_database.dart';
 import 'package:flutter_project_august/page/login_page/login_screen.dart';
@@ -45,6 +46,12 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider<SchoolBloc>(
             create: (context) => SchoolBloc(
+              schoolRepo: context.read<
+                  SchoolRepo>(), // Now SchoolRepo is provided and can be read
+            ),
+          ),
+          BlocProvider<CreateSchoolBloc>(
+            create: (context) => CreateSchoolBloc(
               schoolRepo: context.read<
                   SchoolRepo>(), // Now SchoolRepo is provided and can be read
             ),

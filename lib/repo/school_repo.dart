@@ -8,6 +8,18 @@ class SchoolRepo {
 
   SchoolRepo({required this.dio, required this.localDatabase});
 
+  Future<Response> createSchool({required Map<String, String> dataForm}) async {
+    try {
+      final response = await dio.post(
+        '${AppConstants.baseUrl}/v1/school',
+        data: dataForm,
+      );
+      return response;
+    } catch (e) {
+      throw Exception('Failed to create school: $e');
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getAllSchools(
       int page, int pageSize) async {
     try {

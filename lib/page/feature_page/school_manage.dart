@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/create_school/create_school_bloc.dart';
+import 'package:flutter_project_august/blocs/create_school/create_school_event.dart';
+import 'package:flutter_project_august/blocs/create_school/create_school_state.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
@@ -36,43 +39,60 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
           title: Text('Quản Lý Trường Học(${schools.length})'),
           centerTitle: true,
         ),
-        body: BlocConsumer<SchoolBloc, SchoolState>(
-          listener: (context, state) {
-            if (state is SchoolLoaded) {
-              setState(() {
-                schools = state.schools;
-              });
-            } else if (state is SchoolError) {
-              _loadSchoolsFromLocal();
-            }
-          },
-          builder: (context, state) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView.builder(
-                itemCount: schools.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == schools.length) {
-                    return const SizedBox(height: 240);
-                  }
-                  return ExpansionTile(
-                    title: Text('${index + 1}. ${schools[index]['name']}'),
-                    children: <Widget>[
-                      ListTile(
-                        title: const Text('Địa chỉ'),
-                        subtitle: Text(schools[index]['address'] ?? 'Không có'),
-                      ),
-                      ListTile(
-                        title: const Text('Điện thoại'),
-                        subtitle:
-                            Text(schools[index]['phoneNumber'] ?? 'Không có'),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            );
-          },
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<SchoolBloc, SchoolState>(
+              listener: (context, state) {
+                if (state is SchoolLoaded) {
+                  setState(() {
+                    schools = state.schools;
+                  });
+                } else if (state is SchoolError) {
+                  _loadSchoolsFromLocal();
+                }
+              },
+            ),
+            BlocListener<CreateSchoolBloc, CreateSchoolState>(
+              listener: (context, state) {
+                if (state is CreateSchoolLoading) {
+                  _showLoadingDialog();
+                } else if (state is CreateSchoolSuccess) {
+                  Navigator.of(context).pop(); // Dismiss loading dialog
+                  _showMessageDialog('Thành công', state.message);
+                  BlocProvider.of<SchoolBloc>(context)
+                      .add(GetAllSchoolsEvent());
+                } else if (state is CreateSchoolFailure) {
+                  Navigator.of(context).pop(); // Dismiss loading dialog
+                  _showMessageDialog('Thất bại', state.error);
+                }
+              },
+            ),
+          ],
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.builder(
+              itemCount: schools.length + 1,
+              itemBuilder: (context, index) {
+                if (index == schools.length) {
+                  return const SizedBox(height: 240);
+                }
+                return ExpansionTile(
+                  title: Text('${index + 1}. ${schools[index]['name']}'),
+                  children: <Widget>[
+                    ListTile(
+                      title: const Text('Địa chỉ'),
+                      subtitle: Text(schools[index]['address'] ?? 'Không có'),
+                    ),
+                    ListTile(
+                      title: const Text('Điện thoại'),
+                      subtitle:
+                          Text(schools[index]['phoneNumber'] ?? 'Không có'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _addNewSchool,
@@ -117,91 +137,76 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
                     children: [
                       TextFormField(
                         decoration: InputDecoration(
-                          labelText: 'Tên Trường', // Label text
-                          hintText: 'Nhập tên của trường', // Placeholder text
-                          floatingLabelBehavior:
-                              FloatingLabelBehavior.auto, // Label behavior
-
+                          labelText: 'Tên Trường',
+                          hintText: 'Nhập tên của trường',
+                          floatingLabelBehavior: FloatingLabelBehavior.auto,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                                4), // Rounded corners for the input field
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderSide: const BorderSide(
-                                color: AppColors.primary,
-                                width: 2), // Blue border when focused
+                                color: AppColors.primary, width: 2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.grey,
-                                width: 1), // Grey border by default
+                            borderSide:
+                                const BorderSide(color: Colors.grey, width: 1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                         onChanged: (value) {
-                          name = value; // Update the name variable on change
+                          name = value;
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Bắt buộc'; // Error message when the field is left empty
+                            return 'Bắt buộc';
                           }
                           return null;
                         },
                       ),
-                      const SizedBox(height: 8), // Consistent spacing
-
+                      const SizedBox(height: 8),
                       TextFormField(
                         decoration: InputDecoration(
-                          labelText: 'Địa chỉ', // Label text
-                          hintText: 'Nhập địa chỉ', // Placeholder text
-                          floatingLabelBehavior:
-                              FloatingLabelBehavior.auto, // Label behavior
-
+                          labelText: 'Địa chỉ',
+                          hintText: 'Nhập địa chỉ',
+                          floatingLabelBehavior: FloatingLabelBehavior.auto,
                           border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(4), // Rounded corners
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: AppColors.primary, width: 2),
+                            borderSide: const BorderSide(
+                                color: AppColors.primary, width: 2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide:
-                                BorderSide(color: Colors.grey, width: 1),
+                                const BorderSide(color: Colors.grey, width: 1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onChanged: (value) =>
-                            address = value, // Update phone number
+                        onChanged: (value) => address = value,
                       ),
-                      const SizedBox(height: 8), // Consistent spacing
-
+                      const SizedBox(height: 8),
                       TextFormField(
                         decoration: InputDecoration(
-                          labelText: 'Số điện thoại', // Label text
-                          hintText: 'Nhập số điện thoại', // Placeholder text
-                          floatingLabelBehavior:
-                              FloatingLabelBehavior.auto, // Label behavior
-
+                          labelText: 'Số điện thoại',
+                          hintText: 'Nhập số điện thoại',
+                          floatingLabelBehavior: FloatingLabelBehavior.auto,
                           border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(4), // Rounded corners
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: AppColors.primary, width: 2),
+                            borderSide: const BorderSide(
+                                color: AppColors.primary, width: 2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide:
-                                BorderSide(color: Colors.grey, width: 1),
+                                const BorderSide(color: Colors.grey, width: 1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onChanged: (value) =>
-                            phoneNumber = value, // Update phone number
+                        onChanged: (value) => phoneNumber = value,
                       ),
                     ],
                   ),
@@ -219,15 +224,15 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
             TextButton(
               child: const Text('Lưu'),
               onPressed: () {
-                if (name != null && name!.isNotEmpty) {
-                  //call api tạo trường mới, reload
-                  // setState(() {
-                  //   schools.add({
-                  //     'name': name,
-                  //     'address': address,
-                  //     'phoneNumber': phoneNumber
-                  //   });
-                  // });
+                if (name != null && name!.trim().isNotEmpty) {
+                  context.read<CreateSchoolBloc>().add(
+                        CreateSchool(
+                          name: name!.trim(),
+                          address: (address ?? "").trim(),
+                          contactNumber: (phoneNumber ?? "").trim(),
+                        ),
+                      );
+
                   Navigator.of(context).pop();
                 }
               },
@@ -243,5 +248,37 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
     setState(() {
       schools = dbSchools;
     });
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+  }
+
+  void _showMessageDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
