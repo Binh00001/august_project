@@ -3,6 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/create_category/create_category_bloc.dart';
+import 'package:flutter_project_august/blocs/create_category/create_category_event.dart';
+import 'package:flutter_project_august/blocs/create_category/create_category_state.dart';
+import 'package:flutter_project_august/blocs/create_origin/create_origin_bloc.dart';
+import 'package:flutter_project_august/blocs/create_origin/create_origin_event.dart';
+import 'package:flutter_project_august/blocs/create_origin/create_origin_state.dart';
 import 'package:flutter_project_august/blocs/create_product/create_product_bloc.dart';
 import 'package:flutter_project_august/blocs/create_product/create_product_event.dart';
 import 'package:flutter_project_august/blocs/create_product/create_product_state.dart';
@@ -22,6 +28,8 @@ class CreateProductPage extends StatefulWidget {
 }
 
 class _CreateProductPageState extends State<CreateProductPage> {
+  final TextEditingController _newOriginController = TextEditingController();
+  final TextEditingController _newCategoryController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final _formKey = GlobalKey<FormState>(); // Create a GlobalKey for the Form
@@ -32,18 +40,18 @@ class _CreateProductPageState extends State<CreateProductPage> {
   final List<Map<String, String>> units = [
     {'name': 'Kilogram', 'value': 'kg'},
     {'name': 'Gram', 'value': 'g'},
-    {'name': 'Gói', 'value': 'Gói'},
-    {'name': 'Khay', 'value': 'Khay'},
-    {'name': 'Lít', 'value': 'L'},
-    {'name': 'Mililít', 'value': 'ML'},
-    {'name': 'Thùng', 'value': 'Thùng'},
-    {'name': 'Chai', 'value': 'Chai'},
-    {'name': 'Lon', 'value': 'Lon'},
-    {'name': 'Hộp', 'value': 'Hộp'},
-    {'name': 'Cái', 'value': 'Cái'},
-    {'name': 'Bao', 'value': 'Bao'},
-    {'name': 'Cặp', 'value': 'Cặp'},
-    {'name': 'Cuộn', 'value': 'Cuộn'},
+    {'name': 'Lít', 'value': 'l'},
+    {'name': 'Mililít', 'value': 'ml'},
+    {'name': 'Mét', 'value': 'm'},
+    {'name': 'Centimet', 'value': 'cm'},
+    {'name': 'Khay', 'value': 'khay'},
+    {'name': 'Chiếc', 'value': 'chiếc'},
+    {'name': 'Cái', 'value': 'cái'},
+    {'name': 'Ví', 'value': 'ví'},
+    {'name': 'Bịch', 'value': 'bịch'},
+    {'name': 'Gói', 'value': 'gói'},
+    {'name': 'Chai', 'value': 'chai'},
+    {'name': 'Hộp', 'value': 'hộp'},
   ];
 
   @override
@@ -79,61 +87,149 @@ class _CreateProductPageState extends State<CreateProductPage> {
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
         ),
-        body: BlocListener<CreateProductBloc, CreateProductState>(
-          listener: (context, state) {
-            if (state is CreateProductLoading) {
-              // Show loading dialog or indicator if needed
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<CreateProductBloc, CreateProductState>(
+              listener: (context, state) {
+                if (state is CreateProductLoading) {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    },
                   );
-                },
-              );
-            } else if (state is CreateProductSuccess) {
-              Navigator.of(context).pop(); // Close loading dialog
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Thành công'),
-                    content: const Text('Sản phẩm đã được tạo thành công.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close dialog
-                          Navigator.of(context)
-                              .pop(); // Go back to previous screen
-                        },
-                        child: const Text('OK'),
-                      ),
-                    ],
+                } else if (state is CreateProductSuccess) {
+                  Navigator.of(context).pop(); // Close loading dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Thành công'),
+                        content: const Text('Sản phẩm đã được tạo thành công.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close dialog
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
                   );
-                },
-              );
-            } else if (state is CreateProductFailure) {
-              Navigator.of(context).pop(); // Close loading dialog
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Thất bại'),
-                    content: const Text("Thêm sản phẩm mới thất bại"),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close dialog
-                        },
-                        child: const Text('OK'),
-                      ),
-                    ],
+                } else if (state is CreateProductFailure) {
+                  Navigator.of(context).pop(); // Close loading dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Thất bại'),
+                        content: const Text("Thêm sản phẩm mới thất bại"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close dialog
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
                   );
-                },
-              );
-            }
-          },
+                }
+              },
+            ),
+            BlocListener<CreateCategoryBloc, CreateCategoryState>(
+              listener: (context, state) {
+                if (state is CreateCategoryLoading) {
+                } else if (state is CreateCategorySuccess) {
+                  _loadCategories();
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Thành công'),
+                        content: const Text('Danh mục đã được tạo thành công.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close dialog
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else if (state is CreateCategoryFailure) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Thất bại'),
+                        content: const Text("Thêm danh mục mới thất bại"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close dialog
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+            BlocListener<CreateOriginBloc, CreateOriginState>(
+              listener: (context, state) {
+                if (state is OriginLoading) {
+                } else if (state is CreateOriginSuccess) {
+                  _loadOrigins();
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Thành công'),
+                        content:
+                            const Text('Nguồn gốc đã được tạo thành công.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close dialog
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else if (state is CreateOriginFailure) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Thất bại'),
+                        content: const Text("Thêm nguồn gốc mới thất bại"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close dialog
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+          ],
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
@@ -478,24 +574,31 @@ class _CreateProductPageState extends State<CreateProductPage> {
         return AlertDialog(
           title: const Text('Tạo nguồn gốc mới'),
           content: TextField(
+            controller: _newOriginController, // Use the controller here
             decoration: const InputDecoration(
               labelText: 'Tên nguồn gốc',
               border: OutlineInputBorder(),
             ),
-            onChanged: (value) {
-              // Handle input for new origin name
-            },
           ),
           actions: [
             TextButton(
               onPressed: () {
+                _newOriginController
+                    .clear(); // Clear the controller when canceled
                 Navigator.of(context).pop(); // Close dialog
               },
               child: const Text('Hủy'),
             ),
             ElevatedButton(
               onPressed: () {
-                // Logic to add the new origin
+                final originName = _newOriginController.text;
+
+                if (originName.isNotEmpty) {
+                  BlocProvider.of<CreateOriginBloc>(context).add(
+                    CreateOriginRequested(name: originName),
+                  );
+                }
+                _newOriginController.clear(); // Clear the controller after use
                 Navigator.of(context).pop(); // Close dialog after saving
               },
               child: const Text('Tạo'),
@@ -513,24 +616,32 @@ class _CreateProductPageState extends State<CreateProductPage> {
         return AlertDialog(
           title: const Text('Tạo danh mục mới'),
           content: TextField(
+            controller: _newCategoryController, // Use the controller here
             decoration: const InputDecoration(
               labelText: 'Tên danh mục',
               border: OutlineInputBorder(),
             ),
-            onChanged: (value) {
-              // Handle input for new category name
-            },
           ),
           actions: [
             TextButton(
               onPressed: () {
+                _newCategoryController
+                    .clear(); // Clear the controller when canceled
                 Navigator.of(context).pop(); // Close dialog
               },
               child: const Text('Hủy'),
             ),
             ElevatedButton(
               onPressed: () {
-                // Logic to add the new category
+                final categoryName = _newCategoryController.text;
+
+                if (categoryName.isNotEmpty) {
+                  BlocProvider.of<CreateCategoryBloc>(context).add(
+                    CreateCategoryRequested(name: categoryName),
+                  );
+                }
+                _newCategoryController
+                    .clear(); // Clear the controller after use
                 Navigator.of(context).pop(); // Close dialog after saving
               },
               child: const Text('Tạo'),

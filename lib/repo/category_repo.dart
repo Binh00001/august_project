@@ -7,6 +7,30 @@ class CategoryRepo {
 
   CategoryRepo({required this.dio});
 
+  Future<bool> createCategory({
+    required String name,
+  }) async {
+    try {
+      final response = await dio.post(
+        '${AppConstants.baseUrl}/v1/category',
+        data: {
+          'name': name,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Successfully created the category
+        return true;
+      } else {
+        // Handle different status codes as needed
+        return false;
+      }
+    } catch (e) {
+      print('Error creating category: $e');
+      return false;
+    }
+  }
+
   Future<List<Category>> getCategories(int page, int pageSize) async {
     try {
       final response = await dio.get(

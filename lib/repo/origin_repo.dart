@@ -7,6 +7,30 @@ class OriginRepo {
 
   OriginRepo({required this.dio});
 
+  Future<bool> createOrigin({
+    required String name,
+  }) async {
+    try {
+      final response = await dio.post(
+        '${AppConstants.baseUrl}/v1/origin',
+        data: {
+          'name': name,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Successfully created the origin
+        return true;
+      } else {
+        // Handle different status codes as needed
+        return false;
+      }
+    } catch (e) {
+      print('Error creating origin: $e');
+      return false;
+    }
+  }
+
   Future<List<Origin>> getOrigins(int page, int pageSize) async {
     try {
       final response = await dio.get(

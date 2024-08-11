@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/create_category/create_category_bloc.dart';
+import 'package:flutter_project_august/blocs/create_origin/create_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/create_product/create_product_bloc.dart';
 import 'package:flutter_project_august/blocs/create_school/create_school_bloc.dart';
 import 'package:flutter_project_august/blocs/get_category/get_category_bloc.dart';
@@ -8,7 +10,7 @@ import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/database/local_database.dart';
-import 'package:flutter_project_august/models/product_model.dart';
+
 import 'package:flutter_project_august/page/login_page/login_screen.dart';
 import 'package:flutter_project_august/network/dio.dart';
 import 'package:flutter_project_august/repo/auth_repo.dart';
@@ -84,8 +86,18 @@ class MyApp extends StatelessWidget {
               originRepo: context.read<OriginRepo>(),
             ),
           ),
+          BlocProvider<CreateOriginBloc>(
+            create: (context) => CreateOriginBloc(
+              originRepo: context.read<OriginRepo>(),
+            ),
+          ),
           BlocProvider<CategoryBloc>(
             create: (context) => CategoryBloc(
+              categoryRepo: context.read<CategoryRepo>(),
+            ),
+          ),
+          BlocProvider<CreateCategoryBloc>(
+            create: (context) => CreateCategoryBloc(
               categoryRepo: context.read<CategoryRepo>(),
             ),
           ),
