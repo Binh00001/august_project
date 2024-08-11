@@ -29,7 +29,7 @@ class ManagementScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) => SchoolManageScreen()),
+                            builder: (context) => const SchoolManageScreen()),
                       );
                     },
                   ),

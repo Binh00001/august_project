@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/blocs/create_school/create_school_event.dart';
 import 'package:flutter_project_august/blocs/create_school/create_school_state.dart';
 import 'package:flutter_project_august/repo/school_repo.dart';
-import 'package:dio/dio.dart';
 
 class CreateSchoolBloc extends Bloc<CreateSchoolEvent, CreateSchoolState> {
   final SchoolRepo schoolRepo;
