@@ -5,6 +5,9 @@ import 'package:flutter_project_august/blocs/create_category/create_category_blo
 import 'package:flutter_project_august/blocs/create_origin/create_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/create_product/create_product_bloc.dart';
 import 'package:flutter_project_august/blocs/create_school/create_school_bloc.dart';
+import 'package:flutter_project_august/blocs/create_user/create_user_bloc.dart';
+import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_bloc.dart';
+import 'package:flutter_project_august/blocs/get_all_user/get_all_user_bloc.dart';
 import 'package:flutter_project_august/blocs/get_category/get_category_bloc.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
@@ -18,6 +21,7 @@ import 'package:flutter_project_august/repo/category_repo.dart';
 import 'package:flutter_project_august/repo/origin_repo.dart';
 import 'package:flutter_project_august/repo/product_repo.dart';
 import 'package:flutter_project_august/repo/school_repo.dart';
+import 'package:flutter_project_august/repo/user_repo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,22 +50,19 @@ class MyApp extends StatelessWidget {
               dio), // Assuming AuthRepositoryImpl expects a Dio instance
         ),
         RepositoryProvider<SchoolRepo>(
-          create: (_) => SchoolRepo(
-              dio: dio,
-              localDatabase:
-                  localDatabase), // Create and provide SchoolRepo with Dio
+          create: (_) => SchoolRepo(dio: dio, localDatabase: localDatabase),
         ),
         RepositoryProvider<ProductRepo>(
-          create: (_) =>
-              ProductRepo(dio: dio), // Create and provide SchoolRepo with Dio
+          create: (_) => ProductRepo(dio: dio),
         ),
         RepositoryProvider<OriginRepo>(
-          create: (_) =>
-              OriginRepo(dio: dio), // Create and provide SchoolRepo with Dio
+          create: (_) => OriginRepo(dio: dio),
         ),
         RepositoryProvider<CategoryRepo>(
-          create: (_) =>
-              CategoryRepo(dio: dio), // Create and provide SchoolRepo with Dio
+          create: (_) => CategoryRepo(dio: dio),
+        ),
+        RepositoryProvider<UserRepo>(
+          create: (_) => UserRepo(dio: dio),
         ),
       ],
       child: MultiBlocProvider(
@@ -104,6 +105,21 @@ class MyApp extends StatelessWidget {
           BlocProvider<CreateProductBloc>(
             create: (context) => CreateProductBloc(
               productRepo: context.read<ProductRepo>(),
+            ),
+          ),
+          BlocProvider<UserBloc>(
+            create: (context) => UserBloc(
+              userRepo: context.read<UserRepo>(),
+            ),
+          ),
+          BlocProvider<StaffBloc>(
+            create: (context) => StaffBloc(
+              userRepo: context.read<UserRepo>(),
+            ),
+          ),
+          BlocProvider<CreateUserBloc>(
+            create: (context) => CreateUserBloc(
+              userRepo: context.read<UserRepo>(),
             ),
           ),
           // Include other BlocProviders if needed

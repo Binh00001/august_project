@@ -73,223 +73,219 @@ class _CreateProductPageState extends State<CreateProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Tạo sản phẩm', style: TextStyle(fontSize: 20)),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tạo sản phẩm', style: TextStyle(fontSize: 20)),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
+      ),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<CreateProductBloc, CreateProductState>(
+            listener: (context, state) {
+              if (state is CreateProductLoading) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                );
+              } else if (state is CreateProductSuccess) {
+                Navigator.of(context).pop(); // Close loading dialog
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Thành công'),
+                      content: const Text('Sản phẩm đã được tạo thành công.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close dialog
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              } else if (state is CreateProductFailure) {
+                Navigator.of(context).pop(); // Close loading dialog
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Thất bại'),
+                      content: const Text("Thêm sản phẩm mới thất bại"),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close dialog
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
             },
           ),
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
-        ),
-        body: MultiBlocListener(
-          listeners: [
-            BlocListener<CreateProductBloc, CreateProductState>(
-              listener: (context, state) {
-                if (state is CreateProductLoading) {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext context) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    },
-                  );
-                } else if (state is CreateProductSuccess) {
-                  Navigator.of(context).pop(); // Close loading dialog
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Thành công'),
-                        content: const Text('Sản phẩm đã được tạo thành công.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close dialog
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                } else if (state is CreateProductFailure) {
-                  Navigator.of(context).pop(); // Close loading dialog
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Thất bại'),
-                        content: const Text("Thêm sản phẩm mới thất bại"),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close dialog
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-            ),
-            BlocListener<CreateCategoryBloc, CreateCategoryState>(
-              listener: (context, state) {
-                if (state is CreateCategoryLoading) {
-                } else if (state is CreateCategorySuccess) {
-                  _loadCategories();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Thành công'),
-                        content: const Text('Danh mục đã được tạo thành công.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close dialog
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                } else if (state is CreateCategoryFailure) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Thất bại'),
-                        content: const Text("Thêm danh mục mới thất bại"),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close dialog
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-            ),
-            BlocListener<CreateOriginBloc, CreateOriginState>(
-              listener: (context, state) {
-                if (state is OriginLoading) {
-                } else if (state is CreateOriginSuccess) {
-                  _loadOrigins();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Thành công'),
-                        content:
-                            const Text('Nguồn gốc đã được tạo thành công.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close dialog
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                } else if (state is CreateOriginFailure) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Thất bại'),
-                        content: const Text("Thêm nguồn gốc mới thất bại"),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Close dialog
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-            ),
-          ],
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey, // Assign the GlobalKey to the Form
-                child: Column(
-                  children: [
-                    inputProductName(),
-                    const SizedBox(height: 16),
-                    inputProductPrice(),
-                    const SizedBox(height: 16),
-                    selectUnit(),
-                    const SizedBox(height: 16),
-                    buildDropdownCategory(),
-                    const SizedBox(height: 16),
-                    buildDropdownOrigin(),
-                    const SizedBox(height: 16),
-                    selectAndDisplayImage(),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double
-                          .infinity, // Sets the button to take the full width
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              AppColors.primary, // Background color
-                          foregroundColor: AppColors.onPrimary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(8), // Rounded corners
-                          ),
+          BlocListener<CreateCategoryBloc, CreateCategoryState>(
+            listener: (context, state) {
+              if (state is CreateCategoryLoading) {
+              } else if (state is CreateCategorySuccess) {
+                _loadCategories();
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Thành công'),
+                      content: const Text('Danh mục đã được tạo thành công.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close dialog
+                          },
+                          child: const Text('OK'),
                         ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            final name = _nameController.text;
-                            final unit = _selectedUnit!;
-                            final price = int.parse(_priceController.text);
-                            final categoryId = _selectedCategory!;
-                            final originId = _selectedOrigin!;
-                            final imagePath =
-                                _imagePath ?? ''; // Optional imagePath
-
-                            BlocProvider.of<CreateProductBloc>(context).add(
-                              CreateProductRequested(
-                                name: name,
-                                unit: unit,
-                                price: price,
-                                categoryId: categoryId,
-                                originId: originId,
-                                imagePath:
-                                    imagePath.isNotEmpty ? imagePath : null,
-                              ),
-                            );
-                          }
-                        },
-                        child: const Text('Tạo sản phẩm mới'),
+                      ],
+                    );
+                  },
+                );
+              } else if (state is CreateCategoryFailure) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Thất bại'),
+                      content: const Text("Thêm danh mục mới thất bại"),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close dialog
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+          ),
+          BlocListener<CreateOriginBloc, CreateOriginState>(
+            listener: (context, state) {
+              if (state is OriginLoading) {
+              } else if (state is CreateOriginSuccess) {
+                _loadOrigins();
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Thành công'),
+                      content: const Text('Nguồn gốc đã được tạo thành công.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close dialog
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              } else if (state is CreateOriginFailure) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Thất bại'),
+                      content: const Text("Thêm nguồn gốc mới thất bại"),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close dialog
+                          },
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+          ),
+        ],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey, // Assign the GlobalKey to the Form
+              child: Column(
+                children: [
+                  inputProductName(),
+                  const SizedBox(height: 16),
+                  inputProductPrice(),
+                  const SizedBox(height: 16),
+                  selectUnit(),
+                  const SizedBox(height: 16),
+                  buildDropdownCategory(),
+                  const SizedBox(height: 16),
+                  buildDropdownOrigin(),
+                  const SizedBox(height: 16),
+                  selectAndDisplayImage(),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double
+                        .infinity, // Sets the button to take the full width
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary, // Background color
+                        foregroundColor: AppColors.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(8), // Rounded corners
+                        ),
                       ),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          final name = _nameController.text;
+                          final unit = _selectedUnit!;
+                          final price = int.parse(_priceController.text);
+                          final categoryId = _selectedCategory!;
+                          final originId = _selectedOrigin!;
+                          final imagePath =
+                              _imagePath ?? ''; // Optional imagePath
+
+                          BlocProvider.of<CreateProductBloc>(context).add(
+                            CreateProductRequested(
+                              name: name,
+                              unit: unit,
+                              price: price,
+                              categoryId: categoryId,
+                              originId: originId,
+                              imagePath:
+                                  imagePath.isNotEmpty ? imagePath : null,
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('Tạo sản phẩm mới'),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

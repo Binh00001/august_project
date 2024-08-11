@@ -27,10 +27,11 @@ class SchoolRepo {
         '${AppConstants.baseUrl}/v1/school',
         queryParameters: {'page': page, 'pageSize': pageSize},
       );
+
       if (response.statusCode == 200) {
         // If the server did return a 200 OK response, parse the JSON.
         await _saveSchoolsToDatabase(response.data['data']['docs']);
-        return response.data['data']['docs'];
+        return response.data['data']['docs'] as List<Map<String, dynamic>>;
       } else {
         // If the server did not return a 200 OK response, handle accordingly
         throw Exception(

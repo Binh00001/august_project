@@ -27,89 +27,85 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
-          title: Text('Quản Lý Trường Học(${schools.length})'),
-          centerTitle: true,
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        body: MultiBlocListener(
-          listeners: [
-            BlocListener<SchoolBloc, SchoolState>(
-              listener: (context, state) {
-                if (state is SchoolLoaded) {
-                  setState(() {
-                    schools = state.schools;
-                  });
-                } else if (state is SchoolError) {
-                  _loadSchoolsFromLocal();
-                }
-              },
-            ),
-            BlocListener<CreateSchoolBloc, CreateSchoolState>(
-              listener: (context, state) {
-                if (state is CreateSchoolLoading) {
-                  _showLoadingDialog();
-                } else if (state is CreateSchoolSuccess) {
-                  Navigator.of(context).pop(); // Dismiss loading dialog
-                  _showMessageDialog('Thành công', state.message);
-                  BlocProvider.of<SchoolBloc>(context)
-                      .add(GetAllSchoolsEvent());
-                } else if (state is CreateSchoolFailure) {
-                  Navigator.of(context).pop(); // Dismiss loading dialog
-                  _showMessageDialog('Thất bại', state.error);
-                }
-              },
-            ),
-          ],
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView.builder(
-              itemCount: schools.length + 1,
-              itemBuilder: (context, index) {
-                if (index == schools.length) {
-                  return const SizedBox(height: 240);
-                }
-                return ExpansionTile(
-                  title: Text('${index + 1}. ${schools[index]['name']}'),
-                  children: <Widget>[
-                    ListTile(
-                      title: const Text('Địa chỉ'),
-                      subtitle: Text(schools[index]['address'] ?? 'Không có'),
-                    ),
-                    ListTile(
-                      title: const Text('Điện thoại'),
-                      subtitle:
-                          Text(schools[index]['phoneNumber'] ?? 'Không có'),
-                    ),
-                  ],
-                );
-              },
-            ),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
+        title: Text('Quản Lý Trường Học(${schools.length})'),
+        centerTitle: true,
+      ),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<SchoolBloc, SchoolState>(
+            listener: (context, state) {
+              if (state is SchoolLoaded) {
+                setState(() {
+                  schools = state.schools;
+                });
+              } else if (state is SchoolError) {
+                _loadSchoolsFromLocal();
+              }
+            },
+          ),
+          BlocListener<CreateSchoolBloc, CreateSchoolState>(
+            listener: (context, state) {
+              if (state is CreateSchoolLoading) {
+                _showLoadingDialog();
+              } else if (state is CreateSchoolSuccess) {
+                Navigator.of(context).pop(); // Dismiss loading dialog
+                _showMessageDialog('Thành công', state.message);
+                BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
+              } else if (state is CreateSchoolFailure) {
+                Navigator.of(context).pop(); // Dismiss loading dialog
+                _showMessageDialog('Thất bại', state.error);
+              }
+            },
+          ),
+        ],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListView.builder(
+            itemCount: schools.length + 1,
+            itemBuilder: (context, index) {
+              if (index == schools.length) {
+                return const SizedBox(height: 240);
+              }
+              return ExpansionTile(
+                title: Text('${index + 1}. ${schools[index]['name']}'),
+                children: <Widget>[
+                  ListTile(
+                    title: const Text('Địa chỉ'),
+                    subtitle: Text(schools[index]['address'] ?? 'Không có'),
+                  ),
+                  ListTile(
+                    title: const Text('Điện thoại'),
+                    subtitle: Text(schools[index]['phoneNumber'] ?? 'Không có'),
+                  ),
+                ],
+              );
+            },
           ),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: _addNewSchool,
-          label: const Text(
-            'Thêm Trường Mới',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _addNewSchool,
+        label: const Text(
+          'Thêm Trường Mới',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
-          icon: const Icon(Icons.add),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          backgroundColor: Colors.green,
-          foregroundColor: Colors.white,
         ),
+        icon: const Icon(Icons.add),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
       ),
     );
   }

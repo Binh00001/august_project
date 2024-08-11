@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_august/assets_widget/navigator_container.dart';
 import 'package:flutter_project_august/page/feature_page/school_manage.dart';
+import 'package:flutter_project_august/page/feature_page/user_manage.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
 class ManagementScreen extends StatelessWidget {
@@ -25,7 +26,7 @@ class ManagementScreen extends StatelessWidget {
                     primaryColor: const Color(0xFFF24E1E),
                     iconColor: const Color(0xFFF24E1E),
                     icon: Icons.list,
-                    title: 'Trường Học',
+                    title: 'Trường học',
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -40,9 +41,12 @@ class ManagementScreen extends StatelessWidget {
                     primaryColor: const Color(0xFF5E72E4),
                     iconColor: const Color(0xFF5E72E4),
                     icon: Icons.shopping_cart,
-                    title: 'Khách Hàng',
+                    title: 'Khách hàng',
                     onTap: () {
-                      // Handle tap
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => UserManagePage()),
+                      );
                     },
                   ),
                 ),
@@ -56,7 +60,7 @@ class ManagementScreen extends StatelessWidget {
                     primaryColor: const Color(0xFFA259FF),
                     iconColor: const Color(0xFFA259FF),
                     icon: Icons.assignment_ind,
-                    title: 'Tài Xế',
+                    title: 'Nhân viên',
                     onTap: () {
                       // Handle tap
                     },
