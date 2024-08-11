@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_august/assets_widget/navigator_container.dart';
 import 'package:flutter_project_august/page/feature_page/school_manage.dart';
+import 'package:flutter_project_august/page/feature_page/staff_manage.dart';
 import 'package:flutter_project_august/page/feature_page/user_manage.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
@@ -62,7 +63,10 @@ class ManagementScreen extends StatelessWidget {
                     icon: Icons.assignment_ind,
                     title: 'Nhân viên',
                     onTap: () {
-                      // Handle tap
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => StaffManagePage()),
+                      );
                     },
                   ),
                 ),

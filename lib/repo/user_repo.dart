@@ -6,6 +6,30 @@ class UserRepo {
 
   UserRepo({required this.dio});
 
+  Future<void> createNewStaff({
+    required String username,
+    required String password,
+    required String name,
+  }) async {
+    try {
+      final response = await dio.post(
+        '${AppConstants.baseUrl}/v1/auth/create-user',
+        data: {
+          'username': username,
+          'password': password,
+          'name': name,
+          'role': 'staff',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to create staff');
+      }
+    } catch (e) {
+      throw Exception('Error creating staff: $e');
+    }
+  }
+
   Future<void> createNewUser({
     required String username,
     required String password,

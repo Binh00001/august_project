@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_project_august/models/user_model.dart';
+import 'package:flutter_project_august/models/staff_model.dart';
 
 abstract class StaffState extends Equatable {
   const StaffState();
@@ -13,7 +13,7 @@ class StaffInitial extends StaffState {}
 class StaffLoading extends StaffState {}
 
 class StaffLoaded extends StaffState {
-  final List<User> staff;
+  final List<Staff> staff;
 
   const StaffLoaded({required this.staff});
 

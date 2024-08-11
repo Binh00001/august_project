@@ -5,6 +5,7 @@ import 'package:flutter_project_august/blocs/create_category/create_category_blo
 import 'package:flutter_project_august/blocs/create_origin/create_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/create_product/create_product_bloc.dart';
 import 'package:flutter_project_august/blocs/create_school/create_school_bloc.dart';
+import 'package:flutter_project_august/blocs/create_staff/create_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/create_user/create_user_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_user/get_all_user_bloc.dart';
@@ -119,6 +120,11 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<CreateUserBloc>(
             create: (context) => CreateUserBloc(
+              userRepo: context.read<UserRepo>(),
+            ),
+          ),
+          BlocProvider<CreateStaffBloc>(
+            create: (context) => CreateStaffBloc(
               userRepo: context.read<UserRepo>(),
             ),
           ),

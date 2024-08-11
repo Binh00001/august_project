@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/blocs/create_category/create_category_bloc.dart';
 import 'package:flutter_project_august/blocs/create_category/create_category_event.dart';
@@ -18,7 +17,10 @@ import 'package:flutter_project_august/blocs/get_category/get_category_state.dar
 import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_event.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_state.dart';
+import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
+import 'package:flutter_project_august/blocs/get_product/get_product_event.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreateProductPage extends StatefulWidget {
   const CreateProductPage({super.key});
@@ -36,7 +38,8 @@ class _CreateProductPageState extends State<CreateProductPage> {
   String? _selectedUnit;
   String? _selectedCategory;
   String? _selectedOrigin;
-  String? _imagePath;
+  XFile? _mediaFile;
+  final ImagePicker _picker = ImagePicker();
   final List<Map<String, String>> units = [
     {'name': 'Kilogram', 'value': 'kg'},
     {'name': 'Gram', 'value': 'g'},
@@ -67,8 +70,25 @@ class _CreateProductPageState extends State<CreateProductPage> {
     BlocProvider.of<OriginBloc>(context).add(const FetchOrigins());
   }
 
+  void _loadProducts() {
+    BlocProvider.of<ProductBloc>(context).add(
+      const FetchProducts(
+        page: 1,
+        pageSize: 10,
+      ),
+    );
+  }
+
   void _loadCategories() {
     BlocProvider.of<CategoryBloc>(context).add(const FetchCategories());
+  }
+
+  void _setImageFile(XFile? value) {
+    setState(() {
+      _mediaFile = value;
+    });
+
+    print(value);
   }
 
   @override
@@ -102,6 +122,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                 );
               } else if (state is CreateProductSuccess) {
                 Navigator.of(context).pop(); // Close loading dialog
+                _loadProducts();
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -263,11 +284,11 @@ class _CreateProductPageState extends State<CreateProductPage> {
                         if (_formKey.currentState!.validate()) {
                           final name = _nameController.text;
                           final unit = _selectedUnit!;
-                          final price = int.parse(_priceController.text);
+                          final price = _priceController.text;
                           final categoryId = _selectedCategory!;
                           final originId = _selectedOrigin!;
-                          final imagePath =
-                              _imagePath ?? ''; // Optional imagePath
+                          final XFile? imageFile =
+                              _mediaFile; // XFile? type for the image
 
                           BlocProvider.of<CreateProductBloc>(context).add(
                             CreateProductRequested(
@@ -276,8 +297,8 @@ class _CreateProductPageState extends State<CreateProductPage> {
                               price: price,
                               categoryId: categoryId,
                               originId: originId,
-                              imagePath:
-                                  imagePath.isNotEmpty ? imagePath : null,
+                              imageFile:
+                                  imageFile, // Only pass the path if imageFile is not null
                             ),
                           );
                         }
@@ -298,40 +319,35 @@ class _CreateProductPageState extends State<CreateProductPage> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_imagePath == null) ...[
+        if (_mediaFile == null) ...[
           ElevatedButton.icon(
             onPressed: () async {
-              FilePickerResult? result = await FilePicker.platform.pickFiles(
-                type: FileType.custom,
-                allowedExtensions: ['png', 'jpeg', 'jpg'],
+              final XFile? pickedFile = await _picker.pickImage(
+                source: ImageSource.gallery,
+                // You can also allow taking a new photo with ImageSource.camera
               );
-              if (result != null) {
-                setState(() {
-                  _imagePath = result.files.single.path;
-                });
+              if (pickedFile != null) {
+                _setImageFile(pickedFile);
               }
             },
             icon: const Icon(Icons.attach_file),
             label: const Text('Chọn ảnh'),
           ),
         ],
-        if (_imagePath != null) ...[
+        if (_mediaFile != null) ...[
           GestureDetector(
             onTap: () async {
-              FilePickerResult? result = await FilePicker.platform.pickFiles(
-                type: FileType.custom,
-                allowedExtensions: ['png', 'jpeg', 'jpg'],
+              final XFile? pickedFile = await _picker.pickImage(
+                source: ImageSource.gallery,
               );
-              if (result != null) {
-                setState(() {
-                  _imagePath = result.files.single.path;
-                });
+              if (pickedFile != null) {
+                _setImageFile(pickedFile);
               }
             },
             child: Padding(
-              padding: const EdgeInsets.only(left: 4.0), // Optional padding
+              padding: const EdgeInsets.only(left: 4.0),
               child: Image.file(
-                File(_imagePath!), // Ensure that _imagePath is not null
+                File(_mediaFile!.path), // Safely access _mediaFile path
                 width: 120,
                 height: 120,
                 fit: BoxFit.cover,

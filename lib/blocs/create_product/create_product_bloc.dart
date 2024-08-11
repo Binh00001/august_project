@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_project_august/blocs/create_product/create_product_event.dart';
@@ -16,8 +18,8 @@ class CreateProductBloc extends Bloc<CreateProductEvent, CreateProductState> {
       CreateProductRequested event, Emitter<CreateProductState> emit) async {
     emit(CreateProductLoading());
     try {
-      bool result;
-      if (event.imagePath != "" || event.imagePath == null) {
+      late bool result;
+      if (event.imageFile != null) {
         result = await productRepo.createProduct(
           formData: {
             'name': event.name,
@@ -25,7 +27,7 @@ class CreateProductBloc extends Bloc<CreateProductEvent, CreateProductState> {
             'price': event.price.toString(),
             'categoryId': event.categoryId,
             'originId': event.originId,
-            'image': await MultipartFile.fromFile(event.imagePath!),
+            'image': event.imageFile,
           },
         );
       } else {
@@ -45,7 +47,12 @@ class CreateProductBloc extends Bloc<CreateProductEvent, CreateProductState> {
         emit(const CreateProductFailure(error: "Tạo thất bại"));
       }
     } catch (error) {
+      // print(error);
       emit(CreateProductFailure(error: error.toString()));
     }
+  }
+
+  String _getFileExtension(String filePath) {
+    return filePath.split('.').last.toLowerCase();
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_project_august/utill/app_constants.dart';
 
@@ -10,9 +12,15 @@ class ProductRepo {
     required Map<String, dynamic> formData,
   }) async {
     try {
-      // Convert the input map to FormData
-      FormData data = FormData.fromMap(formData);
-
+      // Convert the formData map to FormData
+      FormData data = FormData.fromMap({
+        'name': formData['name'],
+        'unit': formData['unit'],
+        'price': formData['price'].toString(), // Ensure price is a string
+        'categoryId': formData['categoryId'],
+        'originId': formData['originId'],
+        'image': formData['imageFile'], // Include image only if it exists
+      });
       Response response = await dio.post(
         '${AppConstants.baseUrl}/v1/product',
         data: data,
@@ -24,7 +32,7 @@ class ProductRepo {
       }
     } catch (e) {
       print('Error creating product: $e');
-      throw e;
+      return false;
     }
   }
 

@@ -1,63 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_project_august/blocs/create_user/create_user_bloc.dart';
-import 'package:flutter_project_august/blocs/create_user/create_user_event.dart';
-import 'package:flutter_project_august/blocs/create_user/create_user_state.dart';
-import 'package:flutter_project_august/blocs/get_all_user/get_all_user_bloc.dart';
-import 'package:flutter_project_august/blocs/get_all_user/get_all_user_event.dart';
-import 'package:flutter_project_august/blocs/get_all_user/get_all_user_state.dart';
-import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
-import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
-import 'package:flutter_project_august/database/local_database.dart';
-import 'package:flutter_project_august/models/user_model.dart';
+import 'package:flutter_project_august/blocs/create_staff/create_staff_bloc.dart';
+import 'package:flutter_project_august/blocs/create_staff/create_staff_event.dart';
+import 'package:flutter_project_august/blocs/create_staff/create_staff_state.dart';
+import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_bloc.dart';
+import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_event.dart';
+import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_state.dart';
+import 'package:flutter_project_august/models/staff_model.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
-class UserManagePage extends StatefulWidget {
+class StaffManagePage extends StatefulWidget {
   @override
-  _UserManagePageState createState() => _UserManagePageState();
+  _StaffManagePageState createState() => _StaffManagePageState();
 }
 
-class _UserManagePageState extends State<UserManagePage> {
-  String? selectedSchool;
-  List<Map<String, dynamic>> schools = [];
+class _StaffManagePageState extends State<StaffManagePage> {
   @override
   void initState() {
     super.initState();
-    _loadSchools();
-    // Initially fetch the users
-    _loadUser(null);
+    _loadStaff(null);
   }
 
-  void _loadSchools() async {
-    BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
-    final dbSchools = await LocalDatabase.instance.getAllSchools();
-    setState(() {
-      schools = dbSchools;
-    });
-  }
-
-  void _loadUser(schoolId) {
-    context.read<UserBloc>().add(FetchUsers(schoolId: schoolId));
-  }
-
-  void _clearSelection() {
-    setState(() {
-      selectedSchool = null;
-      _loadUser(null);
-    });
+  void _loadStaff(schoolId) {
+    context.read<StaffBloc>().add(const FetchStaff());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CreateUserBloc, CreateUserState>(
+    return BlocListener<CreateStaffBloc, CreateStaffState>(
       listener: (context, state) {
-        if (state is CreateUserSuccess) {
+        if (state is CreateStaffSuccess) {
           // Show success notification
-          _loadUser(null);
+          _loadStaff(null);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Người dùng đã được tạo thành công!')),
           );
-        } else if (state is CreateUserError) {
+        } else if (state is CreateStaffError) {
           // Show error notification
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Lỗi: Không tạo được tài khoản')),
@@ -75,15 +53,15 @@ class _UserManagePageState extends State<UserManagePage> {
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
           title: const Text(
-            'Người dùng',
+            'Nhân viên',
             style: TextStyle(fontSize: 20),
           ),
           centerTitle: true,
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: _addNewUser,
+          onPressed: _addNewStaff,
           label: const Text(
-            'Thêm Người Dùng',
+            'Thêm Nhân Viên',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
@@ -101,57 +79,28 @@ class _UserManagePageState extends State<UserManagePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButton<String>(
-                      menuMaxHeight: 240,
-                      value: selectedSchool,
-                      hint: const Text('Chọn trường'),
-                      items: schools.map((school) {
-                        return DropdownMenuItem<String>(
-                          value: school['id'],
-                          child: Text(school['name']!),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          selectedSchool = newValue;
-                          _loadUser(selectedSchool);
-                        });
-                      },
-                      isExpanded: true,
-                    ),
-                  ),
-                  if (selectedSchool != null)
-                    IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: _clearSelection,
-                    ),
-                ],
-              ),
               const SizedBox(height: 20),
               Expanded(
-                child: BlocBuilder<UserBloc, UserState>(
+                child: BlocBuilder<StaffBloc, StaffState>(
                   builder: (context, state) {
-                    if (state is UserLoading) {
+                    if (state is StaffLoading) {
                       return const Center(child: CircularProgressIndicator());
-                    } else if (state is UserLoaded) {
+                    } else if (state is StaffLoaded) {
                       return ListView.builder(
-                        itemCount: state.users.length,
+                        itemCount: state.staff.length,
                         itemBuilder: (context, index) {
-                          final user = state.users[index];
-                          return UserItem(
+                          final user = state.staff[index];
+                          return StaffItem(
                             user: user,
-                            schools: schools,
                             index: index,
                           );
                         },
                       );
-                    } else if (state is UserError) {
-                      return const Center(child: Text('Failed to load users'));
+                    } else if (state is StaffError) {
+                      return const Center(
+                          child: Text('Tải thông tin thất bại'));
                     } else {
-                      return const Center(child: Text('No users available'));
+                      return const Center(child: Text('Không có người dùng'));
                     }
                   },
                 ),
@@ -163,7 +112,7 @@ class _UserManagePageState extends State<UserManagePage> {
     );
   }
 
-  void _addNewUser() {
+  void _addNewStaff() {
     final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -172,7 +121,6 @@ class _UserManagePageState extends State<UserManagePage> {
         String? username;
         String? name;
         String? password;
-        String? selectedSchool;
 
         return AlertDialog(
           shape: RoundedRectangleBorder(
@@ -275,43 +223,6 @@ class _UserManagePageState extends State<UserManagePage> {
                     },
                   ),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    menuMaxHeight: 240,
-                    decoration: InputDecoration(
-                      labelText: 'Chọn trường',
-                      floatingLabelBehavior: FloatingLabelBehavior.auto,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.blue, width: 2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.grey, width: 1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    value: selectedSchool,
-                    items: schools.map((school) {
-                      return DropdownMenuItem<String>(
-                        value: school['id'],
-                        child: Text(school['name']!),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      selectedSchool = newValue;
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Bắt buộc';
-                      }
-                      return null;
-                    },
-                    isExpanded: true,
-                  ),
                 ],
               ),
             ),
@@ -327,12 +238,11 @@ class _UserManagePageState extends State<UserManagePage> {
               child: const Text('Lưu'),
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  context.read<CreateUserBloc>().add(
-                        CreateNewUser(
+                  context.read<CreateStaffBloc>().add(
+                        CreateStaffRequested(
                           username: username!.trim(),
                           name: name!.trim(),
                           password: password!.trim(),
-                          schoolId: selectedSchool!,
                         ),
                       );
 
@@ -347,27 +257,17 @@ class _UserManagePageState extends State<UserManagePage> {
   }
 }
 
-class UserItem extends StatefulWidget {
-  final User user;
+class StaffItem extends StatefulWidget {
+  final Staff user;
   final int index;
-  final List<Map<String, dynamic>> schools;
-  const UserItem(
-      {required this.user, required this.index, required this.schools});
+  const StaffItem({required this.user, required this.index});
 
   @override
-  _UserItemState createState() => _UserItemState();
+  _StaffItemState createState() => _StaffItemState();
 }
 
-class _UserItemState extends State<UserItem> {
+class _StaffItemState extends State<StaffItem> {
   bool isExpanded = false;
-
-  String? _getSchoolName(String schoolId) {
-    final school = widget.schools.firstWhere(
-      (school) => school['id'] == schoolId,
-      orElse: () => {'id': '', 'name': 'Unknown School'},
-    );
-    return school['name'];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -398,7 +298,7 @@ class _UserItemState extends State<UserItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Tên người dùng: ${widget.user.name}'),
-                Text('Tên trường: ${_getSchoolName(widget.user.schoolId)}'),
+                const Text('Nhân viên'),
               ],
             ),
           ),

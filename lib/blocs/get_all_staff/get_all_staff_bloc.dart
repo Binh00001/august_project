@@ -1,7 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_event.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_state.dart';
-import 'package:flutter_project_august/models/user_model.dart';
+import 'package:flutter_project_august/models/staff_model.dart';
+
 import 'package:flutter_project_august/repo/user_repo.dart';
 
 class StaffBloc extends Bloc<StaffEvent, StaffState> {
@@ -17,7 +18,7 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       final userList =
           await userRepo.getUsersByRoleAndSchool('staff', event.schoolId, 1);
       final staff = userList
-          .map((user) => User.fromJson(user))
+          .map((user) => Staff.fromJson(user))
           .toList(); // Convert List<dynamic> to List<User>
       emit(StaffLoaded(staff: staff));
     } catch (e) {
