@@ -10,6 +10,7 @@ import 'package:flutter_project_august/blocs/get_origin/get_origin_state.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_event.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_state.dart';
+import 'package:flutter_project_august/page/feature_page/create_product.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
 class ProductListScreen extends StatefulWidget {
@@ -75,9 +76,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                   CircularProgressIndicator()); // Show loading indicator while loading
                         } else if (state is CategoryLoaded) {
                           return DropdownButtonFormField<String>(
+                            alignment: Alignment.bottomCenter,
                             menuMaxHeight: 240,
                             decoration: const InputDecoration(
-                              labelText: 'Nguồn gốc',
+                              labelText: 'Danh mục',
                               border: OutlineInputBorder(),
                             ),
                             value: selectedCategory,
@@ -94,7 +96,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               });
                             },
                           );
-                        } else if (state is OriginError) {
+                        } else if (state is CategoryError) {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -102,8 +104,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               const SizedBox(height: 8.0),
                               ElevatedButton(
                                 onPressed: () {
-                                  BlocProvider.of<OriginBloc>(context)
-                                      .add(const FetchOrigins());
+                                  BlocProvider.of<CategoryBloc>(context)
+                                      .add(const FetchCategories());
                                 },
                                 child: const Text("Tải lại"),
                               ),
@@ -221,7 +223,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => {},
+          onPressed: () => {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (context) => const CreateProductPage()),
+            )
+          },
           label: const Text(
             'Tạo Sản Phẩm Mới',
             style: TextStyle(

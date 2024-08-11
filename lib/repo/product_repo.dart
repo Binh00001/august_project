@@ -6,6 +6,27 @@ class ProductRepo {
 
   ProductRepo({required this.dio});
   //create new product
+  Future<bool> createProduct({
+    required Map<String, dynamic> formData,
+  }) async {
+    try {
+      // Convert the input map to FormData
+      FormData data = FormData.fromMap(formData);
+
+      Response response = await dio.post(
+        '${AppConstants.baseUrl}/v1/product',
+        data: data,
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Error creating product: $e');
+      throw e;
+    }
+  }
 
   //get all (can filter)
   Future<Map<String, dynamic>> getAllProducts(

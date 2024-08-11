@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/create_product/create_product_bloc.dart';
 import 'package:flutter_project_august/blocs/create_school/create_school_bloc.dart';
 import 'package:flutter_project_august/blocs/get_category/get_category_bloc.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
@@ -65,32 +66,32 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider<SchoolBloc>(
             create: (context) => SchoolBloc(
-              schoolRepo: context.read<
-                  SchoolRepo>(), // Now SchoolRepo is provided and can be read
+              schoolRepo: context.read<SchoolRepo>(),
             ),
           ),
           BlocProvider<CreateSchoolBloc>(
             create: (context) => CreateSchoolBloc(
-              schoolRepo: context.read<
-                  SchoolRepo>(), // Now SchoolRepo is provided and can be read
+              schoolRepo: context.read<SchoolRepo>(),
             ),
           ),
           BlocProvider<ProductBloc>(
             create: (context) => ProductBloc(
-              productRepo: context.read<
-                  ProductRepo>(), // Now SchoolRepo is provided and can be read
+              productRepo: context.read<ProductRepo>(),
             ),
           ),
           BlocProvider<OriginBloc>(
             create: (context) => OriginBloc(
-              originRepo: context.read<
-                  OriginRepo>(), // Now SchoolRepo is provided and can be read
+              originRepo: context.read<OriginRepo>(),
             ),
           ),
           BlocProvider<CategoryBloc>(
             create: (context) => CategoryBloc(
-              categoryRepo: context.read<
-                  CategoryRepo>(), // Now SchoolRepo is provided and can be read
+              categoryRepo: context.read<CategoryRepo>(),
+            ),
+          ),
+          BlocProvider<CreateProductBloc>(
+            create: (context) => CreateProductBloc(
+              productRepo: context.read<ProductRepo>(),
             ),
           ),
           // Include other BlocProviders if needed
