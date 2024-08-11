@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/assets_widget/product_widget.dart';
+import 'package:flutter_project_august/blocs/get_category/get_category_bloc.dart';
+import 'package:flutter_project_august/blocs/get_category/get_category_event.dart';
+import 'package:flutter_project_august/blocs/get_category/get_category_state.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_event.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_state.dart';
@@ -25,6 +28,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     super.initState();
     _loadProducts();
     _loadOrigins();
+    _loadCategories();
   }
 
   void _loadProducts() {
@@ -39,6 +43,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   void _loadOrigins() {
     BlocProvider.of<OriginBloc>(context).add(const FetchOrigins());
+  }
+
+  void _loadCategories() {
+    BlocProvider.of<CategoryBloc>(context).add(const FetchCategories());
   }
 
   @override
@@ -59,28 +67,51 @@ class _ProductListScreenState extends State<ProductListScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      menuMaxHeight: 240,
-                      decoration: const InputDecoration(
-                        labelText: 'Danh mục',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: selectedCategory,
-                      items: [
-                        'Category 1',
-                        'Category 2',
-                        'Category 3',
-                      ]
-                          .map((category) => DropdownMenuItem<String>(
-                                value: category,
-                                child: Text(category),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedCategory = value;
-                          // _loadProducts(); // Reload products when category changes
-                        });
+                    child: BlocBuilder<CategoryBloc, CategoryState>(
+                      builder: (context, state) {
+                        if (state is CategoryLoading) {
+                          return const Center(
+                              child:
+                                  CircularProgressIndicator()); // Show loading indicator while loading
+                        } else if (state is CategoryLoaded) {
+                          return DropdownButtonFormField<String>(
+                            menuMaxHeight: 240,
+                            decoration: const InputDecoration(
+                              labelText: 'Nguồn gốc',
+                              border: OutlineInputBorder(),
+                            ),
+                            value: selectedCategory,
+                            items: state.categories
+                                .map((cat) => DropdownMenuItem<String>(
+                                      value: cat.id,
+                                      child: Text(cat.name),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCategory = value;
+                                _loadProducts(); // Reload products when origin changes
+                              });
+                            },
+                          );
+                        } else if (state is OriginError) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text("Lỗi dữ liệu"),
+                              const SizedBox(height: 8.0),
+                              ElevatedButton(
+                                onPressed: () {
+                                  BlocProvider.of<OriginBloc>(context)
+                                      .add(const FetchOrigins());
+                                },
+                                child: const Text("Tải lại"),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return const Text("Lỗi tải dữ liệu");
+                        }
                       },
                     ),
                   ),
@@ -117,14 +148,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text("Failed to load origins"),
+                              const Text("Lỗi dữ liệu"),
                               const SizedBox(height: 8.0),
                               ElevatedButton(
                                 onPressed: () {
                                   BlocProvider.of<OriginBloc>(context)
                                       .add(const FetchOrigins());
                                 },
-                                child: const Text("Retry"),
+                                child: const Text("Tải lại"),
                               ),
                             ],
                           );
