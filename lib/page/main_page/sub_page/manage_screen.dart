@@ -71,17 +71,21 @@ class ManagementScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Expanded(
-                  child: FeatureContainer(
-                    primaryColor: const Color(0xFF0ACF83),
-                    iconColor: const Color(0xFF0ACF83),
-                    icon: Icons.source,
-                    title: 'Nguồn gốc sản phẩm',
-                    onTap: () {
-                      // Handle tap
-                    },
-                  ),
-                ),
+                const Expanded(
+                    child: SizedBox(
+                  width: 10,
+                ))
+                // Expanded(
+                //   child: FeatureContainer(
+                //     primaryColor: const Color(0xFF0ACF83),
+                //     iconColor: const Color(0xFF0ACF83),
+                //     icon: Icons.source,
+                //     title: 'Nguồn gốc sản phẩm',
+                //     onTap: () {
+                //       // Handle tap
+                //     },
+                //   ),
+                // ),
               ],
             ),
           ],

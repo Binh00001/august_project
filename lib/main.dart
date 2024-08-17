@@ -10,6 +10,7 @@ import 'package:flutter_project_august/blocs/create_user/create_user_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_user/get_all_user_bloc.dart';
 import 'package:flutter_project_august/blocs/get_category/get_category_bloc.dart';
+import 'package:flutter_project_august/blocs/get_order/get_order_bloc.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_project_august/page/login_page/login_screen.dart';
 import 'package:flutter_project_august/network/dio.dart';
 import 'package:flutter_project_august/repo/auth_repo.dart';
 import 'package:flutter_project_august/repo/category_repo.dart';
+import 'package:flutter_project_august/repo/order_repo.dart';
 import 'package:flutter_project_august/repo/origin_repo.dart';
 import 'package:flutter_project_august/repo/product_repo.dart';
 import 'package:flutter_project_august/repo/school_repo.dart';
@@ -64,6 +66,9 @@ class MyApp extends StatelessWidget {
         ),
         RepositoryProvider<UserRepo>(
           create: (_) => UserRepo(dio: dio),
+        ),
+        RepositoryProvider<OrderRepo>(
+          create: (_) => OrderRepo(dio: dio),
         ),
       ],
       child: MultiBlocProvider(
@@ -126,6 +131,11 @@ class MyApp extends StatelessWidget {
           BlocProvider<CreateStaffBloc>(
             create: (context) => CreateStaffBloc(
               userRepo: context.read<UserRepo>(),
+            ),
+          ),
+          BlocProvider<GetOrderBloc>(
+            create: (context) => GetOrderBloc(
+              orderRepo: context.read<OrderRepo>(),
             ),
           ),
           // Include other BlocProviders if needed

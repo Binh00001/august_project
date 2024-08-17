@@ -264,8 +264,8 @@ class _CreateProductPageState extends State<CreateProductPage> {
                   const SizedBox(height: 16),
                   buildDropdownCategory(),
                   const SizedBox(height: 16),
-                  buildDropdownOrigin(),
-                  const SizedBox(height: 16),
+                  // buildDropdownOrigin(),
+                  // const SizedBox(height: 16),
                   selectAndDisplayImage(),
                   const SizedBox(height: 16),
                   SizedBox(

@@ -28,7 +28,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
     //get category list, get origin list
     super.initState();
     _loadProducts();
-    _loadOrigins();
     _loadCategories();
   }
 
@@ -40,10 +39,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
           categoryId: selectedCategory,
           originId: selectedOrigin),
     );
-  }
-
-  void _loadOrigins() {
-    BlocProvider.of<OriginBloc>(context).add(const FetchOrigins());
   }
 
   void _loadCategories() {
@@ -105,56 +100,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               onPressed: () {
                                 BlocProvider.of<CategoryBloc>(context)
                                     .add(const FetchCategories());
-                              },
-                              child: const Text("Tải lại"),
-                            ),
-                          ],
-                        );
-                      } else {
-                        return const Text("Lỗi tải dữ liệu");
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8.0),
-                Expanded(
-                  child: BlocBuilder<OriginBloc, OriginState>(
-                    builder: (context, state) {
-                      if (state is OriginLoading) {
-                        return const Center(
-                            child:
-                                CircularProgressIndicator()); // Show loading indicator while loading
-                      } else if (state is OriginLoaded) {
-                        return DropdownButtonFormField<String>(
-                          menuMaxHeight: 240,
-                          decoration: const InputDecoration(
-                            labelText: 'Nguồn gốc',
-                            border: OutlineInputBorder(),
-                          ),
-                          value: selectedOrigin,
-                          items: state.origins
-                              .map((origin) => DropdownMenuItem<String>(
-                                    value: origin.id,
-                                    child: Text(origin.name),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedOrigin = value;
-                              _loadProducts(); // Reload products when origin changes
-                            });
-                          },
-                        );
-                      } else if (state is OriginError) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Lỗi dữ liệu"),
-                            const SizedBox(height: 8.0),
-                            ElevatedButton(
-                              onPressed: () {
-                                BlocProvider.of<OriginBloc>(context)
-                                    .add(const FetchOrigins());
                               },
                               child: const Text("Tải lại"),
                             ),
