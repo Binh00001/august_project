@@ -21,7 +21,7 @@ class CreateProductBloc extends Bloc<CreateProductEvent, CreateProductState> {
       late bool result;
       if (event.imageFile != null) {
         result = await productRepo.createProduct(
-          formData: {
+          data: {
             'name': event.name,
             'unit': event.unit,
             'price': event.price.toString(),
@@ -32,7 +32,7 @@ class CreateProductBloc extends Bloc<CreateProductEvent, CreateProductState> {
         );
       } else {
         result = await productRepo.createProduct(
-          formData: {
+          data: {
             'name': event.name,
             'unit': event.unit,
             'price': event.price.toString(),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/page/main_page/main_screen.dart';
 import 'package:flutter_project_august/repo/auth_repo.dart';
+import 'package:flutter_project_august/utill/color-theme.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -48,6 +49,8 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Đăng Nhập"),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
       ),
       body: Form(
         key: _formKey,
