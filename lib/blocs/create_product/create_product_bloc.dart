@@ -19,28 +19,14 @@ class CreateProductBloc extends Bloc<CreateProductEvent, CreateProductState> {
     emit(CreateProductLoading());
     try {
       late bool result;
-      if (event.imageFile != null) {
-        result = await productRepo.createProduct(
-          data: {
-            'name': event.name,
-            'unit': event.unit,
-            'price': event.price.toString(),
-            'categoryId': event.categoryId,
-            'originId': event.originId,
-            'image': event.imageFile,
-          },
-        );
-      } else {
-        result = await productRepo.createProduct(
-          data: {
-            'name': event.name,
-            'unit': event.unit,
-            'price': event.price.toString(),
-            'categoryId': event.categoryId,
-            'originId': event.originId,
-          },
-        );
-      }
+      result = await productRepo.createProduct(
+        data: {
+          'name': event.name,
+          'unit': event.unit,
+          'price': event.price.toString(),
+          'categoryId': event.categoryId,
+        },
+      );
       if (result) {
         emit(CreateProductSuccess());
       } else {
@@ -50,9 +36,5 @@ class CreateProductBloc extends Bloc<CreateProductEvent, CreateProductState> {
       // print(error);
       emit(CreateProductFailure(error: error.toString()));
     }
-  }
-
-  String _getFileExtension(String filePath) {
-    return filePath.split('.').last.toLowerCase();
   }
 }

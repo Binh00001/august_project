@@ -6,7 +6,7 @@ import 'package:flutter_project_august/blocs/create_school/create_school_state.d
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
-import 'package:flutter_project_august/database/local_database.dart';
+import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
 class SchoolManageScreen extends StatefulWidget {
@@ -17,7 +17,7 @@ class SchoolManageScreen extends StatefulWidget {
 }
 
 class _SchoolManageScreenState extends State<SchoolManageScreen> {
-  List<Map<String, dynamic>> schools = [];
+  List<School> schools = [];
 
   @override
   void initState() {
@@ -46,8 +46,6 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
                 setState(() {
                   schools = state.schools;
                 });
-              } else if (state is SchoolError) {
-                _loadSchoolsFromLocal();
               }
             },
           ),
@@ -75,15 +73,15 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
                 return const SizedBox(height: 240);
               }
               return ExpansionTile(
-                title: Text('${index + 1}. ${schools[index]['name']}'),
+                title: Text('${index + 1}. ${schools[index].name}'),
                 children: <Widget>[
                   ListTile(
                     title: const Text('Địa chỉ'),
-                    subtitle: Text(schools[index]['address'] ?? 'Không có'),
+                    subtitle: Text(schools[index].address ?? 'Không có'),
                   ),
                   ListTile(
                     title: const Text('Điện thoại'),
-                    subtitle: Text(schools[index]['phoneNumber'] ?? 'Không có'),
+                    subtitle: Text(schools[index].phoneNumber ?? 'Không có'),
                   ),
                 ],
               );
@@ -237,13 +235,6 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
         );
       },
     );
-  }
-
-  void _loadSchoolsFromLocal() async {
-    final dbSchools = await LocalDatabase.instance.getAllSchools();
-    setState(() {
-      schools = dbSchools;
-    });
   }
 
   void _showLoadingDialog() {

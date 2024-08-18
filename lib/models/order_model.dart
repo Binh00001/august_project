@@ -3,16 +3,24 @@ import 'package:flutter_project_august/models/product_model.dart';
 class OrderItem {
   final int quantity;
   final String price;
-  final Product product;
+  final String productName;
+  final String productId;
+  final String productUnit;
 
   OrderItem(
-      {required this.quantity, required this.price, required this.product});
+      {required this.quantity,
+      required this.price,
+      required this.productName,
+      required this.productId,
+      required this.productUnit});
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      quantity: json['quantity'],
-      price: json['price'],
-      product: Product.fromJson(json['product']),
+      quantity: json['quantity'] ?? "",
+      price: json['price'] ?? 0,
+      productName: json['product']['name'] ?? "",
+      productId: json['product']['id'] ?? "",
+      productUnit: json['product']['unit'] ?? "",
     );
   }
 }
@@ -44,18 +52,18 @@ class Order {
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
-      id: json['id'],
-      userName: json['user']['name'],
-      userId: json['user']['id'],
+      id: json['id'] ?? "",
+      userName: json['user']['name'] ?? "",
+      userId: json['user']['id'] ?? "",
       orderItems: (json['orderItems'] as List)
           .map((item) => OrderItem.fromJson(item))
           .toList(),
-      schoolId: json['school']['id'],
-      schoolName: json['school']['name'],
-      totalAmount: json['totalAmount'],
-      status: json['status'],
-      payStatus: json['payStatus'],
-      createdAt: json['createdAt'],
+      schoolId: json['school']['id'] ?? "",
+      schoolName: json['school']['name'] ?? "",
+      totalAmount: json['total_amount'] ?? "",
+      status: json['status'] ?? "",
+      payStatus: json['payStatus'] ?? "",
+      createdAt: json['createdAt'] ?? "",
     );
   }
 }

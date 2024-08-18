@@ -87,8 +87,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
     setState(() {
       _mediaFile = value;
     });
-
-    print(value);
   }
 
   @override
@@ -286,9 +284,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
                           final unit = _selectedUnit!;
                           final price = _priceController.text;
                           final categoryId = _selectedCategory!;
-                          final originId = _selectedOrigin!;
-                          final XFile? imageFile =
-                              _mediaFile; // XFile? type for the image
 
                           BlocProvider.of<CreateProductBloc>(context).add(
                             CreateProductRequested(
@@ -296,9 +291,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
                               unit: unit,
                               price: price,
                               categoryId: categoryId,
-                              originId: originId,
-                              imageFile:
-                                  imageFile, // Only pass the path if imageFile is not null
                             ),
                           );
                         }

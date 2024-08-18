@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_project_august/models/order_model.dart'; // Assuming Order model exists
 import 'package:flutter_project_august/utill/app_constants.dart';
 
@@ -20,7 +21,9 @@ class OrderRepo {
         queryParameters:
             _buildQueryParameters(page, pageSize, schoolId, startDate, endDate),
       );
-
+      print(
+        _buildQueryParameters(page, pageSize, schoolId, startDate, endDate),
+      );
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data']
             ['docs']; // Adjust according to your JSON structure
@@ -41,14 +44,13 @@ class OrderRepo {
       'page': page,
       'pageSize': pageSize,
     };
-
     if (schoolId != null) {
       params['schoolId'] = schoolId;
     }
-    if (startDate != null) {
+    if (startDate != null && startDate != 0) {
       params['startDate'] = startDate;
     }
-    if (endDate != null) {
+    if (endDate != null && endDate != 0) {
       params['endDate'] = endDate;
     }
 

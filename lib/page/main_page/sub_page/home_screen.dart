@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project_august/page/feature_page/order_list.dart';
 import 'package:flutter_project_august/page/feature_page/product_list.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:flutter_project_august/assets_widget/navigator_container.dart';
@@ -43,7 +44,10 @@ class HomeScreen extends StatelessWidget {
                       icon: Icons.shopping_cart,
                       title: 'Quản lý đơn hàng',
                       onTap: () {
-                        // Handle tap
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (context) => OrderListPage()),
+                        );
                       },
                     ),
                   ),

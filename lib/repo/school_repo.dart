@@ -20,18 +20,20 @@ class SchoolRepo {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getAllSchools(
+  Future<List<Map<String, String>>> getAllSchools(
       int page, int pageSize) async {
     try {
       Response response = await dio.get(
         '${AppConstants.baseUrl}/v1/school',
         queryParameters: {'page': page, 'pageSize': pageSize},
       );
-
       if (response.statusCode == 200) {
         // If the server did return a 200 OK response, parse the JSON.
-        await _saveSchoolsToDatabase(response.data['data']['docs']);
-        return response.data['data']['docs'] as List<Map<String, dynamic>>;
+        List<dynamic> docs = response.data['data']['docs'];
+        return docs.map((doc) {
+          return Map.from(doc).map((key, value) =>
+              MapEntry<String, String>(key.toString(), value.toString()));
+        }).toList();
       } else {
         // If the server did not return a 200 OK response, handle accordingly
         throw Exception(
@@ -41,17 +43,6 @@ class SchoolRepo {
       // Handle errors on request and throw an exception with a message
       throw Exception(
           'Failed to connect to the API: ${e.response?.data ?? e.message}');
-    }
-  }
-
-  Future<void> _saveSchoolsToDatabase(List<dynamic> schools) async {
-    for (var school in schools) {
-      await localDatabase.addSchool({
-        'id': school['id'],
-        'name': school['name'],
-        'address': school['address'],
-        'phone_number': school['phoneNumber'],
-      });
     }
   }
 }

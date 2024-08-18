@@ -16,10 +16,10 @@ class School {
       {required this.id, required this.name, this.address, this.phoneNumber});
 
   // Factory constructor to create a School instance from a map (usually from JSON data)
-  factory School.fromJson(Map<String, dynamic> json) {
+  factory School.fromJson(Map<String, String> json) {
     return School(
-      id: json['id'],
-      name: json['name'],
+      id: json['id'] ?? "",
+      name: json['name'] ?? "",
       address: json['address'],
       phoneNumber: json['phoneNumber'],
     );

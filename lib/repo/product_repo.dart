@@ -13,22 +13,12 @@ class ProductRepo {
     required Map<String, dynamic> data,
   }) async {
     try {
-      FormData formData;
-// Ensure you're in an async function to use 'await'
-      if (data['image'] == null) {
-        formData = await createFormData(
-            name: data['name'],
-            price: data['price'],
-            categoryId: data['categoryId'],
-            originId: data['originId']);
-      } else {
-        formData = await createFormData(
-            name: data['name'],
-            price: data['price'],
-            categoryId: data['categoryId'],
-            originId: data['originId'],
-            imageFile: data['image']);
-      }
+      FormData formData = FormData.fromMap({
+        'name': data['name'],
+        'price': data['price'],
+        'categoryId': data['categoryId'],
+        'originId': data['originId'],
+      });
 
       Response response = await dio.post(
         '${AppConstants.baseUrl}/v1/product',
@@ -40,42 +30,8 @@ class ProductRepo {
         return false;
       }
     } catch (e) {
-      print('Error creating product: $e');
       return false;
     }
-  }
-
-  Future<FormData> createFormData({
-    required String name,
-    required String price,
-    required String categoryId,
-    required String originId,
-    XFile? imageFile,
-  }) async {
-    var formData = FormData();
-
-    // Add text fields to FormData
-    formData.fields
-      ..add(MapEntry('name', name))
-      ..add(MapEntry('price', price))
-      ..add(MapEntry('category_id', categoryId))
-      ..add(MapEntry('origin_id', originId));
-
-    // Add file to FormData if it's not null
-    if (imageFile != null) {
-      // Create a MultipartFile from XFile
-      MultipartFile multipartFile = await MultipartFile.fromFile(
-        imageFile.path,
-        filename: imageFile.name, // Uses the original filename
-      );
-      // Add the file to FormData
-      formData.files.add(MapEntry(
-        'images', // This 'image' key should match the server-side expected key for the file
-        multipartFile,
-      ));
-    }
-
-    return formData;
   }
 
   //get all (can filter)

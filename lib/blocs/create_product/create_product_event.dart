@@ -15,7 +15,6 @@ class CreateProductRequested extends CreateProductEvent {
   final String unit;
   final String price;
   final String categoryId;
-  final String originId;
   final XFile? imageFile;
 
   const CreateProductRequested({
@@ -23,11 +22,9 @@ class CreateProductRequested extends CreateProductEvent {
     required this.unit,
     required this.price,
     required this.categoryId,
-    required this.originId,
     this.imageFile,
   });
 
   @override
-  List<Object> get props =>
-      [name, unit, price, categoryId, originId, imageFile!];
+  List<Object> get props => [name, unit, price, categoryId, imageFile!];
 }

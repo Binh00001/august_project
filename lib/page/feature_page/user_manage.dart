@@ -104,10 +104,16 @@ class _UserManagePageState extends State<UserManagePage> {
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButton<String>(
+                    child: DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        labelText: 'Chọn trường học',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                       menuMaxHeight: 240,
                       value: selectedSchool,
-                      hint: const Text('Chọn trường'),
+                      // hint: const Text('Chọn trường'),
                       items: schools.map((school) {
                         return DropdownMenuItem<String>(
                           value: school['id'],

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
+import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/repo/school_repo.dart';
 
 class SchoolBloc extends Bloc<SchoolEvent, SchoolState> {
@@ -17,11 +18,14 @@ class SchoolBloc extends Bloc<SchoolEvent, SchoolState> {
       GetAllSchoolsEvent event, Emitter<SchoolState> emit) async {
     try {
       emit(SchoolLoading());
-      final schools = await schoolRepo.getAllSchools(1, 10);
+      final schools = await schoolRepo.getAllSchools(1, 100);
+      final schoolList = schools
+          .map((school) => School.fromJson(school))
+          .toList(); // Convert List<dynamic> to List<User>
       if (schools.isEmpty) {
         emit(SchoolInitial());
       } else {
-        emit(SchoolLoaded(schools));
+        emit(SchoolLoaded(schoolList));
       }
     } catch (e) {
       emit(SchoolError(e.toString()));
