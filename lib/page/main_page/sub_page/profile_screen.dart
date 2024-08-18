@@ -54,7 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildProfileDetail('Tên người dùng', _user!.name),
                   _buildProfileDetail('Chức vụ', _user!.role),
                   if (_user!.role == 'user')
-                    _buildProfileDetail('Trường học', _user!.schoolName ?? ''),
+                    _buildProfileDetail('Trường học', _user!.schoolName),
                   const Spacer(),
                   Center(
                     child: ElevatedButton.icon(

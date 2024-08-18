@@ -19,7 +19,6 @@ class ProductRepo {
         'categoryId': data['categoryId'],
         'originId': data['originId'],
       });
-
       Response response = await dio.post(
         '${AppConstants.baseUrl}/v1/product',
         data: formData,
@@ -47,9 +46,6 @@ class ProductRepo {
       // Conditionally add categoryId and originId if they are not null or empty
       if (categoryId != null && categoryId.isNotEmpty) {
         queryParams['categoryId'] = categoryId;
-      }
-      if (originId != null && originId.isNotEmpty) {
-        queryParams['originId'] = originId;
       }
       Response response = await dio.get(
         '${AppConstants.baseUrl}/v1/product',

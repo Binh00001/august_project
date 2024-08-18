@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_event.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_state.dart';
+import 'package:flutter_project_august/models/product_model.dart';
 import 'package:flutter_project_august/repo/product_repo.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
@@ -20,7 +21,11 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         event.categoryId,
         event.originId,
       );
-      final products = result['products'];
+
+      final products = (result['products'] as List<dynamic>)
+          .map((product) => Product.fromJson(product))
+          .toList();
+
       final totalItems = result['totalItems'] as int;
       final totalPages = result['totalPages'] as int;
 

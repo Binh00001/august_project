@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_project_august/models/product_model.dart';
 
 abstract class ProductState extends Equatable {
   const ProductState();
@@ -12,7 +13,7 @@ class ProductInitial extends ProductState {}
 class ProductLoading extends ProductState {}
 
 class ProductLoaded extends ProductState {
-  final List<dynamic> products;
+  final List<Product> products;
   final int totalItems;
   final int totalPages;
 

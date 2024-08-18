@@ -35,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
       SharedPreferencesHelper.setApiTokenKey(result['data']['accessToken']);
       // Save user information
       var userData = result['data']['user'];
+
       User user = User.fromJson(userData);
       await SharedPreferencesHelper.setUserInfo(user);
       //chuyển trang

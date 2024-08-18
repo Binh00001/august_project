@@ -24,7 +24,7 @@ class User {
       role: json['role'],
       deletedAt: json['deleted_at'] ?? "",
       schoolId: json['school_id'] ?? "",
-      schoolName: json['school_name'] ?? "",
+      schoolName: json['schoolName'] ?? "",
     );
   }
 
@@ -36,7 +36,7 @@ class User {
       'role': role,
       'deleted_at': deletedAt,
       'school_id': schoolId,
-      'school_name': schoolName
+      'schoolName': schoolName
     };
   }
 }
