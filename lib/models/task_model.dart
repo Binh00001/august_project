@@ -20,7 +20,10 @@ class Task {
     return Task(
       id: json['id'],
       name: json['name'],
-      quantity: json['quantity'], // Ensure quantity is treated as double
+      quantity: (json['quantity'] is int)
+          ? (json['quantity'] as int).toDouble() // Convert int to double
+          : json['quantity']
+              as double, // Directly use if it's already doubleEnsure quantity is treated as double
       unit: json['unit'],
       staff: json['staff'] != null ? Staff.fromJson(json['staff']) : null,
     );
