@@ -12,6 +12,7 @@ import 'package:flutter_project_august/blocs/get_product/get_product_state.dart'
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/product_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
+import 'package:flutter_project_august/page/feature_page/cart_page.dart';
 import 'package:flutter_project_august/page/feature_page/create_product.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:input_quantity/input_quantity.dart';
@@ -93,7 +94,23 @@ class _ProductListScreenState extends State<ProductListScreen> {
               backgroundColor: AppColors.onSuccess,
               foregroundColor: AppColors.onPrimary,
             )
-          : null, // If not admin, no floating action button
+          : _user?.role == 'user'
+              ? FloatingActionButton(
+                  onPressed: () {
+                    // Handle the cart action
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const CartPage(), // Replace with your cart page
+                      ),
+                    );
+                  },
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
+                  child: const Icon(Icons.shopping_cart),
+                )
+              : null, // If neither admin nor user, no floating action button
+// If not admin, no floating action button
     );
   }
 
