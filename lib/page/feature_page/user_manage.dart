@@ -8,7 +8,8 @@ import 'package:flutter_project_august/blocs/get_all_user/get_all_user_event.dar
 import 'package:flutter_project_august/blocs/get_all_user/get_all_user_state.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
-import 'package:flutter_project_august/database/local_database.dart';
+import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
+import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
@@ -18,8 +19,9 @@ class UserManagePage extends StatefulWidget {
 }
 
 class _UserManagePageState extends State<UserManagePage> {
-  String? selectedSchool;
-  List<Map<String, dynamic>> schools = [];
+  String? selectedSchoolId;
+  List<School> schools = [];
+
   @override
   void initState() {
     super.initState();
@@ -30,10 +32,6 @@ class _UserManagePageState extends State<UserManagePage> {
 
   void _loadSchools() async {
     BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
-    final dbSchools = await LocalDatabase.instance.getAllSchools();
-    setState(() {
-      schools = dbSchools;
-    });
   }
 
   void _loadUser(schoolId) {
@@ -42,130 +40,173 @@ class _UserManagePageState extends State<UserManagePage> {
 
   void _clearSelection() {
     setState(() {
-      selectedSchool = null;
+      selectedSchoolId = null;
       _loadUser(null);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CreateUserBloc, CreateUserState>(
+    return BlocListener<SchoolBloc, SchoolState>(
       listener: (context, state) {
-        if (state is CreateUserSuccess) {
-          // Show success notification
-          _loadUser(null);
+        if (state is SchoolLoaded) {
+          setState(() {
+            schools = state.schools; // Update the schools list when loaded
+          });
+        } else if (state is SchoolError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Người dùng đã được tạo thành công!')),
-          );
-        } else if (state is CreateUserError) {
-          // Show error notification
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Lỗi: Không tạo được tài khoản')),
+            SnackBar(content: Text('Error: ${state.message}')),
           );
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
-          title: const Text(
-            'Người dùng',
-            style: TextStyle(fontSize: 20),
-          ),
-          centerTitle: true,
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: _addNewUser,
-          label: const Text(
-            'Thêm Người Dùng',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+      child: BlocListener<CreateUserBloc, CreateUserState>(
+        listener: (context, state) {
+          if (state is CreateUserSuccess) {
+            // Show success notification
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Người dùng đã được tạo thành công!')),
+            );
+            // Optionally reload users after a new user is created
+            setState(() {
+              selectedSchoolId = null;
+            });
+            _loadUser(null);
+          } else if (state is CreateUserError) {
+            // Show error notification
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Lỗi: ${state.message}')),
+            );
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.onPrimary,
+            title: const Text(
+              'Người dùng',
+              style: TextStyle(fontSize: 20),
+            ),
+            centerTitle: true,
           ),
-          icon: const Icon(Icons.add),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          backgroundColor: Colors.green,
-          foregroundColor: Colors.white,
+          floatingActionButton: addNewUserFloatButton(),
+          body: listUser(),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      ),
+    );
+  }
+
+  Padding listUser() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        labelText: 'Chọn trường học',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      menuMaxHeight: 240,
-                      value: selectedSchool,
-                      // hint: const Text('Chọn trường'),
-                      items: schools.map((school) {
-                        return DropdownMenuItem<String>(
-                          value: school['id'],
-                          child: Text(school['name']!),
-                        );
-                      }).toList(),
-                      onChanged: (newValue) {
-                        setState(() {
-                          selectedSchool = newValue;
-                          _loadUser(selectedSchool);
-                        });
-                      },
-                      isExpanded: true,
-                    ),
-                  ),
-                  if (selectedSchool != null)
-                    IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: _clearSelection,
-                    ),
-                ],
-              ),
-              const SizedBox(height: 20),
               Expanded(
-                child: BlocBuilder<UserBloc, UserState>(
+                child: BlocBuilder<SchoolBloc, SchoolState>(
                   builder: (context, state) {
-                    if (state is UserLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state is UserLoaded) {
-                      return ListView.builder(
-                        itemCount: state.users.length,
-                        itemBuilder: (context, index) {
-                          final user = state.users[index];
-                          return UserItem(
-                            user: user,
-                            schools: schools,
-                            index: index,
-                          );
+                    if (state is SchoolLoading) {
+                      return const CircularProgressIndicator();
+                    } else if (state is SchoolLoaded) {
+                      return DropdownButtonFormField<String>(
+                        value: selectedSchoolId,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedSchoolId =
+                                newValue; // Update the selected school ID
+                            _loadUser(selectedSchoolId);
+                          });
                         },
+                        decoration: InputDecoration(
+                          labelText: 'Chọn trường học',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        items: [
+                          const DropdownMenuItem<String>(
+                            value: null, // Null value for "All"
+                            child: Text("Tất cả"),
+                          ),
+                          ...state.schools
+                              .map<DropdownMenuItem<String>>((School school) {
+                            return DropdownMenuItem<String>(
+                              value: school.id,
+                              child: Text(school.name),
+                            );
+                          }).toList(),
+                        ],
                       );
-                    } else if (state is UserError) {
-                      return const Center(child: Text('Failed to load users'));
+                    } else if (state is SchoolError) {
+                      return Text('Error: ${state.message}');
                     } else {
-                      return const Center(child: Text('No users available'));
+                      return const Text("Không có dữ liệu trường học");
                     }
                   },
                 ),
               ),
+              if (selectedSchoolId != null)
+                IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: _clearSelection,
+                ),
             ],
           ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: BlocBuilder<UserBloc, UserState>(
+              builder: (context, state) {
+                if (state is UserLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is UserLoaded) {
+                  return ListView.builder(
+                    itemCount: state.users.length,
+                    itemBuilder: (context, index) {
+                      final user = state.users[index];
+                      return UserItem(
+                        user: user,
+                        schools: schools, // Pass the updated schools list
+                        index: index,
+                      );
+                    },
+                  );
+                } else if (state is UserError) {
+                  return const Center(child: Text('Failed to load users'));
+                } else {
+                  return const Center(child: Text('No users available'));
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  FloatingActionButton addNewUserFloatButton() {
+    return FloatingActionButton.extended(
+      onPressed: _addNewUser,
+      label: const Text(
+        'Thêm Người Dùng',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
         ),
       ),
+      icon: const Icon(Icons.add),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      backgroundColor: Colors.green,
+      foregroundColor: Colors.white,
     );
   }
 
@@ -281,42 +322,38 @@ class _UserManagePageState extends State<UserManagePage> {
                     },
                   ),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    menuMaxHeight: 240,
-                    decoration: InputDecoration(
-                      labelText: 'Chọn trường',
-                      floatingLabelBehavior: FloatingLabelBehavior.auto,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.blue, width: 2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.grey, width: 1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    value: selectedSchool,
-                    items: schools.map((school) {
-                      return DropdownMenuItem<String>(
-                        value: school['id'],
-                        child: Text(school['name']!),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      selectedSchool = newValue;
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Bắt buộc';
+                  BlocBuilder<SchoolBloc, SchoolState>(
+                    builder: (context, state) {
+                      if (state is SchoolLoading) {
+                        return const CircularProgressIndicator();
+                      } else if (state is SchoolLoaded) {
+                        return DropdownButtonFormField<String>(
+                          value: selectedSchool,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedSchool = newValue;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'Chọn trường học',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          items: state.schools
+                              .map<DropdownMenuItem<String>>((School school) {
+                            return DropdownMenuItem<String>(
+                              value: school.id,
+                              child: Text(school.name),
+                            );
+                          }).toList(),
+                        );
+                      } else if (state is SchoolError) {
+                        return Text('Error: ${state.message}');
+                      } else {
+                        return const Text("Không có dữ liệu trường học");
                       }
-                      return null;
                     },
-                    isExpanded: true,
                   ),
                 ],
               ),
@@ -335,9 +372,9 @@ class _UserManagePageState extends State<UserManagePage> {
                 if (_formKey.currentState!.validate()) {
                   context.read<CreateUserBloc>().add(
                         CreateNewUser(
-                          username: username!.trim(),
-                          name: name!.trim(),
-                          password: password!.trim(),
+                          username: username?.trim() ?? "",
+                          name: name?.trim() ?? "",
+                          password: password?.trim() ?? "",
                           schoolId: selectedSchool!,
                         ),
                       );
@@ -356,9 +393,13 @@ class _UserManagePageState extends State<UserManagePage> {
 class UserItem extends StatefulWidget {
   final User user;
   final int index;
-  final List<Map<String, dynamic>> schools;
-  const UserItem(
-      {required this.user, required this.index, required this.schools});
+  final List<School> schools;
+
+  const UserItem({
+    required this.user,
+    required this.index,
+    required this.schools,
+  });
 
   @override
   _UserItemState createState() => _UserItemState();
@@ -369,47 +410,58 @@ class _UserItemState extends State<UserItem> {
 
   String? _getSchoolName(String schoolId) {
     final school = widget.schools.firstWhere(
-      (school) => school['id'] == schoolId,
-      orElse: () => {'id': '', 'name': 'Unknown School'},
+      (school) => school.id == schoolId,
+      orElse: () => School(id: "", name: "Unknown School"),
     );
-    return school['name'];
+    return school.name;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              isExpanded = !isExpanded;
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              children: [
-                Text('${widget.index + 1}.'),
-                const SizedBox(width: 8),
-                Text(widget.user.username),
-              ],
-            ),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isExpanded = !isExpanded;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey, // Set the border color to gray
+            width: 1.0, // Set the border width
+          ),
+          borderRadius:
+              BorderRadius.circular(4.0), // Set the border radius to 4
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text('${widget.index + 1}.'),
+                  const SizedBox(width: 8),
+                  Text(widget.user.username),
+                ],
+              ),
+              if (isExpanded)
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0, top: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Tên người dùng: ${widget.user.name}'),
+                      Text(
+                          'Tên trường: ${_getSchoolName(widget.user.schoolId)}'),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ),
-        if (isExpanded)
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Tên người dùng: ${widget.user.name}'),
-                Text('Tên trường: ${_getSchoolName(widget.user.schoolId)}'),
-              ],
-            ),
-          ),
-        const Divider(),
-      ],
+      ),
     );
   }
 }

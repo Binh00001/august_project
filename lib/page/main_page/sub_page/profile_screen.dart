@@ -31,8 +31,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_user == null) {
-      return Scaffold(
-        body: Center(
+      return const Scaffold(
+        body: const Center(
           child:
               CircularProgressIndicator(), // Display a loading indicator while user data is loading
         ),

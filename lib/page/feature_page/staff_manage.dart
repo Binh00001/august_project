@@ -271,39 +271,52 @@ class _StaffItemState extends State<StaffItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              isExpanded = !isExpanded;
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              children: [
-                Text('${widget.index + 1}.'),
-                const SizedBox(width: 8),
-                Text(widget.user.username),
-              ],
-            ),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isExpanded = !isExpanded;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey, // Set the border color to gray
+            width: 1.0, // Set the border width
+          ),
+          borderRadius:
+              BorderRadius.circular(4.0), // Set the border radius to 4
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  children: [
+                    Text('${widget.index + 1}.'),
+                    const SizedBox(width: 8),
+                    Text(widget.user.username),
+                  ],
+                ),
+              ),
+              if (isExpanded)
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Tên người dùng: ${widget.user.name}'),
+                      const Text('Nhân viên'),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ),
-        if (isExpanded)
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Tên người dùng: ${widget.user.name}'),
-                const Text('Nhân viên'),
-              ],
-            ),
-          ),
-        const Divider(),
-      ],
+      ),
     );
   }
 }
