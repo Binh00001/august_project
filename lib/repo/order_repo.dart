@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_project_august/models/order_model.dart'; // Assuming Order model exists
 import 'package:flutter_project_august/models/task_model.dart';
 import 'package:flutter_project_august/utill/app_constants.dart';
@@ -8,6 +7,28 @@ class OrderRepo {
   final Dio dio;
 
   OrderRepo({required this.dio});
+
+  Future<bool> assignStaffToTask(String userId, String productId) async {
+    try {
+      final response = await dio.post(
+        '${AppConstants.baseUrl}/v1/staff-assignment',
+        data: {
+          "userId": userId,
+          "productId": productId,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Staff assignment successful');
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Error assigning staff: $e');
+      return false;
+    }
+  }
 
   Future<List<Task>> getTasks(int date) async {
     try {

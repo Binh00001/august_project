@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/assign_staff/assign_staff_bloc.dart';
+import 'package:flutter_project_august/blocs/assign_staff/assign_staff_event.dart';
+import 'package:flutter_project_august/blocs/assign_staff/assign_staff_state.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_event.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_state.dart';
 import 'package:flutter_project_august/blocs/task/task_bloc.dart';
@@ -24,63 +27,81 @@ class _TaskPageState extends State<TaskPage> {
     super.initState();
     _loadStaff();
     // Get today's date in milliseconds since epoch
-    DateTime now = DateTime.now();
-    // Dispatch the event to fetch tasks for today
-    context.read<TaskBloc>().add(FetchTasks(date: now.millisecondsSinceEpoch));
+    _loadTask();
   }
 
   void _loadStaff() {
     context.read<StaffBloc>().add(const FetchStaff());
   }
 
+  void _loadTask() {
+    DateTime now = DateTime.now();
+    // Dispatch the event to fetch tasks for today
+    context.read<TaskBloc>().add(FetchTasks(date: now.millisecondsSinceEpoch));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        title: const Text('Phân công mua'),
-        centerTitle: true,
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              // Navigate to the history page
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) =>
-                      const HistoryPage())); // Replace with your history page
+              Navigator.of(context).pop();
             },
           ),
-        ],
-      ),
-      body: BlocBuilder<TaskBloc, TaskState>(
-        builder: (context, state) {
-          if (state is TaskLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is TaskLoaded) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children:
-                    state.tasks.map((task) => _buildTaskItem(task)).toList(),
-              ),
-            );
-          } else if (state is TaskError) {
-            return Center(
-              child: Text('Lỗi: ${state.message}'),
-            );
-          } else {
-            return const Center(child: Text('Không có nhiệm vụ nào.'));
-          }
-        },
-      ),
-    );
+          title: const Text('Phân công mua'),
+          centerTitle: true,
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.history),
+              onPressed: () {
+                // Navigate to the history page
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) =>
+                        const HistoryPage())); // Replace with your history page
+              },
+            ),
+          ],
+        ),
+        body: BlocListener<AssignStaffBloc, AssignStaffState>(
+          listener: (context, state) {
+            if (state is AssignStaffSuccess) {
+              _loadTask();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Chỉ định thành công!')),
+              );
+            } else if (state is AssignStaffFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Lỗi: ${state.error}')),
+              );
+            }
+          },
+          child: BlocBuilder<TaskBloc, TaskState>(
+            builder: (context, state) {
+              if (state is TaskLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is TaskLoaded) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: state.tasks
+                        .map((task) => _buildTaskItem(task))
+                        .toList(),
+                  ),
+                );
+              } else if (state is TaskError) {
+                return Center(
+                  child: Text('Lỗi: ${state.message}'),
+                );
+              } else {
+                return const Center(child: Text('Không có nhiệm vụ nào.'));
+              }
+            },
+          ),
+        ));
   }
 
   Widget _buildTaskItem(Task task) {
@@ -230,10 +251,11 @@ class _TaskPageState extends State<TaskPage> {
                                   ),
                                   onTap: () {
                                     // Assign the selected staff to the task
-                                    // context.read<TaskBloc>().add(AssignStaffToTask(
-                                    //       taskId: task.id,
-                                    //       staff: staff,
-                                    //     ));
+                                    BlocProvider.of<AssignStaffBloc>(context)
+                                        .add(
+                                      AssignStaffToTaskEvent(
+                                          userId: staff.id, productId: task.id),
+                                    );
                                     Navigator.of(context)
                                         .pop(); // Close the dialog
                                   },

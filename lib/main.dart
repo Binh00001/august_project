@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/assign_staff/assign_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/cart/cart_bloc.dart';
 import 'package:flutter_project_august/blocs/create_category/create_category_bloc.dart';
 import 'package:flutter_project_august/blocs/create_order/create_order_bloc.dart';
@@ -154,6 +155,11 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<TaskBloc>(
             create: (context) => TaskBloc(
+              orderRepo: context.read<OrderRepo>(),
+            ),
+          ),
+          BlocProvider<AssignStaffBloc>(
+            create: (context) => AssignStaffBloc(
               orderRepo: context.read<OrderRepo>(),
             ),
           ),
