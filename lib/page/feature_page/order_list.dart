@@ -6,8 +6,10 @@ import 'package:flutter_project_august/blocs/get_order/get_order_event.dart';
 import 'package:flutter_project_august/blocs/get_order/get_order_state.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
+import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/order_model.dart';
 import 'package:flutter_project_august/models/school_model.dart';
+import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/order_detail.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:intl/intl.dart';
@@ -23,10 +25,14 @@ class _OrderListPageState extends State<OrderListPage> {
   DateTime? _startDate;
   DateTime? _endDate;
   String? selectedSchoolId;
+  User? _user;
 
   @override
   void initState() {
     super.initState();
+
+    // Load user information
+    _loadUserInfo();
 
     // Set _startDate and _endDate to today's date
     DateTime now = DateTime.now();
@@ -34,23 +40,36 @@ class _OrderListPageState extends State<OrderListPage> {
     _endDate = DateTime(now.year, now.month, now.day)
         .add(const Duration(days: 1))
         .subtract(const Duration(microseconds: 1));
+  }
 
-    // Add initial event to fetch orders with today's date
-    BlocProvider.of<GetOrderBloc>(context, listen: false).add(
-      FetchOrders(
-          page: 1,
-          pageSize: 10,
-          schoolId: selectedSchoolId,
-          startDate: _startDate!.millisecondsSinceEpoch,
-          endDate: _endDate!.millisecondsSinceEpoch),
-    );
-
-    // Fetch list of schools
-    BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
+  Future<void> _loadUserInfo() async {
+    _user = await SharedPreferencesHelper.getUserInfo();
+    setState(() {
+      if (_user != null) {
+        if (_user!.role == 'admin') {
+          // Fetch list of schools for admin users
+          BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
+        } else if (_user!.role == 'user') {
+          // If the user is a regular user, use their school ID
+          selectedSchoolId = _user!.schoolId;
+        }
+        // Fetch orders for today
+        fetchOrdersIfPossible(context);
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_user == null) {
+      return const Scaffold(
+        body: Center(
+          child:
+              CircularProgressIndicator(), // Show a loading spinner while the user data is being loaded
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Đơn hàng', style: TextStyle(color: Colors.white)),
@@ -110,47 +129,49 @@ class _OrderListPageState extends State<OrderListPage> {
               ],
             ),
             const SizedBox(height: 16),
-            BlocBuilder<SchoolBloc, SchoolState>(
-              builder: (context, state) {
-                if (state is SchoolLoading) {
-                  return const CircularProgressIndicator();
-                } else if (state is SchoolLoaded) {
-                  return DropdownButtonFormField<String>(
-                    value: selectedSchoolId,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedSchoolId = newValue; // Cập nhật giá trị mới
-                        fetchOrdersIfPossible(context);
-                      });
-                      // Thực hiện hành động nào đó khi chọn (cập nhật UI, gửi sự kiện,...)
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'Chọn trường học',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+            if (_user!.role == 'admin') ...[
+              BlocBuilder<SchoolBloc, SchoolState>(
+                builder: (context, state) {
+                  if (state is SchoolLoading) {
+                    return const CircularProgressIndicator();
+                  } else if (state is SchoolLoaded) {
+                    return DropdownButtonFormField<String>(
+                      value: selectedSchoolId,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedSchoolId =
+                              newValue; // Update the selected school ID
+                          fetchOrdersIfPossible(context);
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Chọn trường học',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                    ),
-                    items: [
-                      const DropdownMenuItem<String>(
-                        value: null, // Giá trị null cho lựa chọn "Tất cả"
-                        child: Text("Tất cả"),
-                      ),
-                      ...state.schools
-                          .map<DropdownMenuItem<String>>((School school) {
-                        return DropdownMenuItem<String>(
-                          value: school.id,
-                          child: Text(school.name),
-                        );
-                      }).toList(),
-                    ],
-                  );
-                } else if (state is SchoolError) {
-                  return Text('Error: ${state.message}');
-                } else {
-                  return const Text("Không có dữ liệu trường học");
-                }
-              },
-            ),
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null, // Null value for "All"
+                          child: Text("Tất cả"),
+                        ),
+                        ...state.schools
+                            .map<DropdownMenuItem<String>>((School school) {
+                          return DropdownMenuItem<String>(
+                            value: school.id,
+                            child: Text(school.name),
+                          );
+                        }).toList(),
+                      ],
+                    );
+                  } else if (state is SchoolError) {
+                    return Text('Error: ${state.message}');
+                  } else {
+                    return const Text("Không có dữ liệu trường học");
+                  }
+                },
+              ),
+            ],
             Expanded(
               child: BlocBuilder<GetOrderBloc, GetOrderState>(
                 builder: (context, state) {
@@ -158,7 +179,6 @@ class _OrderListPageState extends State<OrderListPage> {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is GetOrderLoaded) {
                     if (state.orders.isEmpty) {
-                      // Nếu danh sách đơn hàng rỗng, hiển thị một thông báo
                       return const Center(
                         child: Text(
                           'Không có đơn',
@@ -167,7 +187,6 @@ class _OrderListPageState extends State<OrderListPage> {
                         ),
                       );
                     } else {
-                      // Nếu danh sách không rỗng, xây dựng ListView để hiển thị đơn hàng
                       return ListView.builder(
                         itemCount: state.orders.length,
                         itemBuilder: (context, index) {
@@ -203,10 +222,8 @@ class _OrderListPageState extends State<OrderListPage> {
                                           color: order.payStatus == "pending"
                                               ? AppColors.error
                                               : AppColors.onSuccess,
-                                          fontWeight: FontWeight
-                                              .bold, // Nếu cần, có thể thay đổi font weight
-                                          fontSize:
-                                              16, // Nếu cần, có thể thay đổi kích thước chữ
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
                                         ),
                                       ),
                                       Text(
@@ -245,17 +262,8 @@ class _OrderListPageState extends State<OrderListPage> {
     );
   }
 
-  void _showOrderDetails(Order order) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => OrderDetailsPage(order: order),
-      ),
-    );
-  }
-
   void fetchOrdersIfPossible(BuildContext context) {
     if (_startDate != null && _endDate != null) {
-      // Nếu cả ngày bắt đầu và ngày kết thúc đều không phải là null, gửi yêu cầu đầy đủ
       BlocProvider.of<GetOrderBloc>(context).add(FetchOrders(
           page: 1,
           pageSize: 10,
@@ -263,7 +271,6 @@ class _OrderListPageState extends State<OrderListPage> {
           endDate: _endDate!.millisecondsSinceEpoch,
           schoolId: selectedSchoolId));
     } else {
-      // Nếu một trong các ngày là null, chỉ sử dụng schoolId để gửi yêu cầu
       BlocProvider.of<GetOrderBloc>(context)
           .add(FetchOrders(page: 1, pageSize: 10, schoolId: selectedSchoolId));
     }
@@ -281,28 +288,27 @@ class _OrderListPageState extends State<OrderListPage> {
         if (isStartDate) {
           _startDate = picked;
           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-            _endDate =
-                null; // Optionally reset the end date if it is before the start date
+            _endDate = null;
           }
         } else {
           if (_startDate != null && picked.isBefore(_startDate!)) {
-            return; // Optionally do nothing if the end date is before the start date
+            return;
           }
           _endDate = picked;
         }
 
-        // Check if both dates are selected before fetching data
         if (_startDate != null && _endDate != null) {
-          BlocProvider.of<GetOrderBloc>(context).add(FetchOrders(
-              page: 1,
-              pageSize: 10,
-              startDate: _startDate!.millisecondsSinceEpoch,
-              endDate: _endDate!.millisecondsSinceEpoch,
-              schoolId:
-                  selectedSchoolId // Ensure this is correctly being captured elsewhere in your code
-              ));
+          fetchOrdersIfPossible(context);
         }
       });
     }
+  }
+
+  void _showOrderDetails(Order order) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => OrderDetailsPage(order: order),
+      ),
+    );
   }
 }
