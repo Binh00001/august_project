@@ -201,8 +201,8 @@ class _OrderListPageState extends State<OrderListPage> {
                                             : "Đã thanh toán",
                                         style: TextStyle(
                                           color: order.payStatus == "pending"
-                                              ? Colors.red
-                                              : Colors.green,
+                                              ? AppColors.error
+                                              : AppColors.onSuccess,
                                           fontWeight: FontWeight
                                               .bold, // Nếu cần, có thể thay đổi font weight
                                           fontSize:
@@ -214,7 +214,7 @@ class _OrderListPageState extends State<OrderListPage> {
                                       Text(
                                         'Tổng tiền: ${NumberFormat('#,##0', 'vi_VN').format(num.parse(order.totalAmount))} đ',
                                         style: const TextStyle(
-                                          color: Color(0xFFFF8A8A),
+                                          color: AppColors.lightRed,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),

@@ -183,8 +183,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.onSuccess,
+        foregroundColor: AppColors.onPrimary,
       ),
     );
   }

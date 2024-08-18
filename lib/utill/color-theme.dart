@@ -10,8 +10,10 @@ class AppColors {
   static const Color onSecondary =
       Color(0xFFFFFFFF); // Màu trắng, dùng cho văn bản và icon trên nền màu phụ
   static const Color error = Colors.red; // Màu đỏ cho lỗi
+  static const Color lightRed = Color(0xFFFF8A8A);
   static const Color onError =
       Colors.white; // Màu trắng cho văn bản trên nền lỗi
+  static const Color onSuccess = Colors.green;
   static const Color surface =
       Color(0xFF864AF9); // Color for component surfaces
   static const Color onSurface = Color(

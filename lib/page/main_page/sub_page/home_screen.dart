@@ -1,14 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project_august/database/share_preferences_helper.dart';
+import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/order_list.dart';
 import 'package:flutter_project_august/page/feature_page/product_list.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:flutter_project_august/assets_widget/navigator_container.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    User? user = await SharedPreferencesHelper.getUserInfo();
+    if (user != null) {
+      setState(() {
+        _user = user;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_user == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Trang chủ'),
@@ -54,45 +84,36 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: FeatureContainer(
-                      primaryColor: const Color(0xFFA259FF),
-                      iconColor: const Color(0xFFA259FF),
-                      icon: Icons.assignment_ind,
-                      title: 'Phân công mua hàng',
-                      onTap: () {
-                        // Handle tap
-                      },
+              if (_user!.role == 'admin') ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: FeatureContainer(
+                        primaryColor: const Color(0xFFA259FF),
+                        iconColor: const Color(0xFFA259FF),
+                        icon: Icons.assignment_ind,
+                        title: 'Phân công mua hàng',
+                        onTap: () {
+                          // Handle tap
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Expanded(
-                  //   child: FeatureContainer(
-                  //     primaryColor: const Color(0xFF0ACF83),
-                  //     iconColor: const Color(0xFF0ACF83),
-                  //     icon: Icons.source,
-                  //     title: 'Nguồn gốc sản phẩm',
-                  //     onTap: () {
-                  //       // Handle tap
-                  //     },
-                  //   ),
-                  // ),
-                  Expanded(
-                    child: FeatureContainer(
-                      primaryColor: const Color(0xFFF24E1E),
-                      iconColor: const Color(0xFFF24E1E),
-                      icon: Icons.attach_money,
-                      title: 'Doanh thu',
-                      onTap: () {
-                        // Handle tap
-                      },
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: FeatureContainer(
+                        primaryColor: const Color(0xFFF24E1E),
+                        iconColor: const Color(0xFFF24E1E),
+                        icon: Icons.attach_money,
+                        title: 'Doanh thu',
+                        onTap: () {
+                          // Handle tap
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
               Row(
                 children: [
                   Expanded(
@@ -110,7 +131,7 @@ class HomeScreen extends StatelessWidget {
                   const Expanded(
                       child: SizedBox(
                     width: 10,
-                  ))
+                  )),
                 ],
               ),
             ],

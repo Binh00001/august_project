@@ -3,6 +3,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
+import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/main_page/main_screen.dart';
 import 'package:flutter_project_august/repo/auth_repo.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
@@ -32,7 +33,12 @@ class _LoginPageState extends State<LoginPage> {
     if (result["success"]) {
       //lưu token
       SharedPreferencesHelper.setApiTokenKey(result['data']['accessToken']);
+      // Save user information
+      var userData = result['data']['user'];
+      User user = User.fromJson(userData);
+      await SharedPreferencesHelper.setUserInfo(user);
       //chuyển trang
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MainPage()),

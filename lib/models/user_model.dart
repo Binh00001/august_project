@@ -5,7 +5,7 @@ class User {
   final String role;
   final String? deletedAt;
   final String schoolId;
-
+  final String schoolName;
   User({
     required this.id,
     required this.username,
@@ -13,6 +13,7 @@ class User {
     required this.role,
     this.deletedAt,
     required this.schoolId,
+    required this.schoolName,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -21,8 +22,9 @@ class User {
       username: json['username'],
       name: json['name'],
       role: json['role'],
-      deletedAt: json['deleted_at'],
-      schoolId: json['school_id'],
+      deletedAt: json['deleted_at'] ?? "",
+      schoolId: json['school_id'] ?? "",
+      schoolName: json['school_name'] ?? "",
     );
   }
 
@@ -34,6 +36,7 @@ class User {
       'role': role,
       'deleted_at': deletedAt,
       'school_id': schoolId,
+      'school_name': schoolName
     };
   }
 }

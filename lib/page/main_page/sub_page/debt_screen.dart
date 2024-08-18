@@ -6,9 +6,11 @@ import 'package:flutter_project_august/blocs/get_debt/get_debt_state.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
+import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/school_model.dart';
+import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
-import 'package:intl/intl.dart'; // Thêm package intl để làm việc với định dạng ngày tháng
+import 'package:intl/intl.dart';
 
 class DebtScreen extends StatefulWidget {
   @override
@@ -20,14 +22,36 @@ class _DebtScreenState extends State<DebtScreen> {
   DateTime? _endDate;
   String _dateError = '';
   String? selectedSchoolId;
+  User? _user;
 
   @override
   void initState() {
     super.initState();
-    // Fetch list of schools
-    BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
-    // Fetch Debt
-    BlocProvider.of<DebtBloc>(context).add(FetchDebt());
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    try {
+      _user = await SharedPreferencesHelper.getUserInfo();
+      if (_user != null) {
+        setState(() {});
+        if (_user!.role == 'admin') {
+          // Fetch the list of schools only if the user is an admin
+          BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
+          // Fetch Debt without specifying a school
+          BlocProvider.of<DebtBloc>(context).add(FetchDebt());
+        } else if (_user!.role == 'user') {
+          // If the user is a regular user, fetch the debt for their school
+          BlocProvider.of<DebtBloc>(context).add(FetchDebt(
+            schoolId: _user!.schoolId,
+          ));
+        }
+      } else {
+        print('User is null');
+      }
+    } catch (e) {
+      print('Error loading user info: $e');
+    }
   }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
@@ -42,14 +66,13 @@ class _DebtScreenState extends State<DebtScreen> {
         if (isStartDate) {
           _startDate = picked;
           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-            _endDate =
-                null; // Optionally reset the end date if it is before the start date
+            _endDate = null;
             _dateError = 'Ngày kết thúc phải sau ngày bắt đầu';
           }
         } else {
           if (_startDate != null && picked.isBefore(_startDate!)) {
             _dateError = 'Ngày kết thúc phải sau ngày bắt đầu';
-            return; // Optionally do nothing if the end date is before the start date
+            return;
           }
           _dateError = "";
           _endDate = picked;
@@ -68,6 +91,15 @@ class _DebtScreenState extends State<DebtScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_user == null) {
+      return const Scaffold(
+        body: const Center(
+          child:
+              CircularProgressIndicator(), // Display a loading indicator while user data is loading
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Công nợ'),
@@ -130,47 +162,48 @@ class _DebtScreenState extends State<DebtScreen> {
                 ),
               ),
             const SizedBox(height: 16),
-            BlocBuilder<SchoolBloc, SchoolState>(
-              builder: (context, state) {
-                if (state is SchoolLoading) {
-                  return const CircularProgressIndicator();
-                } else if (state is SchoolLoaded) {
-                  return DropdownButtonFormField<String>(
-                    value: selectedSchoolId,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedSchoolId = newValue; // Cập nhật giá trị mới
-                        fetchDebtIfPossible(context);
-                      });
-                      // Thực hiện hành động nào đó khi chọn (cập nhật UI, gửi sự kiện,...)
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'Chọn trường học',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+            if (_user!.role == 'admin') ...[
+              BlocBuilder<SchoolBloc, SchoolState>(
+                builder: (context, state) {
+                  if (state is SchoolLoading) {
+                    return const CircularProgressIndicator();
+                  } else if (state is SchoolLoaded) {
+                    return DropdownButtonFormField<String>(
+                      value: selectedSchoolId,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedSchoolId = newValue;
+                          fetchDebtIfPossible(context);
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Chọn trường học',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                    ),
-                    items: [
-                      const DropdownMenuItem<String>(
-                        value: null, // Giá trị null cho lựa chọn "Tất cả"
-                        child: Text("Tất cả"),
-                      ),
-                      ...state.schools
-                          .map<DropdownMenuItem<String>>((School school) {
-                        return DropdownMenuItem<String>(
-                          value: school.id,
-                          child: Text(school.name),
-                        );
-                      }).toList(),
-                    ],
-                  );
-                } else if (state is SchoolError) {
-                  return Text('Error: ${state.message}');
-                } else {
-                  return const Text("Không có dữ liệu trường học");
-                }
-              },
-            ),
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null,
+                          child: Text("Tất cả"),
+                        ),
+                        ...state.schools
+                            .map<DropdownMenuItem<String>>((School school) {
+                          return DropdownMenuItem<String>(
+                            value: school.id,
+                            child: Text(school.name),
+                          );
+                        }).toList(),
+                      ],
+                    );
+                  } else if (state is SchoolError) {
+                    return Text('Error: ${state.message}');
+                  } else {
+                    return const Text("Không có dữ liệu trường học");
+                  }
+                },
+              ),
+            ],
             const Spacer(),
             BlocBuilder<DebtBloc, DebtState>(
               builder: (context, state) {
@@ -219,11 +252,9 @@ class _DebtScreenState extends State<DebtScreen> {
           startDate: _startDate!.millisecondsSinceEpoch,
           endDate: _endDate!.millisecondsSinceEpoch,
           schoolId: selectedSchoolId));
-      // Nếu cả ngày bắt đầu và ngày kết thúc đều không phải là null, gửi yêu cầu đầy đủ
     } else {
       BlocProvider.of<DebtBloc>(context)
           .add(FetchDebt(schoolId: selectedSchoolId));
-      // Nếu một trong các ngày là null, chỉ sử dụng schoolId để gửi yêu cầu
     }
   }
 }
