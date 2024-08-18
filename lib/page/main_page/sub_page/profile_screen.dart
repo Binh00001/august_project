@@ -102,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
       child: Column(
         children: [
-          const SizedBox(height: 40),
+          const SizedBox(height: 80),
           CircleAvatar(
             radius: 50,
             backgroundColor: Colors.grey[300],
