@@ -1,7 +1,7 @@
 import 'package:flutter_project_august/models/product_model.dart';
 
 class OrderItem {
-  final int quantity;
+  final String quantity;
   final String price;
   final String productName;
   final String productId;
@@ -17,7 +17,7 @@ class OrderItem {
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
       quantity: json['quantity'] ?? "",
-      price: json['price'] ?? 0,
+      price: json['price'] ?? "",
       productName: json['product']['name'] ?? "",
       productId: json['product']['id'] ?? "",
       productUnit: json['product']['unit'] ?? "",
