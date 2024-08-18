@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/cart/cart_bloc.dart';
 import 'package:flutter_project_august/blocs/create_category/create_category_bloc.dart';
+import 'package:flutter_project_august/blocs/create_order/create_order_bloc.dart';
 import 'package:flutter_project_august/blocs/create_origin/create_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/create_product/create_product_bloc.dart';
 import 'package:flutter_project_august/blocs/create_school/create_school_bloc.dart';
@@ -143,6 +145,14 @@ class MyApp extends StatelessWidget {
             create: (context) => DebtBloc(
               orderRepo: context.read<OrderRepo>(),
             ),
+          ),
+          BlocProvider<CreateOrderBloc>(
+            create: (context) => CreateOrderBloc(
+              orderRepo: context.read<OrderRepo>(),
+            ),
+          ),
+          BlocProvider<CartBloc>(
+            create: (context) => CartBloc(),
           ),
           // Include other BlocProviders if needed
         ],

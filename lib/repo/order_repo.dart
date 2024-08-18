@@ -8,6 +8,32 @@ class OrderRepo {
 
   OrderRepo({required this.dio});
 
+  Future<bool> createOrder(
+      List<Map<String, dynamic>> products, num totalAmount) async {
+    try {
+      final response = await dio.post(
+        'http://13.215.253.129:3001/v1/order',
+        data: {
+          'totalAmount': totalAmount,
+          'products': products,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Handle success
+        print('Order created successfully: ${response.data}');
+        return true;
+      } else {
+        // Handle error
+        print('Failed to create order: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Error creating order: $e');
+      return false;
+    }
+  }
+
   Future<List<Order>> getOrders({
     required int page,
     required int pageSize,

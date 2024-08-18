@@ -53,15 +53,15 @@ class Product {
   final String price;
   final DateTime createdAt;
   final Category category;
-
-  Product({
-    required this.id,
-    required this.name,
-    this.imageUrl,
-    required this.price,
-    required this.createdAt,
-    required this.category,
-  });
+  final String unit;
+  Product(
+      {required this.id,
+      required this.name,
+      this.imageUrl,
+      required this.price,
+      required this.createdAt,
+      required this.category,
+      required this.unit});
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
@@ -71,6 +71,7 @@ class Product {
       price: json['price'],
       createdAt: DateTime.parse(json['created_at']),
       category: Category.fromJson(json['category']),
+      unit: json['unit'] ?? "",
     );
   }
 
@@ -82,6 +83,7 @@ class Product {
       'price': price,
       'created_at': createdAt.toIso8601String(),
       'category': category.toJson(),
+      'unit': unit
     };
   }
 }

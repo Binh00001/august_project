@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/assets_widget/product_widget.dart';
+import 'package:flutter_project_august/blocs/cart/cart_bloc.dart';
+import 'package:flutter_project_august/blocs/cart/cart_event.dart';
 import 'package:flutter_project_august/blocs/get_category/get_category_bloc.dart';
 import 'package:flutter_project_august/blocs/get_category/get_category_event.dart';
 import 'package:flutter_project_august/blocs/get_category/get_category_state.dart';
@@ -12,6 +14,7 @@ import 'package:flutter_project_august/models/product_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/create_product.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
+import 'package:input_quantity/input_quantity.dart';
 
 class ProductListScreen extends StatefulWidget {
   @override
@@ -98,7 +101,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return Expanded(
       child: BlocBuilder<ProductBloc, ProductState>(
         builder: (context, state) {
-          print(state);
           if (state is ProductLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is ProductLoaded) {
@@ -221,95 +223,141 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   void showProductBottomDialog(Product product) {
+    num quantity = 1;
     showModalBottomSheet(
       context: context,
+      isScrollControlled:
+          true, // Allow the bottom sheet to adjust for the keyboard
       builder: (BuildContext context) {
-        num quantity = 1;
-
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Center(
-                  //   child: Image.network(
-                  //     product.imageUrl,
-                  //     height: 150,
-                  //   ),
-                  // ),
-                  const SizedBox(height: 16.0),
-                  Text(
-                    product.name,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    'Giá: \$${product.price.toString()}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ), // Adjusts for the keyboard
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Số lượng:',
-                        style: TextStyle(fontSize: 16),
+                      if (product.imageUrl != null)
+                        Container(
+                          width: double.infinity,
+                          height: 150.0,
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8.0),
+                              topRight: Radius.circular(8.0),
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(8.0),
+                              topRight: Radius.circular(8.0),
+                            ),
+                            child: Image.network(
+                              product.imageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                width: double.infinity,
+                                height: 150.0,
+                                color: Colors.grey,
+                                child: const Icon(Icons.image_not_supported),
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        Container(
+                          width: double.infinity,
+                          height: 150.0,
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8.0),
+                              topRight: Radius.circular(8.0),
+                            ),
+                            color: Colors.grey,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: const Icon(Icons.image_not_supported),
+                          ),
+                        ),
+                      const SizedBox(height: 16.0),
+                      Text(
+                        '${product.name} (${product.unit})',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                      const SizedBox(height: 8.0),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove),
-                            onPressed: () {
-                              if (quantity > 1) {
-                                setState(() {
-                                  quantity--;
-                                });
-                              }
-                            },
+                          const Text(
+                            'Số lượng:',
+                            style: TextStyle(fontSize: 16),
                           ),
-                          Text(
-                            '$quantity',
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
+                          InputQty(
+                            maxVal: 999,
+                            initVal: quantity,
+                            minVal: 1,
+                            steps: 1,
+                            onQtyChanged: (val) {
                               setState(() {
-                                quantity++;
+                                quantity = val;
                               });
                             },
                           ),
                         ],
                       ),
+                      const SizedBox(height: 8.0),
+                      // Text(
+                      //   'Tổng tiền: $totalPrice',
+                      //   style: const TextStyle(
+                      //     fontSize: 16,
+                      //     color: AppColors.lightRed,
+                      //   ),
+                      // ),
+                      const SizedBox(height: 16.0),
+                      GestureDetector(
+                        onTap: () {
+                          BlocProvider.of<CartBloc>(context).add(
+                              AddProductToCart(
+                                  product: product, quantity: quantity));
+                          Navigator.of(context).pop(); // Close the bottom sheet
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Đã thêm $quantity sản phẩm vào giỏ hàng.'),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Thêm vào giỏ hàng',
+                              style: TextStyle(
+                                color: AppColors.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 16.0),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Handle add to cart action
-                        Navigator.of(context).pop(); // Close the bottom sheet
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Đã thêm $quantity sản phẩm vào giỏ hàng.'),
-                          ),
-                        );
-                      },
-                      child: const Text('Thêm vào giỏ hàng'),
-                    ),
-                  ),
-                ],
+                ),
               ),
             );
           },
