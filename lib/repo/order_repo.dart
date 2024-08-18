@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project_august/models/order_model.dart'; // Assuming Order model exists
+import 'package:flutter_project_august/models/task_model.dart';
 import 'package:flutter_project_august/utill/app_constants.dart';
 
 class OrderRepo {
@@ -8,11 +9,29 @@ class OrderRepo {
 
   OrderRepo({required this.dio});
 
+  Future<List<Task>> getTasks(int date) async {
+    try {
+      final response = await dio.get(
+        '${AppConstants.baseUrl}/v1/order/buy',
+        queryParameters: {'date': date},
+      );
+      // Parse the response data into a list of BuyTask objects
+      List<Task> tasks = (response.data['data']['products'] as List)
+          .map((taskJson) => Task.fromJson(taskJson as Map<String, dynamic>))
+          .toList();
+
+      return tasks;
+    } catch (e) {
+      print('Error fetching tasks: $e');
+      rethrow; // Re-throw the error after logging it
+    }
+  }
+
   Future<bool> createOrder(
       List<Map<String, dynamic>> products, num totalAmount) async {
     try {
       final response = await dio.post(
-        'http://13.215.253.129:3001/v1/order',
+        '${AppConstants.baseUrl}/v1/order',
         data: {
           'totalAmount': totalAmount,
           'products': products,

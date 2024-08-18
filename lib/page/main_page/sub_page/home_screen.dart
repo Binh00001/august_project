@@ -3,6 +3,7 @@ import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/order_list.dart';
 import 'package:flutter_project_august/page/feature_page/product_list.dart';
+import 'package:flutter_project_august/page/feature_page/task_page.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:flutter_project_august/assets_widget/navigator_container.dart';
 
@@ -95,6 +96,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: 'Phân công mua hàng',
                         onTap: () {
                           // Handle tap
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => TaskPage()),
+                          );
                         },
                       ),
                     ),

@@ -17,6 +17,7 @@ import 'package:flutter_project_august/blocs/get_order/get_order_bloc.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
+import 'package:flutter_project_august/blocs/task/task_bloc.dart';
 import 'package:flutter_project_august/database/local_database.dart';
 
 import 'package:flutter_project_august/page/login_page/login_screen.dart';
@@ -148,6 +149,11 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<CreateOrderBloc>(
             create: (context) => CreateOrderBloc(
+              orderRepo: context.read<OrderRepo>(),
+            ),
+          ),
+          BlocProvider<TaskBloc>(
+            create: (context) => TaskBloc(
               orderRepo: context.read<OrderRepo>(),
             ),
           ),

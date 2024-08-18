@@ -15,11 +15,11 @@ class Staff {
 
   factory Staff.fromJson(Map<String, dynamic> json) {
     return Staff(
-      id: json['id'],
-      username: json['username'],
-      name: json['name'],
-      role: json['role'],
-      deletedAt: json['deleted_at'],
+      id: json['id'] ?? "",
+      username: json['username'] ?? "",
+      name: json['name'] ?? "",
+      role: json['role'] ?? "",
+      deletedAt: json['deleted_at'] ?? "",
     );
   }
 
