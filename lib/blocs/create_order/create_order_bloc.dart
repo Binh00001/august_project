@@ -20,9 +20,9 @@ class CreateOrderBloc extends Bloc<CreateOrderEvent, CreateOrderState> {
       final result =
           await orderRepo.createOrder(event.products, event.totalAmount);
       if (result) {
-        emit(CreateOrderSuccess(message: 'Order created successfully.'));
+        emit(const CreateOrderSuccess(message: 'Order created successfully.'));
       } else {
-        emit(CreateOrderFailure(error: ""));
+        emit(const CreateOrderFailure(error: ""));
       }
     } catch (e) {
       emit(CreateOrderFailure(error: e.toString()));
