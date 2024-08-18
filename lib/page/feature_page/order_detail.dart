@@ -22,6 +22,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView.builder(
@@ -50,6 +51,24 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           },
         ),
       ),
+      bottomNavigationBar: widget.order.payStatus == "pending"
+          ? BottomAppBar(
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    // // Hành động khi nút được nhấn
+                    // markAsPaid();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: AppColors.onPrimary,
+                    backgroundColor: AppColors.primary, // Text and icon color
+                  ),
+                  child: const Text('Đánh dấu đã thanh toán'),
+                ),
+              ),
+            )
+          : null, // Không hiển thị nút nếu đã thanh toán
     );
   }
 }

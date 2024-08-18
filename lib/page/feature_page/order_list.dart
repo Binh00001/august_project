@@ -196,6 +196,20 @@ class _OrderListPageState extends State<OrderListPage> {
                                       ),
                                       Text(order.schoolName),
                                       Text(
+                                        order.payStatus == "pending"
+                                            ? "Chưa thanh toán"
+                                            : "Đã thanh toán",
+                                        style: TextStyle(
+                                          color: order.payStatus == "pending"
+                                              ? Colors.red
+                                              : Colors.green,
+                                          fontWeight: FontWeight
+                                              .bold, // Nếu cần, có thể thay đổi font weight
+                                          fontSize:
+                                              16, // Nếu cần, có thể thay đổi kích thước chữ
+                                        ),
+                                      ),
+                                      Text(
                                           'Số mặt hàng: ${order.orderItems.length}'),
                                       Text(
                                         'Tổng tiền: ${NumberFormat('#,##0', 'vi_VN').format(num.parse(order.totalAmount))} đ',
