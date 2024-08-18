@@ -5,8 +5,11 @@ import 'package:intl/intl.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final Order order;
+  final String userRole; // Add userRole as a parameter
 
-  const OrderDetailsPage({Key? key, required this.order}) : super(key: key);
+  const OrderDetailsPage(
+      {Key? key, required this.order, required this.userRole})
+      : super(key: key);
 
   @override
   _OrderDetailsPageState createState() => _OrderDetailsPageState();
@@ -22,7 +25,6 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView.builder(
@@ -51,13 +53,14 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           },
         ),
       ),
-      bottomNavigationBar: widget.order.payStatus == "pending"
+      bottomNavigationBar: (widget.order.payStatus == "pending" &&
+              widget.userRole == 'admin')
           ? BottomAppBar(
               child: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    // // Hành động khi nút được nhấn
+                    // Hành động khi nút được nhấn
                     // markAsPaid();
                   },
                   style: ElevatedButton.styleFrom(
@@ -68,7 +71,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 ),
               ),
             )
-          : null, // Không hiển thị nút nếu đã thanh toán
+          : null, // Không hiển thị nút nếu đã thanh toán hoặc không phải admin
     );
   }
 }

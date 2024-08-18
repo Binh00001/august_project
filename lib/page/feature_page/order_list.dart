@@ -307,7 +307,10 @@ class _OrderListPageState extends State<OrderListPage> {
   void _showOrderDetails(Order order) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => OrderDetailsPage(order: order),
+        builder: (context) => OrderDetailsPage(
+          order: order,
+          userRole: _user!.role,
+        ),
       ),
     );
   }
