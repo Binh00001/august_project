@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/get_debt/get_debt_bloc.dart';
+import 'package:flutter_project_august/blocs/get_debt/get_debt_event.dart';
+import 'package:flutter_project_august/blocs/get_debt/get_debt_state.dart';
+import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
+import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
+import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
+import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:intl/intl.dart'; // Thêm package intl để làm việc với định dạng ngày tháng
 
@@ -10,16 +18,17 @@ class DebtScreen extends StatefulWidget {
 class _DebtScreenState extends State<DebtScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
-  String? _selectedSchool;
-  double _totalDebt = 0.0;
   String _dateError = '';
+  String? selectedSchoolId;
 
-  final List<String> _schools = [
-    'Trường A',
-    'Trường B',
-    'Trường C',
-    'Trường D',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Fetch list of schools
+    BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
+    // Fetch Debt
+    BlocProvider.of<DebtBloc>(context).add(FetchDebt());
+  }
 
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
@@ -33,17 +42,25 @@ class _DebtScreenState extends State<DebtScreen> {
         if (isStartDate) {
           _startDate = picked;
           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+            _endDate =
+                null; // Optionally reset the end date if it is before the start date
             _dateError = 'Ngày kết thúc phải sau ngày bắt đầu';
-          } else {
-            _dateError = '';
           }
         } else {
           if (_startDate != null && picked.isBefore(_startDate!)) {
             _dateError = 'Ngày kết thúc phải sau ngày bắt đầu';
-          } else {
-            _endDate = picked;
-            _dateError = '';
+            return; // Optionally do nothing if the end date is before the start date
           }
+          _dateError = "";
+          _endDate = picked;
+        }
+
+        // Check if both dates are selected before fetching data
+        if (_startDate != null && _endDate != null) {
+          BlocProvider.of<DebtBloc>(context).add(FetchDebt(
+              startDate: _startDate!.millisecondsSinceEpoch,
+              endDate: _endDate!.millisecondsSinceEpoch,
+              schoolId: selectedSchoolId));
         }
       });
     }
@@ -113,51 +130,100 @@ class _DebtScreenState extends State<DebtScreen> {
                 ),
               ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Chọn trường học',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              value: _selectedSchool,
-              items: _schools.map((String school) {
-                return DropdownMenuItem<String>(
-                  value: school,
-                  child: Text(school),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedSchool = newValue;
-                });
+            BlocBuilder<SchoolBloc, SchoolState>(
+              builder: (context, state) {
+                if (state is SchoolLoading) {
+                  return const CircularProgressIndicator();
+                } else if (state is SchoolLoaded) {
+                  return DropdownButtonFormField<String>(
+                    value: selectedSchoolId,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedSchoolId = newValue; // Cập nhật giá trị mới
+                        fetchDebtIfPossible(context);
+                      });
+                      // Thực hiện hành động nào đó khi chọn (cập nhật UI, gửi sự kiện,...)
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Chọn trường học',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    items: [
+                      const DropdownMenuItem<String>(
+                        value: null, // Giá trị null cho lựa chọn "Tất cả"
+                        child: Text("Tất cả"),
+                      ),
+                      ...state.schools
+                          .map<DropdownMenuItem<String>>((School school) {
+                        return DropdownMenuItem<String>(
+                          value: school.id,
+                          child: Text(school.name),
+                        );
+                      }).toList(),
+                    ],
+                  );
+                } else if (state is SchoolError) {
+                  return Text('Error: ${state.message}');
+                } else {
+                  return const Text("Không có dữ liệu trường học");
+                }
               },
             ),
             const Spacer(),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Tổng nợ:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '${_totalDebt.toStringAsFixed(2)} VND',
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
+            BlocBuilder<DebtBloc, DebtState>(
+              builder: (context, state) {
+                if (state is DebtLoaded) {
+                  String formattedDebt =
+                      NumberFormat('#,##0', 'vi_VN').format(state.debts);
+
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Tổng nợ:',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '$formattedDebt đ',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  );
+                } else if (state is DebtLoading) {
+                  return const CircularProgressIndicator();
+                } else {
+                  return const Text("Không có thông tin nợ");
+                }
+              },
             ),
           ],
         ),
       ),
     );
+  }
+
+  void fetchDebtIfPossible(BuildContext context) {
+    if (_startDate != null && _endDate != null) {
+      BlocProvider.of<DebtBloc>(context).add(FetchDebt(
+          startDate: _startDate!.millisecondsSinceEpoch,
+          endDate: _endDate!.millisecondsSinceEpoch,
+          schoolId: selectedSchoolId));
+      // Nếu cả ngày bắt đầu và ngày kết thúc đều không phải là null, gửi yêu cầu đầy đủ
+    } else {
+      BlocProvider.of<DebtBloc>(context)
+          .add(FetchDebt(schoolId: selectedSchoolId));
+      // Nếu một trong các ngày là null, chỉ sử dụng schoolId để gửi yêu cầu
+    }
   }
 }

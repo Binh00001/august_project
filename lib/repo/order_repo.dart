@@ -18,12 +18,14 @@ class OrderRepo {
     try {
       final response = await dio.get(
         '${AppConstants.baseUrl}/v1/order',
-        queryParameters:
-            _buildQueryParameters(page, pageSize, schoolId, startDate, endDate),
+        queryParameters: _buildQueryParameters(
+            page: page,
+            pageSize: pageSize,
+            schoolId: schoolId,
+            startDate: startDate,
+            endDate: endDate),
       );
-      print(
-        _buildQueryParameters(page, pageSize, schoolId, startDate, endDate),
-      );
+
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data']
             ['docs']; // Adjust according to your JSON structure
@@ -38,21 +40,38 @@ class OrderRepo {
     }
   }
 
-  Map<String, dynamic> _buildQueryParameters(
-      int page, int pageSize, String? schoolId, int? startDate, int? endDate) {
-    final Map<String, dynamic> params = {
-      'page': page,
-      'pageSize': pageSize,
-    };
-    if (schoolId != null) {
-      params['schoolId'] = schoolId;
+  Future<num> getDebtOrders(Map<String, dynamic> queryParams) async {
+    try {
+      final response = await dio.get(
+        '${AppConstants.baseUrl}/v1/order/debt',
+        queryParameters: queryParams,
+      );
+      if (response.statusCode == 200) {
+        // Adjust according to your JSON structure
+        return response.data['data']['debt'];
+      } else {
+        throw Exception(
+            'Failed to load debt orders with status code: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+          'Failed to connect to the API: ${e.response?.data ?? e.message}');
     }
-    if (startDate != null && startDate != 0) {
-      params['startDate'] = startDate;
-    }
-    if (endDate != null && endDate != 0) {
-      params['endDate'] = endDate;
-    }
+  }
+
+  Map<String, dynamic> _buildQueryParameters({
+    int? page,
+    int? pageSize,
+    String? schoolId,
+    int? startDate,
+    int? endDate,
+  }) {
+    final Map<String, dynamic> params = {};
+    if (page != null) params['page'] = page;
+    if (pageSize != null) params['pageSize'] = pageSize;
+    if (schoolId != null) params['schoolId'] = schoolId;
+    if (startDate != null) params['startDate'] = startDate;
+    if (endDate != null) params['endDate'] = endDate;
 
     return params;
   }

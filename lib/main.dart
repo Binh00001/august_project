@@ -10,6 +10,7 @@ import 'package:flutter_project_august/blocs/create_user/create_user_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_user/get_all_user_bloc.dart';
 import 'package:flutter_project_august/blocs/get_category/get_category_bloc.dart';
+import 'package:flutter_project_august/blocs/get_debt/get_debt_bloc.dart';
 import 'package:flutter_project_august/blocs/get_order/get_order_bloc.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
@@ -135,6 +136,11 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<GetOrderBloc>(
             create: (context) => GetOrderBloc(
+              orderRepo: context.read<OrderRepo>(),
+            ),
+          ),
+          BlocProvider<DebtBloc>(
+            create: (context) => DebtBloc(
               orderRepo: context.read<OrderRepo>(),
             ),
           ),
