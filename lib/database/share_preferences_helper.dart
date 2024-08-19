@@ -43,6 +43,12 @@ class SharedPreferencesHelper {
     return null;
   }
 
+  static Future<bool> checkUserLoggedIn() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('_accessToken');
+    return token != null;
+  }
+
   // Remove user information
   static Future<void> removeUserInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

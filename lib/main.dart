@@ -23,6 +23,7 @@ import 'package:flutter_project_august/database/local_database.dart';
 
 import 'package:flutter_project_august/page/login_page/login_screen.dart';
 import 'package:flutter_project_august/network/dio.dart';
+import 'package:flutter_project_august/page/main_page/main_screen.dart';
 import 'package:flutter_project_august/repo/auth_repo.dart';
 import 'package:flutter_project_august/repo/category_repo.dart';
 import 'package:flutter_project_august/repo/order_repo.dart';
@@ -31,23 +32,32 @@ import 'package:flutter_project_august/repo/product_repo.dart';
 import 'package:flutter_project_august/repo/school_repo.dart';
 import 'package:flutter_project_august/repo/user_repo.dart';
 
+import 'package:flutter_project_august/database/share_preferences_helper.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Dio dio = await DioClient.createDio();
-
+  bool isLoggedIn = await SharedPreferencesHelper.checkUserLoggedIn();
+  print(isLoggedIn);
   LocalDatabase localDatabase =
       LocalDatabase.instance; // Access the singleton instance of LocalDatabase
 
   runApp(MyApp(
     dio: dio,
     localDatabase: localDatabase,
+    isLoggedIn: isLoggedIn,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final Dio dio;
   final LocalDatabase localDatabase;
-  const MyApp({super.key, required this.dio, required this.localDatabase});
+  final bool isLoggedIn;
+  MyApp(
+      {super.key,
+      required this.dio,
+      required this.localDatabase,
+      required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -168,9 +178,11 @@ class MyApp extends StatelessWidget {
           ),
           // Include other BlocProviders if needed
         ],
-        child: const MaterialApp(
+        child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: LoginPage(), // Ensure LoginPage is correctly implemented
+          home: isLoggedIn
+              ? const MainPage()
+              : const LoginPage(), // Ensure LoginPage is correctly implemented
         ),
       ),
     );
