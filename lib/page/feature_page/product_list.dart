@@ -138,15 +138,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 final product = state.products[index];
                 return GestureDetector(
                   onTap: () {
-                    if (_user?.role != null) {
+                    if (_user?.role == "user") {
                       showProductBottomDialog(product);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Bạn không có quyền thực hiện hành động này.'),
-                        ),
-                      );
                     }
                   },
                   child: ProductWidget(

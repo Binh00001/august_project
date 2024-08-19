@@ -57,11 +57,12 @@ class _TaskPageState extends State<TaskPage> {
           actions: [
             IconButton(
               icon: const Icon(Icons.history),
-              onPressed: () {
+              onPressed: () async {
                 // Navigate to the history page
-                Navigator.of(context).push(MaterialPageRoute(
+                await Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) =>
                         const HistoryPage())); // Replace with your history page
+                _loadTask();
               },
             ),
           ],
