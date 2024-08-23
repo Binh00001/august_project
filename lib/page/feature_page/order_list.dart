@@ -129,7 +129,7 @@ class _OrderListPageState extends State<OrderListPage> {
               ],
             ),
             const SizedBox(height: 16),
-            if (_user!.role == 'admin') ...[
+            if (_user!.role == 'admin' || _user!.role == 'staff') ...[
               BlocBuilder<SchoolBloc, SchoolState>(
                 builder: (context, state) {
                   if (state is SchoolLoading) {

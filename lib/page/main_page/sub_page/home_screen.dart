@@ -117,27 +117,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-              ],
-              Row(
-                children: [
-                  Expanded(
-                    child: FeatureContainer(
-                      primaryColor: const Color(0xFF1ABCF3),
-                      iconColor: const Color(0xFF1ABCF3),
-                      icon: Icons.bar_chart,
-                      title: 'Thống kê',
-                      onTap: () {
-                        // Handle tap
-                      },
+                Row(
+                  children: [
+                    Expanded(
+                      child: FeatureContainer(
+                        primaryColor: const Color(0xFF1ABCF3),
+                        iconColor: const Color(0xFF1ABCF3),
+                        icon: Icons.bar_chart,
+                        title: 'Thống kê',
+                        onTap: () {
+                          // Handle tap
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                      child: SizedBox(
-                    width: 10,
-                  )),
-                ],
-              ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                        child: SizedBox(
+                      width: 10,
+                    )),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

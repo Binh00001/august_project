@@ -93,7 +93,7 @@ class _DebtScreenState extends State<DebtScreen> {
   Widget build(BuildContext context) {
     if (_user == null) {
       return const Scaffold(
-        body: const Center(
+        body: Center(
           child:
               CircularProgressIndicator(), // Display a loading indicator while user data is loading
         ),
@@ -162,7 +162,7 @@ class _DebtScreenState extends State<DebtScreen> {
                 ),
               ),
             const SizedBox(height: 16),
-            if (_user!.role == 'admin') ...[
+            if (_user!.role == 'admin' || _user!.role == 'staff') ...[
               BlocBuilder<SchoolBloc, SchoolState>(
                 builder: (context, state) {
                   if (state is SchoolLoading) {
@@ -202,6 +202,14 @@ class _DebtScreenState extends State<DebtScreen> {
                     return const Text("Không có dữ liệu trường học");
                   }
                 },
+              ),
+            ] else if (_user!.role == 'user') ...[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Trường học: ${_user!.schoolName}',
+                  style: const TextStyle(fontSize: 16),
+                ),
               ),
             ],
             const Spacer(),
