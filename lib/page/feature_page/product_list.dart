@@ -112,12 +112,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
       ),
       floatingActionButton: _user?.role == 'admin'
           ? FloatingActionButton.extended(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const CreateProductPage(),
                   ),
                 );
+                _resetProducts();
+                _loadProducts();
               },
               label: const Text(
                 'Tạo Sản Phẩm Mới',
