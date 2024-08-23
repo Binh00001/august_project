@@ -26,14 +26,19 @@ class _ProductListScreenState extends State<ProductListScreen> {
   String? selectedCategory;
   String? selectedOrigin;
   User? _user;
+  int _currentPage = 1;
+  bool _isLoading = false;
+  bool _hasMore = true;
+  List<Product> _products = []; // List to store loaded products
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadProducts();
     _loadCategories();
-    // Load user information
     _loadUserInfo();
+    _scrollController.addListener(_onScroll);
   }
 
   Future<void> _loadUserInfo() async {
@@ -41,10 +46,16 @@ class _ProductListScreenState extends State<ProductListScreen> {
     setState(() {});
   }
 
-  void _loadProducts() {
+  void _loadProducts({int page = 1}) {
+    if (_isLoading || !_hasMore) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
     BlocProvider.of<ProductBloc>(context).add(
       FetchProducts(
-        page: 1,
+        page: page,
         pageSize: 10,
         categoryId: selectedCategory,
         originId: selectedOrigin,
@@ -54,6 +65,34 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   void _loadCategories() {
     BlocProvider.of<CategoryBloc>(context).add(const FetchCategories());
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMoreProducts();
+    }
+  }
+
+  void _loadMoreProducts() {
+    if (_isLoading || !_hasMore) return;
+    _currentPage++;
+    _loadProducts(page: _currentPage);
+  }
+
+  void _resetProducts() {
+    setState(() {
+      _products.clear(); // Clear the current products list
+      _currentPage = 1; // Reset the current page
+      _hasMore = true; // Reset the flag for more products
+    });
+    _loadProducts();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -97,11 +136,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
           : _user?.role == 'user'
               ? FloatingActionButton(
                   onPressed: () {
-                    // Handle the cart action
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) =>
-                            const CartPage(), // Replace with your cart page
+                        builder: (context) => const CartPage(),
                       ),
                     );
                   },
@@ -109,65 +146,64 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   foregroundColor: AppColors.onPrimary,
                   child: const Icon(Icons.shopping_cart),
                 )
-              : null, // If neither admin nor user, no floating action button
-// If not admin, no floating action button
+              : null,
     );
   }
 
   Expanded gridViewListProduct() {
     return Expanded(
-      child: BlocBuilder<ProductBloc, ProductState>(
-        builder: (context, state) {
-          if (state is ProductLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is ProductLoaded) {
-            if (state.products.isEmpty) {
-              return const Center(child: Text("Không có dữ liệu"));
-            }
-            return GridView.builder(
-              padding: const EdgeInsets.fromLTRB(
-                  8.0, 8.0, 8.0, 160.0), // Add bottom padding
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Display 2 products per row
-                crossAxisSpacing: 0,
-                mainAxisSpacing: 0,
-                childAspectRatio: 0.75, // Adjust ratio as needed to fit content
-              ),
-              itemCount: state.products.length,
-              itemBuilder: (context, index) {
-                final product = state.products[index];
-                return GestureDetector(
-                  onTap: () {
-                    if (_user?.role == "user") {
-                      showProductBottomDialog(product);
-                    }
-                  },
-                  child: ProductWidget(
-                    name: product.name,
-                    imageUrl: product.imageUrl,
-                    price: double.parse(product.price),
-                  ),
-                );
-              },
-            );
+      child: BlocListener<ProductBloc, ProductState>(
+        listener: (context, state) {
+          if (state is ProductLoaded) {
+            setState(() {
+              _isLoading = false;
+              if (state.products.isEmpty) {
+                _hasMore = false;
+              } else {
+                _products
+                    .addAll(state.products); // Add new products to the list
+              }
+            });
           } else if (state is ProductError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Không có dữ liệu"),
-                  const SizedBox(height: 8.0),
-                  ElevatedButton(
-                    onPressed: _loadProducts,
-                    child: const Text("Thử lại"),
-                  ),
-                ],
-              ),
+            setState(() {
+              _isLoading = false;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text("Error loading products: ${state.message}")),
             );
-          } else {
-            return const Center(child: Text("Không có dữ liệu"));
           }
         },
+        child: _products.isEmpty && _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : GridView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.fromLTRB(
+                    8.0, 8.0, 8.0, 160.0), // Add bottom padding
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // Display 2 products per row
+                  crossAxisSpacing: 0,
+                  mainAxisSpacing: 0,
+                  childAspectRatio:
+                      0.75, // Adjust ratio as needed to fit content
+                ),
+                itemCount: _products.length,
+                itemBuilder: (context, index) {
+                  final product = _products[index];
+                  return GestureDetector(
+                    onTap: () {
+                      if (_user?.role == "user") {
+                        showProductBottomDialog(product);
+                      }
+                    },
+                    child: ProductWidget(
+                      name: product.name,
+                      imageUrl: product.imageUrl,
+                      price: double.parse(product.price),
+                    ),
+                  );
+                },
+              ),
       ),
     );
   }
@@ -181,9 +217,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
             child: BlocBuilder<CategoryBloc, CategoryState>(
               builder: (context, state) {
                 if (state is CategoryLoading) {
-                  return const Center(
-                      child:
-                          CircularProgressIndicator()); // Show loading indicator while loading
+                  return const Center(child: CircularProgressIndicator());
                 } else if (state is CategoryLoaded) {
                   return DropdownButtonFormField<String>(
                     alignment: Alignment.bottomCenter,
@@ -202,7 +236,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     onChanged: (value) {
                       setState(() {
                         selectedCategory = value;
-                        _loadProducts(); // Reload products when origin changes
+                        _resetProducts(); // Reset the products list when a new category is selected
                       });
                     },
                   );
@@ -326,13 +360,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         ],
                       ),
                       const SizedBox(height: 8.0),
-                      // Text(
-                      //   'Tổng tiền: $totalPrice',
-                      //   style: const TextStyle(
-                      //     fontSize: 16,
-                      //     color: AppColors.lightRed,
-                      //   ),
-                      // ),
                       const SizedBox(height: 16.0),
                       GestureDetector(
                         onTap: () {
