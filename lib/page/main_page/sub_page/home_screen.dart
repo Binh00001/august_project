@@ -138,6 +138,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ],
+              if (_user!.role == 'staff') ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: FeatureContainer(
+                        primaryColor: const Color(0xFFA259FF),
+                        iconColor: const Color(0xFFA259FF),
+                        icon: Icons.assignment_ind,
+                        title: 'Phân công mua hàng',
+                        onTap: () {
+                          // Handle tap
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => TaskPage()),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                        child: SizedBox(
+                      width: 10,
+                    )),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

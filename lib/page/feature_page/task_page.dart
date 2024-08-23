@@ -8,7 +8,9 @@ import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_state.d
 import 'package:flutter_project_august/blocs/task/task_bloc.dart';
 import 'package:flutter_project_august/blocs/task/task_state.dart';
 import 'package:flutter_project_august/blocs/task/task_event.dart';
+import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/task_model.dart';
+import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/history_task.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
@@ -22,12 +24,14 @@ class TaskPage extends StatefulWidget {
 }
 
 class _TaskPageState extends State<TaskPage> {
+  User? _user;
   @override
   void initState() {
     super.initState();
     _loadStaff();
     // Get today's date in milliseconds since epoch
     _loadTask();
+    _loadUserInfo();
   }
 
   void _loadStaff() {
@@ -38,6 +42,15 @@ class _TaskPageState extends State<TaskPage> {
     DateTime now = DateTime.now();
     // Dispatch the event to fetch tasks for today
     context.read<TaskBloc>().add(FetchTasks(date: now.millisecondsSinceEpoch));
+  }
+
+  Future<void> _loadUserInfo() async {
+    User? user = await SharedPreferencesHelper.getUserInfo();
+    if (user != null) {
+      setState(() {
+        _user = user;
+      });
+    }
   }
 
   @override
@@ -55,16 +68,20 @@ class _TaskPageState extends State<TaskPage> {
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
           actions: [
-            IconButton(
-              icon: const Icon(Icons.history),
-              onPressed: () async {
-                // Navigate to the history page
-                await Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        const HistoryPage())); // Replace with your history page
-                _loadTask();
-              },
-            ),
+            if (_user!.role == 'admin')
+              IconButton(
+                icon: const Icon(Icons.history),
+                onPressed: () async {
+                  // Navigate to the history page
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const HistoryPage(), // Replace with your history page
+                    ),
+                  );
+                  _loadTask();
+                },
+              ),
           ],
         ),
         body: BlocListener<AssignStaffBloc, AssignStaffState>(
@@ -138,41 +155,72 @@ class _TaskPageState extends State<TaskPage> {
           ),
           Column(
             children: [
-              if (task.staff == null)
-                GestureDetector(
-                  onTap: () {
-                    _showAssignStaffDialog(context, task);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 4.0), // Padding inside the container
-                    decoration: BoxDecoration(
-                      color: AppColors.lightRed, // Background color
-                      border: Border.all(
-                          color: Colors.red, width: 1.0), // Red border
-                      borderRadius:
-                          BorderRadius.circular(4.0), // Rounded corners
-                    ),
-                    child: const Text(
-                      'Phân công', // The text inside the container
-                      style: TextStyle(
-                        color: Colors.white, // White text color
-                        fontSize: 14.0, // Font size
-                        fontWeight: FontWeight.bold, // Bold text
+              if (_user!.role == 'admin') ...[
+                if (task.staff == null)
+                  GestureDetector(
+                    onTap: () {
+                      _showAssignStaffDialog(context, task);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 4.0), // Padding inside the container
+                      decoration: BoxDecoration(
+                        color: AppColors.lightRed, // Background color
+                        border: Border.all(
+                            color: Colors.red, width: 1.0), // Red border
+                        borderRadius:
+                            BorderRadius.circular(4.0), // Rounded corners
+                      ),
+                      child: const Text(
+                        'Phân công', // The text inside the container
+                        style: TextStyle(
+                          color: Colors.white, // White text color
+                          fontSize: 14.0, // Font size
+                          fontWeight: FontWeight.bold, // Bold text
+                        ),
                       ),
                     ),
+                  )
+                else ...[
+                  const Icon(Icons.person_4, color: AppColors.onSuccess),
+                  Text(
+                    task.staff!.name, // Assuming 'staff' has a 'name' field
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
+                    ),
                   ),
-                )
-              else ...[
-                const Icon(Icons.person_4, color: AppColors.onSuccess),
-                Text(
-                  task.staff!.name, // Assuming 'staff' has a 'name' field
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
+                ]
+              ] else if (_user!.role == 'staff' && task.staff != null) ...[
+                if (task.staff!.id == _user!.id) ...[
+                  Row(
+                    children: [
+                      const Icon(Icons.person_4, color: Colors.blue),
+                      Text(
+                        task.staff!.name, // Assuming 'staff' has a 'name' field
+                        style: const TextStyle(
+                          color: Colors.blue, // Highlighted text color
+                          fontSize: 16, // Slightly larger font size
+                          fontWeight: FontWeight.bold, // Bold text
+                        ),
+                      ),
+                    ],
+                  ), // Highlighted icon
+                ] else ...[
+                  Row(
+                    children: [
+                      const Icon(Icons.person_4, color: AppColors.onSuccess),
+                      Text(
+                        task.staff!.name,
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                ]
               ]
             ],
           ),
