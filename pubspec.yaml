@@ -38,6 +38,8 @@ dependencies:
   image: ^4.2.0
   screenshot: ^3.0.0
   esc_pos_utils_plus: ^2.0.3
+  mime: ^1.0.5
+  http_parser: ^4.0.2
 
 dev_dependencies:
   flutter_test:

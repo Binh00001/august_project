@@ -22,7 +22,7 @@ class CreateProductRequested extends CreateProductEvent {
     required this.unit,
     required this.price,
     required this.categoryId,
-    this.imageFile,
+    required this.imageFile,
   });
 
   @override

@@ -21,6 +21,7 @@ import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_event.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mime/mime.dart';
 
 class CreateProductPage extends StatefulWidget {
   const CreateProductPage({super.key});
@@ -98,6 +99,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
+            _setImageFile(null);
             Navigator.pop(context);
           },
         ),
@@ -108,6 +110,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
         listeners: [
           BlocListener<CreateProductBloc, CreateProductState>(
             listener: (context, state) {
+              print(state);
               if (state is CreateProductLoading) {
                 showDialog(
                   context: context,
@@ -287,11 +290,11 @@ class _CreateProductPageState extends State<CreateProductPage> {
 
                           BlocProvider.of<CreateProductBloc>(context).add(
                             CreateProductRequested(
-                              name: name,
-                              unit: unit,
-                              price: price,
-                              categoryId: categoryId,
-                            ),
+                                name: name,
+                                unit: unit,
+                                price: price,
+                                categoryId: categoryId,
+                                imageFile: _mediaFile),
                           );
                         }
                       },
@@ -316,10 +319,11 @@ class _CreateProductPageState extends State<CreateProductPage> {
             onPressed: () async {
               final XFile? pickedFile = await _picker.pickImage(
                 source: ImageSource.gallery,
-                // You can also allow taking a new photo with ImageSource.camera
               );
-              if (pickedFile != null) {
+              if (pickedFile != null && _isValidImage(pickedFile)) {
                 _setImageFile(pickedFile);
+              } else {
+                _showUnsupportedFileTypeDialog();
               }
             },
             icon: const Icon(Icons.attach_file),
@@ -332,8 +336,10 @@ class _CreateProductPageState extends State<CreateProductPage> {
               final XFile? pickedFile = await _picker.pickImage(
                 source: ImageSource.gallery,
               );
-              if (pickedFile != null) {
+              if (pickedFile != null && _isValidImage(pickedFile)) {
                 _setImageFile(pickedFile);
+              } else {
+                _showUnsupportedFileTypeDialog();
               }
             },
             child: Padding(
@@ -348,6 +354,40 @@ class _CreateProductPageState extends State<CreateProductPage> {
           ),
         ],
       ],
+    );
+  }
+
+  bool _isValidImage(XFile file) {
+    // Kiểm tra MIME type
+    final mimeType = lookupMimeType(file.path);
+    print('mime của ảnh $mimeType');
+    if (mimeType == null || !mimeType.startsWith('image/')) {
+      return false;
+    }
+
+    // Kiểm tra phần mở rộng tệp
+    final String extension = file.path.split('.').last.toLowerCase();
+    print('Phần mở rộng tệp: $extension, MIME type: $mimeType');
+    return extension == 'jpg' || extension == 'jpeg' || extension == 'png';
+  }
+
+  void _showUnsupportedFileTypeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Unsupported File Type'),
+          content: const Text('Hãy chọn ảnh có định dạng jpg, jpeg hoặc png'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
 

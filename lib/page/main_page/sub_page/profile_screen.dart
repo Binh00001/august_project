@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/cart/cart_bloc.dart';
+import 'package:flutter_project_august/blocs/cart/cart_event.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
@@ -22,10 +25,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _logout() async {
+    BlocProvider.of<CartBloc>(context).add(ClearCart());
     SharedPreferencesHelper.removeApiTokenKey();
     await SharedPreferencesHelper.removeUserInfo();
-    Navigator.of(context).pushReplacementNamed(
-        '/'); // Navigate to the login page after logging out
+    Navigator.of(context).pushReplacementNamed('/');
   }
 
   @override

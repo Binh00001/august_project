@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_project_august/utill/app_constants.dart';
-import 'package:image_picker/image_picker.dart';
 
 class ProductRepo {
   final Dio dio;
@@ -10,15 +7,9 @@ class ProductRepo {
   ProductRepo({required this.dio});
   //create new product
   Future<bool> createProduct({
-    required Map<String, dynamic> data,
+    required FormData formData,
   }) async {
     try {
-      FormData formData = FormData.fromMap({
-        'name': data['name'],
-        'price': data['price'],
-        'categoryId': data['categoryId'],
-        'originId': data['originId'],
-      });
       Response response = await dio.post(
         '${AppConstants.baseUrl}/v1/product',
         data: formData,
