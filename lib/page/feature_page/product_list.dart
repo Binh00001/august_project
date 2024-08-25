@@ -29,7 +29,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   int _currentPage = 1;
   bool _isLoading = false;
   bool _hasMore = true;
-  List<Product> _products = []; // List to store loaded products
+  final List<Product> _products = []; // List to store loaded products
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -372,7 +372,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                  'Đã thêm $quantity sản phẩm vào giỏ hàng.'),
+                                  'Đã thêm $quantity ${product.name} vào giỏ hàng.'),
                             ),
                           );
                         },

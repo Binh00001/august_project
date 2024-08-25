@@ -56,70 +56,74 @@ class _TaskPageState extends State<TaskPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          title: const Text('Phân công mua'),
-          centerTitle: true,
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
-          actions: [
-            if (_user!.role == 'admin')
-              IconButton(
-                icon: const Icon(Icons.history),
-                onPressed: () async {
-                  // Navigate to the history page
-                  await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const HistoryPage(), // Replace with your history page
-                    ),
-                  );
-                  _loadTask();
-                },
-              ),
-          ],
-        ),
-        body: BlocListener<AssignStaffBloc, AssignStaffState>(
-          listener: (context, state) {
-            if (state is AssignStaffSuccess) {
-              _loadTask();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Chỉ định thành công!')),
-              );
-            } else if (state is AssignStaffFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Lỗi: ${state.error}')),
-              );
-            }
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
           },
-          child: BlocBuilder<TaskBloc, TaskState>(
-            builder: (context, state) {
-              if (state is TaskLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is TaskLoaded) {
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: state.tasks
-                        .map((task) => _buildTaskItem(task))
-                        .toList(),
+        ),
+        title: const Text('Phân công mua'),
+        centerTitle: true,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
+        actions: [
+          if (_user!.role == 'admin')
+            IconButton(
+              icon: const Icon(Icons.history),
+              onPressed: () async {
+                // Navigate to the history page
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const HistoryPage(), // Replace with your history page
                   ),
                 );
-              } else if (state is TaskError) {
-                return Center(
-                  child: Text('Lỗi: ${state.message}'),
-                );
-              } else {
-                return const Center(child: Text('Không có nhiệm vụ nào.'));
+                _loadTask();
+              },
+            ),
+        ],
+      ),
+      body: BlocListener<AssignStaffBloc, AssignStaffState>(
+        listener: (context, state) {
+          if (state is AssignStaffSuccess) {
+            _loadTask();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Chỉ định thành công!')),
+            );
+          } else if (state is AssignStaffFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Lỗi: ${state.error}')),
+            );
+          }
+        },
+        child: BlocBuilder<TaskBloc, TaskState>(
+          builder: (context, state) {
+            if (state is TaskLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is TaskLoaded) {
+              if (state.tasks.isEmpty) {
+                return const Center(
+                    child: Text('Không có hàng hoá nào cần mua.'));
               }
-            },
-          ),
-        ));
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children:
+                      state.tasks.map((task) => _buildTaskItem(task)).toList(),
+                ),
+              );
+            } else if (state is TaskError) {
+              return Center(
+                child: Text('Lỗi: ${state.message}'),
+              );
+            } else {
+              return const Center(child: Text('Không có nhiệm vụ nào.'));
+            }
+          },
+        ),
+      ),
+    );
   }
 
   Widget _buildTaskItem(Task task) {

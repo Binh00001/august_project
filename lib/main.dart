@@ -17,6 +17,7 @@ import 'package:flutter_project_august/blocs/get_debt/get_debt_bloc.dart';
 import 'package:flutter_project_august/blocs/get_order/get_order_bloc.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
+import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/task/task_bloc.dart';
 import 'package:flutter_project_august/database/local_database.dart';
@@ -175,6 +176,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<CartBloc>(
             create: (context) => CartBloc(),
+          ),
+          BlocProvider<PrintInvoiceImageBloc>(
+            create: (context) => PrintInvoiceImageBloc(),
           ),
           // Include other BlocProviders if needed
         ],

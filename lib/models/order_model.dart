@@ -63,7 +63,7 @@ class Order {
       totalAmount: json['total_amount'] ?? "",
       status: json['status'] ?? "",
       payStatus: json['pay_status'] ?? "",
-      createdAt: json['createdAt'] ?? "",
+      createdAt: json['created_at'] ?? "",
     );
   }
 }
