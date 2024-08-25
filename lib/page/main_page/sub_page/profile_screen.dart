@@ -4,6 +4,7 @@ import 'package:flutter_project_august/blocs/cart/cart_bloc.dart';
 import 'package:flutter_project_august/blocs/cart/cart_event.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/user_model.dart';
+import 'package:flutter_project_august/page/login_page/login_screen.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -28,7 +29,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     BlocProvider.of<CartBloc>(context).add(ClearCart());
     SharedPreferencesHelper.removeApiTokenKey();
     await SharedPreferencesHelper.removeUserInfo();
-    Navigator.of(context).pushReplacementNamed('/');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
   }
 
   @override
