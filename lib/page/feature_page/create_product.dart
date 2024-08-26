@@ -110,7 +110,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
         listeners: [
           BlocListener<CreateProductBloc, CreateProductState>(
             listener: (context, state) {
-              print(state);
               if (state is CreateProductLoading) {
                 showDialog(
                   context: context,

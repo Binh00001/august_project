@@ -79,7 +79,7 @@ class ProductWidget extends StatelessWidget {
               name,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 18.0,
+                fontSize: 16.0,
               ),
             ),
           ),

@@ -17,7 +17,8 @@ import 'package:flutter_project_august/utill/color-theme.dart';
 import '../../blocs/get_all_staff/get_all_staff_bloc.dart';
 
 class TaskPage extends StatefulWidget {
-  const TaskPage({Key? key}) : super(key: key);
+  final User user;
+  const TaskPage({Key? key, required this.user}) : super(key: key);
 
   @override
   _TaskPageState createState() => _TaskPageState();
@@ -31,7 +32,6 @@ class _TaskPageState extends State<TaskPage> {
     _loadStaff();
     // Get today's date in milliseconds since epoch
     _loadTask();
-    _loadUserInfo();
   }
 
   void _loadStaff() {
@@ -42,15 +42,6 @@ class _TaskPageState extends State<TaskPage> {
     DateTime now = DateTime.now();
     // Dispatch the event to fetch tasks for today
     context.read<TaskBloc>().add(FetchTasks(date: now.millisecondsSinceEpoch));
-  }
-
-  Future<void> _loadUserInfo() async {
-    User? user = await SharedPreferencesHelper.getUserInfo();
-    if (user != null) {
-      setState(() {
-        _user = user;
-      });
-    }
   }
 
   @override
@@ -68,7 +59,7 @@ class _TaskPageState extends State<TaskPage> {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         actions: [
-          if (_user!.role == 'admin')
+          if (widget.user.role == 'admin')
             IconButton(
               icon: const Icon(Icons.history),
               onPressed: () async {
@@ -159,7 +150,7 @@ class _TaskPageState extends State<TaskPage> {
           ),
           Column(
             children: [
-              if (_user!.role == 'admin') ...[
+              if (widget.user.role == 'admin') ...[
                 if (task.staff == null)
                   GestureDetector(
                     onTap: () {
@@ -196,7 +187,7 @@ class _TaskPageState extends State<TaskPage> {
                     ),
                   ),
                 ]
-              ] else if (_user!.role == 'staff' && task.staff != null) ...[
+              ] else if (widget.user.role == 'staff' && task.staff != null) ...[
                 if (task.staff!.id == _user!.id) ...[
                   Row(
                     children: [

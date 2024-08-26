@@ -113,13 +113,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
       floatingActionButton: _user?.role == 'admin'
           ? FloatingActionButton.extended(
               onPressed: () async {
-                Navigator.of(context).push(
+                await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const CreateProductPage(),
                   ),
                 );
                 _resetProducts();
-                _loadProducts();
+
+                // _loadProducts();
               },
               label: const Text(
                 'Tạo Sản Phẩm Mới',
@@ -187,7 +188,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   crossAxisSpacing: 0,
                   mainAxisSpacing: 0,
                   childAspectRatio:
-                      0.75, // Adjust ratio as needed to fit content
+                      0.7, // Adjust ratio as needed to fit content
                 ),
                 itemCount: _products.length,
                 itemBuilder: (context, index) {

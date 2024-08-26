@@ -97,7 +97,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () {
                           // Handle tap
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => TaskPage()),
+                            MaterialPageRoute(
+                                builder: (context) => TaskPage(
+                                      user: _user!,
+                                    )),
                           );
                         },
                       ),
@@ -150,7 +153,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () {
                           // Handle tap
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => TaskPage()),
+                            MaterialPageRoute(
+                                builder: (context) => TaskPage(user: _user!)),
                           );
                         },
                       ),
