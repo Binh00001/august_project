@@ -71,6 +71,41 @@ class ManagementScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
+                // const Expanded(
+                //     child: SizedBox(
+                //   width: 10,
+                // ))
+                Expanded(
+                  child: FeatureContainer(
+                    primaryColor: const Color(0xFF0ACF83),
+                    iconColor: const Color(0xFF0ACF83),
+                    icon: Icons.source,
+                    title: 'Danh mục sản phẩm',
+                    onTap: () {
+                      // Handle tap
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: FeatureContainer(
+                    primaryColor: const Color(0xFF1ABCF3),
+                    iconColor: const Color(0xFF1ABCF3),
+                    icon: Icons.print,
+                    title: 'Cài đặt máy in',
+                    onTap: () {
+                      // Navigator.of(context).push(
+                      //   MaterialPageRoute(
+                      //       builder: (context) => StaffManagePage()),
+                      // );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
                 const Expanded(
                     child: SizedBox(
                   width: 10,
@@ -80,7 +115,7 @@ class ManagementScreen extends StatelessWidget {
                 //     primaryColor: const Color(0xFF0ACF83),
                 //     iconColor: const Color(0xFF0ACF83),
                 //     icon: Icons.source,
-                //     title: 'Nguồn gốc sản phẩm',
+                //     title: 'Danh mục sản phẩm',
                 //     onTap: () {
                 //       // Handle tap
                 //     },

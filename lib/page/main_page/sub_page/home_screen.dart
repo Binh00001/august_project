@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/order_list.dart';
 import 'package:flutter_project_august/page/feature_page/product_list.dart';
@@ -9,35 +8,24 @@ import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:flutter_project_august/assets_widget/navigator_container.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final User user;
+  const HomeScreen({super.key, required this.user});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  User _user = AppConstants.defaultUser;
-
   @override
   void initState() {
     super.initState();
-    _loadUserInfo();
-  }
-
-  Future<void> _loadUserInfo() async {
-    User? user = await SharedPreferencesHelper.getUserInfo();
-    if (user != AppConstants.defaultUser) {
-      setState(() {
-        _user = user;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_user == AppConstants.defaultUser) {
+    if (widget.user == AppConstants.defaultUser) {
       return const Scaffold(
-        body: Center(child: Text("Lỗi thông tin người dùng")),
+        body: Center(child: Text("Lỗi khi tải thông tin người dùng")),
       );
     }
 
@@ -86,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              if (_user!.role == 'admin') ...[
+              if (widget.user.role == 'admin') ...[
                 Row(
                   children: [
                     Expanded(
@@ -100,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (context) => TaskPage(
-                                      user: _user,
+                                      user: widget.user,
                                     )),
                           );
                         },
@@ -142,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ],
-              if (_user.role == 'staff') ...[
+              if (widget.user.role == 'staff') ...[
                 Row(
                   children: [
                     Expanded(
@@ -155,7 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Handle tap
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (context) => TaskPage(user: _user)),
+                                builder: (context) =>
+                                    TaskPage(user: widget.user)),
                           );
                         },
                       ),

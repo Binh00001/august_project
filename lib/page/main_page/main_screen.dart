@@ -48,8 +48,12 @@ class _MainPageState extends State<MainPage> {
 
     // Conditionally show the Management screen
     List<Widget> widgetOptions = <Widget>[
-      const HomeScreen(),
-      DebtScreen(),
+      HomeScreen(
+        user: _user,
+      ),
+      DebtScreen(
+        user: _user,
+      ),
       if (_user.role == 'admin') const ManagementScreen(),
       ProfileScreen(),
     ];
