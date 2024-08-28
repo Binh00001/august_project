@@ -9,6 +9,7 @@ import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
+import 'package:flutter_project_august/utill/app_constants.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:intl/intl.dart';
 
@@ -22,7 +23,7 @@ class _DebtScreenState extends State<DebtScreen> {
   DateTime? _endDate;
   String _dateError = '';
   String? selectedSchoolId;
-  User? _user;
+  User _user = AppConstants.defaultUser;
 
   @override
   void initState() {
@@ -33,17 +34,17 @@ class _DebtScreenState extends State<DebtScreen> {
   Future<void> _loadUserInfo() async {
     try {
       _user = await SharedPreferencesHelper.getUserInfo();
-      if (_user != null) {
+      if (_user != AppConstants.defaultUser) {
         setState(() {});
-        if (_user!.role == 'admin') {
+        if (_user.role == 'admin') {
           // Fetch the list of schools only if the user is an admin
           BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
           // Fetch Debt without specifying a school
           BlocProvider.of<DebtBloc>(context).add(FetchDebt());
-        } else if (_user!.role == 'user') {
+        } else if (_user.role == 'user') {
           // If the user is a regular user, fetch the debt for their school
           BlocProvider.of<DebtBloc>(context).add(FetchDebt(
-            schoolId: _user!.schoolId,
+            schoolId: _user.schoolId,
           ));
         }
       } else {
@@ -91,7 +92,7 @@ class _DebtScreenState extends State<DebtScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_user == null) {
+    if (_user == AppConstants.defaultUser) {
       return const Scaffold(
         body: Center(
           child:
@@ -162,7 +163,7 @@ class _DebtScreenState extends State<DebtScreen> {
                 ),
               ),
             const SizedBox(height: 16),
-            if (_user!.role == 'admin' || _user!.role == 'staff') ...[
+            if (_user.role == 'admin' || _user.role == 'staff') ...[
               BlocBuilder<SchoolBloc, SchoolState>(
                 builder: (context, state) {
                   if (state is SchoolLoading) {
@@ -203,11 +204,11 @@ class _DebtScreenState extends State<DebtScreen> {
                   }
                 },
               ),
-            ] else if (_user!.role == 'user') ...[
+            ] else if (_user.role == 'user') ...[
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  'Trường học: ${_user!.schoolName}',
+                  'Trường học: ${_user.schoolName}',
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
