@@ -5,6 +5,7 @@ import 'package:flutter_project_august/page/main_page/sub_page/debt_screen.dart'
 import 'package:flutter_project_august/page/main_page/sub_page/home_screen.dart';
 import 'package:flutter_project_august/page/main_page/sub_page/manage_screen.dart';
 import 'package:flutter_project_august/page/main_page/sub_page/profile_screen.dart';
+import 'package:flutter_project_august/utill/app_constants.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
 class MainPage extends StatefulWidget {
@@ -16,7 +17,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
-  User? _user;
+  User _user = AppConstants.defaultUser;
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future<void> _loadUserInfo() async {
-    User? user = await SharedPreferencesHelper.getUserInfo();
+    User user = await SharedPreferencesHelper.getUserInfo();
     setState(() {
       _user = user;
     });
@@ -39,22 +40,21 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_user == null) {
+    if (_user == AppConstants.defaultUser) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: Text("Lỗi khi tải thông tin người dùng")),
       );
     }
 
     // Conditionally show the Management screen
-    List<Widget> _widgetOptions = <Widget>[
+    List<Widget> widgetOptions = <Widget>[
       const HomeScreen(),
       DebtScreen(),
-      if (_user!.role == 'admin') const ManagementScreen(),
+      if (_user.role == 'admin') const ManagementScreen(),
       ProfileScreen(),
     ];
 
-    List<BottomNavigationBarItem> _bottomNavBarItems =
-        <BottomNavigationBarItem>[
+    List<BottomNavigationBarItem> bottomNavBarItems = <BottomNavigationBarItem>[
       const BottomNavigationBarItem(
         icon: Icon(Icons.home_rounded),
         label: 'Trang chủ',
@@ -63,7 +63,7 @@ class _MainPageState extends State<MainPage> {
         icon: Icon(Icons.attach_money_rounded),
         label: 'Công nợ',
       ),
-      if (_user!.role == 'admin')
+      if (_user.role == 'admin')
         const BottomNavigationBarItem(
           icon: Icon(Icons.manage_accounts_rounded),
           label: 'Quản lý',
@@ -75,10 +75,10 @@ class _MainPageState extends State<MainPage> {
     ];
 
     return Scaffold(
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         useLegacyColorScheme: false,
-        items: _bottomNavBarItems,
+        items: bottomNavBarItems,
         currentIndex: _selectedIndex,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.onSurface,

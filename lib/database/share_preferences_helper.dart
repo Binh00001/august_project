@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_project_august/models/user_model.dart';
+import 'package:flutter_project_august/utill/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesHelper {
@@ -75,13 +76,13 @@ class SharedPreferencesHelper {
   }
 
   // Get user information
-  static Future<User?> getUserInfo() async {
+  static Future<User> getUserInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userJson = prefs.getString(userKey);
     if (userJson != null) {
       return User.fromJson(jsonDecode(userJson));
     }
-    return null;
+    return AppConstants.defaultUser;
   }
 
   static Future<bool> checkUserLoggedIn() async {

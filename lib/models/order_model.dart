@@ -1,5 +1,3 @@
-import 'package:flutter_project_august/models/product_model.dart';
-
 class OrderItem {
   final String quantity;
   final String price;

@@ -335,7 +335,7 @@ class _UserManagePageState extends State<UserManagePage> {
                             });
                           },
                           decoration: InputDecoration(
-                            labelText: 'Chọn trường học',
+                            labelText: 'Chọn trường',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),

@@ -4,6 +4,7 @@ import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/order_list.dart';
 import 'package:flutter_project_august/page/feature_page/product_list.dart';
 import 'package:flutter_project_august/page/feature_page/task_page.dart';
+import 'package:flutter_project_august/utill/app_constants.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:flutter_project_august/assets_widget/navigator_container.dart';
 
@@ -15,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  User? _user;
+  User _user = AppConstants.defaultUser;
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadUserInfo() async {
     User? user = await SharedPreferencesHelper.getUserInfo();
-    if (user != null) {
+    if (user != AppConstants.defaultUser) {
       setState(() {
         _user = user;
       });
@@ -34,9 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_user == null) {
+    if (_user == AppConstants.defaultUser) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: Text("Lỗi thông tin người dùng")),
       );
     }
 
@@ -99,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                                 builder: (context) => TaskPage(
-                                      user: _user!,
+                                      user: _user,
                                     )),
                           );
                         },
@@ -141,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ],
-              if (_user!.role == 'staff') ...[
+              if (_user.role == 'staff') ...[
                 Row(
                   children: [
                     Expanded(
@@ -154,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Handle tap
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (context) => TaskPage(user: _user!)),
+                                builder: (context) => TaskPage(user: _user)),
                           );
                         },
                       ),
