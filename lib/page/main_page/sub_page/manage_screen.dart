@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_august/assets_widget/navigator_container.dart';
+import 'package:flutter_project_august/page/feature_page/printer_page.dart';
 import 'package:flutter_project_august/page/feature_page/school_manage.dart';
 import 'package:flutter_project_august/page/feature_page/staff_manage.dart';
 import 'package:flutter_project_august/page/feature_page/user_manage.dart';
@@ -98,13 +99,14 @@ class ManagementScreen extends StatelessWidget {
                     icon: Icons.print,
                     title: 'Cài đặt máy in',
                     onTap: () {
-                      // Navigator.of(context).push(
-                      //   MaterialPageRoute(
-                      //       builder: (context) => StaffManagePage()),
-                      // );
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => PrinterSettingsPage()),
+                      );
                     },
                   ),
                 ),
+
                 const SizedBox(width: 16),
                 const Expanded(
                     child: SizedBox(
