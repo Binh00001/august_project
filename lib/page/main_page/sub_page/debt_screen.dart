@@ -6,7 +6,6 @@ import 'package:flutter_project_august/blocs/get_debt/get_debt_state.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
-import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/utill/app_constants.dart';

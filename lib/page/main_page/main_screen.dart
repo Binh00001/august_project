@@ -55,7 +55,9 @@ class _MainPageState extends State<MainPage> {
         user: _user,
       ),
       if (_user.role == 'admin') const ManagementScreen(),
-      ProfileScreen(),
+      ProfileScreen(
+        user: _user,
+      ),
     ];
 
     List<BottomNavigationBarItem> bottomNavBarItems = <BottomNavigationBarItem>[

@@ -5,24 +5,21 @@ import 'package:flutter_project_august/blocs/cart/cart_event.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/login_page/login_screen.dart';
+import 'package:flutter_project_august/utill/app_constants.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
 class ProfileScreen extends StatefulWidget {
+  final User user;
+
+  const ProfileScreen({super.key, required this.user});
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  User? _user;
   @override
   void initState() {
     super.initState();
-    _loadUserInfo();
-  }
-
-  Future<void> _loadUserInfo() async {
-    _user = await SharedPreferencesHelper.getUserInfo();
-    setState(() {});
   }
 
   void _logout() async {
@@ -37,11 +34,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_user == null) {
+    if (widget.user == AppConstants.defaultUser) {
       return const Scaffold(
-        body: const Center(
-          child:
-              CircularProgressIndicator(), // Display a loading indicator while user data is loading
+        body: Center(
+          child: Text(
+              "Lỗi khi tải dữ liệu người dùng"), // Display a loading indicator while user data is loading
         ),
       );
     }
@@ -58,10 +55,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-                  _buildProfileDetail('Tên người dùng', _user!.name),
-                  _buildProfileDetail('Chức vụ', _user!.role),
-                  if (_user!.role == 'user')
-                    _buildProfileDetail('Trường học', _user!.schoolName),
+                  _buildProfileDetail('Tên người dùng', widget.user.name),
+                  _buildProfileDetail('Chức vụ', widget.user.role),
+                  if (widget.user.role == 'user')
+                    _buildProfileDetail('Trường học', widget.user.schoolName),
                   const Spacer(),
                   Center(
                     child: ElevatedButton.icon(
@@ -121,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            _user?.name ?? '',
+            widget.user.name,
             style: const TextStyle(
               fontSize: 24,
               color: Colors.white,
