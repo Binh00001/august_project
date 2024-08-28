@@ -75,6 +75,9 @@ class _PrinterSettingsPageState extends State<PrinterSettingsPage> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
+                  // Dismiss the keyboard by removing focus from any focused element
+                  FocusScope.of(context).unfocus();
+
                   setPrinterIP(_ipAddressController.text);
                   setPrinterPort(int.parse(_portController.text));
                   setPrinterScale(double.parse(_scaleController.text));
