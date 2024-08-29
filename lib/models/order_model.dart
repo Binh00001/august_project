@@ -19,8 +19,7 @@ class OrderItem {
         product != null ? product['name'] ?? "" : "Sản phẩm đã bị xoá";
     final productId =
         product != null ? product['id'] ?? "" : "Sản phẩm đã bị xoá";
-    final productUnit =
-        product != null ? product['unit'] ?? "" : "Sản phẩm đã bị xoá";
+    final productUnit = product != null ? product['unit'] ?? "" : "";
 
     return OrderItem(
       quantity: json['quantity'] ?? "",

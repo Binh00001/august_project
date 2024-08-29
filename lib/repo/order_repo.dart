@@ -8,6 +8,25 @@ class OrderRepo {
 
   OrderRepo({required this.dio});
 
+  Future<bool> markOrderAsPaid(String orderId) async {
+    try {
+      final response = await dio.patch(
+        '${AppConstants.baseUrl}/v1/order/pay/$orderId',
+      );
+
+      if (response.statusCode == 200) {
+        print('Order marked as paid successfully');
+        return true;
+      } else {
+        print('Failed to mark order as paid: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Error marking order as paid: $e');
+      return false;
+    }
+  }
+
   Future<bool> assignStaffToTask(String userId, String productId) async {
     try {
       final response = await dio.post(

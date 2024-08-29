@@ -17,6 +17,7 @@ import 'package:flutter_project_august/blocs/get_debt/get_debt_bloc.dart';
 import 'package:flutter_project_august/blocs/get_order/get_order_bloc.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
+import 'package:flutter_project_august/blocs/mark_paid_order/mark_paid_bloc.dart';
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/task/task_bloc.dart';
@@ -166,6 +167,11 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<TaskBloc>(
             create: (context) => TaskBloc(
+              orderRepo: context.read<OrderRepo>(),
+            ),
+          ),
+          BlocProvider<MarkOrderBloc>(
+            create: (context) => MarkOrderBloc(
               orderRepo: context.read<OrderRepo>(),
             ),
           ),

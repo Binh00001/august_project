@@ -66,7 +66,7 @@ class CartPage extends StatelessWidget {
                       itemCount: state.products.length,
                       itemBuilder: (context, index) {
                         final product = state.products.keys.elementAt(index);
-                        final quantity = state.products[product]!;
+                        final quantity = state.products[product] ?? 0;
                         final price = num.parse(product.price) * quantity;
                         final formattedPrice =
                             NumberFormat.currency(locale: 'vi_VN', symbol: '₫')
@@ -82,7 +82,7 @@ class CartPage extends StatelessWidget {
                           child: Row(
                             children: [
                               Image.network(
-                                product.imageUrl!,
+                                product.imageUrl ?? "",
                                 width: 40,
                                 height: 40,
                                 errorBuilder: (context, error, stackTrace) =>

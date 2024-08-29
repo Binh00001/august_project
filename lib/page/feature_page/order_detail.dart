@@ -2,11 +2,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/assets_widget/notification_dialog.dart';
+import 'package:flutter_project_august/blocs/mark_paid_order/mark_paid_bloc.dart';
+import 'package:flutter_project_august/blocs/mark_paid_order/mark_paid_event.dart';
+import 'package:flutter_project_august/blocs/mark_paid_order/mark_paid_state.dart';
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_bloc.dart';
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_event.dart';
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_state.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/order_model.dart';
+import 'package:flutter_project_august/page/feature_page/order_list.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:intl/intl.dart';
 import 'package:screenshot/screenshot.dart';
@@ -37,44 +41,91 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
       ),
-      body: BlocListener<PrintInvoiceImageBloc, PrintInvoiceImageState>(
-        listener: (context, state) {
-          if (state is PrintInvoiceImageLoading) {
-            // Show loading dialog
-            showDialog(
-              context: context,
-              builder: (context) => const NotificationDialog(
-                iconDialog: Icons.print_rounded,
-                colorIconDialog: Colors.amber,
-                titleDialog: "Đang in hoá đơn",
-              ),
-            );
-          } else if (state is PrintInvoiceImageSuccess) {
-            // Close loading dialog before showing success dialog
-            Navigator.pop(context);
-            // Show success dialog
-            showDialog(
-              context: context,
-              builder: (context) => const NotificationDialog(
-                iconDialog: Icons.check_circle,
-                colorIconDialog: Colors.green,
-                titleDialog: "In thành công",
-              ),
-            );
-          } else if (state is PrintInvoiceImageError) {
-            // Close loading dialog before showing error dialog
-            Navigator.pop(context);
-            // Show error dialog
-            showDialog(
-              context: context,
-              builder: (context) => NotificationDialog(
-                iconDialog: Icons.error_rounded,
-                colorIconDialog: Colors.red,
-                titleDialog: state.errorMessage,
-              ),
-            );
-          }
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<PrintInvoiceImageBloc, PrintInvoiceImageState>(
+            listener: (context, state) {
+              if (state is PrintInvoiceImageLoading) {
+                // Show loading dialog
+                showDialog(
+                  context: context,
+                  builder: (context) => const NotificationDialog(
+                    iconDialog: Icons.print_rounded,
+                    colorIconDialog: Colors.amber,
+                    titleDialog: "Đang in hoá đơn",
+                  ),
+                );
+              } else if (state is PrintInvoiceImageSuccess) {
+                // Close loading dialog before showing success dialog
+                Navigator.pop(context);
+                // Show success dialog
+                showDialog(
+                  context: context,
+                  builder: (context) => const NotificationDialog(
+                    iconDialog: Icons.check_circle,
+                    colorIconDialog: Colors.green,
+                    titleDialog: "In thành công",
+                  ),
+                );
+              } else if (state is PrintInvoiceImageError) {
+                // Close loading dialog before showing error dialog
+                Navigator.pop(context);
+                // Show error dialog
+                showDialog(
+                  context: context,
+                  builder: (context) => NotificationDialog(
+                    iconDialog: Icons.error_rounded,
+                    colorIconDialog: Colors.red,
+                    titleDialog: state.errorMessage,
+                  ),
+                );
+              }
+            },
+          ),
+          BlocListener<MarkOrderBloc, MarkOrderState>(
+            listener: (context, state) async {
+              if (state is MarkOrderLoading) {
+                // Show loading dialog for marking order as paid
+                showDialog(
+                  context: context,
+                  builder: (context) => const NotificationDialog(
+                    iconDialog: Icons.hourglass_empty,
+                    colorIconDialog: Colors.amber,
+                    titleDialog: "Đang xử lý...",
+                  ),
+                );
+              } else if (state is MarkOrderPaidSuccess) {
+                // Close loading dialog before showing success dialog
+                Navigator.pop(context);
+                // Show success dialog
+                await showDialog(
+                  context: context,
+                  builder: (context) => const NotificationDialog(
+                    iconDialog: Icons.check_circle,
+                    colorIconDialog: Colors.green,
+                    titleDialog: "Đã đánh dấu thanh toán",
+                  ),
+                );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => OrderListPage()),
+                );
+              } else if (state is MarkOrderPaidFailure) {
+                // Close loading dialog before showing error dialog
+                Navigator.pop(context);
+                // Show error dialog
+                showDialog(
+                  context: context,
+                  builder: (context) => NotificationDialog(
+                    iconDialog: Icons.error_rounded,
+                    colorIconDialog: Colors.red,
+                    titleDialog: state.error,
+                  ),
+                );
+              }
+            },
+          ),
+        ],
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: ListView.builder(
@@ -104,42 +155,46 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           ),
         ),
       ),
-      bottomNavigationBar: (widget.order.payStatus == "pending" &&
-              (widget.userRole == 'admin' || widget.userRole == 'staff'))
-          ? BottomAppBar(
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    if (widget.userRole == 'admin')
-                      ElevatedButton(
-                        onPressed: () {
-                          // Action when the "Mark as Paid" button is pressed
-                          // markAsPaid();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: AppColors.onPrimary,
-                          backgroundColor: AppColors.primary,
+      bottomNavigationBar:
+          (widget.userRole == 'admin' || widget.userRole == 'staff')
+              ? BottomAppBar(
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Only show "Mark as Paid" button if order status is "pending" and user is "admin"
+                        if (widget.order.payStatus == "pending")
+                          ElevatedButton(
+                            onPressed: () {
+                              // Action when the "Mark as Paid" button is pressed
+                              context
+                                  .read<MarkOrderBloc>()
+                                  .add(MarkOrderAsPaidEvent(widget.order.id));
+                            },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: AppColors.onPrimary,
+                              backgroundColor: AppColors.primary,
+                            ),
+                            child: const Text('Đánh dấu đã thanh toán'),
+                          ),
+                        // Always show "Print Order" button
+                        ElevatedButton(
+                          onPressed: () {
+                            // Action when the "Print Order" button is pressed
+                            _captureInvoiceImageThenPrint(widget.order);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.green,
+                          ),
+                          child: const Text('In đơn'),
                         ),
-                        child: const Text('Đánh dấu đã thanh toán'),
-                      ),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Action when the "Print Order" button is pressed
-                        _captureInvoiceImageThenPrint(widget.order);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.green,
-                      ),
-                      child: const Text('In đơn'),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            )
-          : null,
+                  ),
+                )
+              : null,
     );
   }
 

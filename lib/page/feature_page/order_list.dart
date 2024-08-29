@@ -239,7 +239,7 @@ class _OrderListPageState extends State<OrderListPage> {
                                   ),
                                 ),
                                 GestureDetector(
-                                  onTap: () => _showOrderDetails(order),
+                                  onTap: () => {_showOrderDetails(order)},
                                   child: const Icon(Icons.arrow_forward_ios,
                                       color: Colors.grey),
                                 ),
@@ -304,8 +304,8 @@ class _OrderListPageState extends State<OrderListPage> {
     }
   }
 
-  void _showOrderDetails(Order order) {
-    Navigator.of(context).push(
+  void _showOrderDetails(Order order) async {
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => OrderDetailsPage(
           order: order,
@@ -313,5 +313,6 @@ class _OrderListPageState extends State<OrderListPage> {
         ),
       ),
     );
+    fetchOrdersIfPossible(context);
   }
 }
