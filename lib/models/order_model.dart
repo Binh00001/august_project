@@ -13,12 +13,21 @@ class OrderItem {
       required this.productUnit});
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
+    // Kiểm tra product có null không và gán giá trị mặc định nếu cần
+    final product = json['product'];
+    final productName =
+        product != null ? product['name'] ?? "" : "Sản phẩm đã bị xoá";
+    final productId =
+        product != null ? product['id'] ?? "" : "Sản phẩm đã bị xoá";
+    final productUnit =
+        product != null ? product['unit'] ?? "" : "Sản phẩm đã bị xoá";
+
     return OrderItem(
       quantity: json['quantity'] ?? "",
       price: json['price'] ?? "",
-      productName: json['product']['name'] ?? "",
-      productId: json['product']['id'] ?? "",
-      productUnit: json['product']['unit'] ?? "",
+      productName: productName,
+      productId: productId,
+      productUnit: productUnit,
     );
   }
 }

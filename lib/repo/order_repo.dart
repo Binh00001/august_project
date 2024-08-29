@@ -91,9 +91,9 @@ class OrderRepo {
             startDate: startDate,
             endDate: endDate),
       );
+
       if (response.statusCode == 200) {
-        List<dynamic> data = response.data['data']
-            ['docs']; // Adjust according to your JSON structure
+        List<dynamic> data = response.data['data']['docs'];
         return data.map((order) => Order.fromJson(order)).toList();
       } else {
         throw Exception(
