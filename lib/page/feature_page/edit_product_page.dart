@@ -24,7 +24,7 @@ class _EditProductPageState extends State<EditProductPage> {
   late TextEditingController _priceController;
   XFile? _mediaFile;
   final ImagePicker _picker = ImagePicker();
-
+  String? previewImageUrl;
   @override
   void initState() {
     super.initState();
@@ -40,31 +40,22 @@ class _EditProductPageState extends State<EditProductPage> {
     super.dispose();
   }
 
-  void _setImageFile(XFile? value) {
-    setState(() {
-      _mediaFile = value;
-    });
-  }
-
   //check và đặt giá trị khởi đầu cho ảnh
   Future<void> _validateImageUrl(String imageUrl) async {
     try {
       final response = await http.head(Uri.parse(imageUrl));
       if (response.statusCode == 200) {
         setState(() {
-          _mediaFile = XFile(imageUrl);
+          previewImageUrl = imageUrl;
         });
       } else {
-        print(
-            'Image URL returned status code ${response.statusCode}. Setting image path to null.');
         setState(() {
-          _mediaFile = null;
+          previewImageUrl = null;
         });
       }
     } catch (e) {
-      print('Failed to load image: $e');
       setState(() {
-        _mediaFile = null;
+        previewImageUrl = null;
       });
     }
   }
@@ -106,7 +97,7 @@ class _EditProductPageState extends State<EditProductPage> {
                 const SnackBar(content: Text("Cập nhật sản phẩm thành công!")),
               );
               // Quay lại màn hình trước
-              // Navigator.pop(context);
+              Navigator.pop(context);
             } else if (state is UpdateProductFailure) {
               // Tắt dialog loading nếu đang hiển thị
               Navigator.pop(context);
@@ -178,18 +169,34 @@ class _EditProductPageState extends State<EditProductPage> {
   Widget buildImagePickerRow(BuildContext context) {
     return Row(
       children: [
-        if (_mediaFile != null)
+        if (_mediaFile != null) // If there's a selected file, display it
           Image.file(
             File(_mediaFile!.path),
             width: 120,
             height: 120,
             fit: BoxFit.cover,
           )
-        else
+        else if (previewImageUrl !=
+            null) // If no file is selected but there's a valid preview URL
+          Image.network(
+            previewImageUrl!,
+            width: 120,
+            height: 120,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 120,
+              height: 120,
+              color: Colors.grey[200],
+              child: const Center(
+                child: Text('Lỗi ảnh', style: TextStyle(color: Colors.black54)),
+              ),
+            ),
+          )
+        else // If no file is selected and no valid preview URL, show placeholder
           Container(
             width: 120,
             height: 120,
-            color: Colors.grey[200], // Màu xám nhạt cho placeholder
+            color: Colors.grey[200],
             child: const Center(
               child:
                   Text('Chưa có ảnh', style: TextStyle(color: Colors.black54)),

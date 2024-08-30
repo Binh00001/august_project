@@ -207,7 +207,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                 EditProductPage(product: product),
                           ),
                         );
-                        _loadProducts();
+                        _resetProducts();
                       }
                     },
                     child: ProductWidget(
