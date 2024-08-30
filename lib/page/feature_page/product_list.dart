@@ -14,6 +14,7 @@ import 'package:flutter_project_august/models/product_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/cart_page.dart';
 import 'package:flutter_project_august/page/feature_page/create_product.dart';
+import 'package:flutter_project_august/page/feature_page/edit_product_page.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:input_quantity/input_quantity.dart';
 
@@ -194,9 +195,19 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 itemBuilder: (context, index) {
                   final product = _products[index];
                   return GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       if (_user?.role == "user") {
                         showProductBottomDialog(product);
+                      }
+
+                      if (_user?.role == "admin") {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EditProductPage(product: product),
+                          ),
+                        );
+                        _loadProducts();
                       }
                     },
                     child: ProductWidget(
