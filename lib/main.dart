@@ -43,7 +43,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Dio dio = await DioClient.createDio();
   bool isLoggedIn = await SharedPreferencesHelper.checkUserLoggedIn();
-  print(isLoggedIn);
   LocalDatabase localDatabase =
       LocalDatabase.instance; // Access the singleton instance of LocalDatabase
 

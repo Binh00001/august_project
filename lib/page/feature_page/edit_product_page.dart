@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/blocs/update_product/update_product_bloc.dart';
 import 'package:flutter_project_august/blocs/update_product/update_product_event.dart';
 import 'package:flutter_project_august/blocs/update_product/update_product_state.dart';
+import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_project_august/models/product_model.dart';
 import 'package:image_picker/image_picker.dart';
@@ -80,6 +81,9 @@ class _EditProductPageState extends State<EditProductPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        centerTitle: true,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
