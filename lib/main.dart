@@ -35,7 +35,9 @@ import 'package:flutter_project_august/repo/category_repo.dart';
 import 'package:flutter_project_august/repo/order_repo.dart';
 import 'package:flutter_project_august/repo/origin_repo.dart';
 import 'package:flutter_project_august/repo/product_repo.dart';
+import 'package:flutter_project_august/repo/revenue_repo.dart';
 import 'package:flutter_project_august/repo/school_repo.dart';
+import 'package:flutter_project_august/repo/statistics_repo.dart';
 import 'package:flutter_project_august/repo/user_repo.dart';
 
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
@@ -89,6 +91,12 @@ class MyApp extends StatelessWidget {
         ),
         RepositoryProvider<OrderRepo>(
           create: (_) => OrderRepo(dio: dio),
+        ),
+        RepositoryProvider<StatisticsRepo>(
+          create: (_) => StatisticsRepo(dio: dio),
+        ),
+        RepositoryProvider<RevenueRepo>(
+          create: (_) => RevenueRepo(dio: dio),
         ),
       ],
       child: MultiBlocProvider(
