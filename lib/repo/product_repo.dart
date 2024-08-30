@@ -9,16 +9,21 @@ class ProductRepo {
   // Update product
   Future<bool> updateProduct({required FormData formData}) async {
     try {
+      print("Called update repo");
+      print(formData.fields);
+      print(formData.files);
       Response response = await dio.patch(
         '${AppConstants.baseUrl}/v1/product',
         data: formData,
       );
+      print(response);
       if (response.statusCode == 200) {
         return true;
       } else {
         return false;
       }
     } catch (e) {
+      print(e);
       return false;
     }
   }
