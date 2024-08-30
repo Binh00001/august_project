@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/order_list.dart';
 import 'package:flutter_project_august/page/feature_page/product_list.dart';
+import 'package:flutter_project_august/page/feature_page/statistic_page.dart';
 import 'package:flutter_project_august/page/feature_page/task_page.dart';
 import 'package:flutter_project_august/utill/app_constants.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
@@ -118,7 +119,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: Icons.bar_chart,
                         title: 'Thống kê',
                         onTap: () {
-                          // Handle tap
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => const StatisticPage()),
+                          );
                         },
                       ),
                     ),

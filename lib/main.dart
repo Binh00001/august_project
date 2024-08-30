@@ -22,6 +22,7 @@ import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
 import 'package:flutter_project_august/blocs/mark_paid_order/mark_paid_bloc.dart';
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
+import 'package:flutter_project_august/blocs/statistic/statistic_bloc.dart';
 import 'package:flutter_project_august/blocs/task/task_bloc.dart';
 import 'package:flutter_project_august/blocs/update_category/update_category_bloc.dart';
 import 'package:flutter_project_august/blocs/update_product/update_product_bloc.dart';
@@ -101,6 +102,11 @@ class MyApp extends StatelessWidget {
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider<StatisticBloc>(
+            create: (context) => StatisticBloc(
+              statisticsRepo: context.read<StatisticsRepo>(),
+            ),
+          ),
           BlocProvider<SchoolBloc>(
             create: (context) => SchoolBloc(
               schoolRepo: context.read<SchoolRepo>(),

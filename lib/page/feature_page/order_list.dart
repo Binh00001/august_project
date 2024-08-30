@@ -85,49 +85,7 @@ class _OrderListPageState extends State<OrderListPage> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _selectDate(context, true),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        _startDate == null
-                            ? 'Từ ngày'
-                            : DateFormat('dd/MM/yyyy').format(_startDate!),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => _selectDate(context, false),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        _endDate == null
-                            ? 'Đến ngày'
-                            : DateFormat('dd/MM/yyyy').format(_endDate!),
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            buildSelectStartAndEnd(context),
             const SizedBox(height: 16),
             if (_user!.role == 'admin' || _user!.role == 'staff') ...[
               BlocBuilder<SchoolBloc, SchoolState>(
@@ -259,6 +217,50 @@ class _OrderListPageState extends State<OrderListPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Row buildSelectStartAndEnd(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () => _selectDate(context, true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                _startDate == null
+                    ? 'Từ ngày'
+                    : DateFormat('dd/MM/yyyy').format(_startDate!),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => _selectDate(context, false),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                _endDate == null
+                    ? 'Đến ngày'
+                    : DateFormat('dd/MM/yyyy').format(_endDate!),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
