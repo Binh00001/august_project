@@ -245,14 +245,12 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                 ),
                 Center(
                   child: Text(
-                    'Số HĐ: ${order.id} \n',
+                    'Số HĐ: ${order.id.length > 10 ? order.id.substring(order.id.length - 10) : order.id} \n',
                     style: const TextStyle(
-                      // font: lightFont,
                       fontSize: 12,
                     ),
                   ),
                 ),
-
                 //thông tin khách hàng
                 Align(
                   alignment: Alignment.centerLeft,
