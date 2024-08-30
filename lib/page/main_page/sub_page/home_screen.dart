@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/order_list.dart';
 import 'package:flutter_project_august/page/feature_page/product_list.dart';
+import 'package:flutter_project_august/page/feature_page/revenue_page.dart';
 import 'package:flutter_project_august/page/feature_page/statistic_page.dart';
 import 'package:flutter_project_august/page/feature_page/task_page.dart';
 import 'package:flutter_project_august/utill/app_constants.dart';
@@ -103,6 +104,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         icon: Icons.attach_money,
                         title: 'Doanh thu',
                         onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => RevenuePage()),
+                          );
                           // Handle tap
                         },
                       ),

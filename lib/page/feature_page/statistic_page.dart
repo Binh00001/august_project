@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_project_august/blocs/statistic/statistic_bloc.dart';
-import 'package:flutter_project_august/blocs/statistic/statistic_event.dart';
-import 'package:flutter_project_august/blocs/statistic/statistic_state.dart';
+import 'package:flutter_project_august/blocs/get_statistic/statistic_bloc.dart';
+import 'package:flutter_project_august/blocs/get_statistic/statistic_event.dart';
+import 'package:flutter_project_august/blocs/get_statistic/statistic_state.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:intl/intl.dart';
 

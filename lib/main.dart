@@ -19,10 +19,11 @@ import 'package:flutter_project_august/blocs/get_debt/get_debt_bloc.dart';
 import 'package:flutter_project_august/blocs/get_order/get_order_bloc.dart';
 import 'package:flutter_project_august/blocs/get_origin/get_origin_bloc.dart';
 import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
+import 'package:flutter_project_august/blocs/get_revenue/revenue_bloc.dart';
 import 'package:flutter_project_august/blocs/mark_paid_order/mark_paid_bloc.dart';
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
-import 'package:flutter_project_august/blocs/statistic/statistic_bloc.dart';
+import 'package:flutter_project_august/blocs/get_statistic/statistic_bloc.dart';
 import 'package:flutter_project_august/blocs/task/task_bloc.dart';
 import 'package:flutter_project_august/blocs/update_category/update_category_bloc.dart';
 import 'package:flutter_project_august/blocs/update_product/update_product_bloc.dart';
@@ -102,6 +103,11 @@ class MyApp extends StatelessWidget {
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider<RevenueBloc>(
+            create: (context) => RevenueBloc(
+              repo: context.read<RevenueRepo>(),
+            ),
+          ),
           BlocProvider<StatisticBloc>(
             create: (context) => StatisticBloc(
               statisticsRepo: context.read<StatisticsRepo>(),
