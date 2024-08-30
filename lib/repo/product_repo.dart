@@ -28,6 +28,26 @@ class ProductRepo {
     }
   }
 
+  // Delete product
+  Future<bool> deleteProduct(String productId) async {
+    try {
+      Response response = await dio.delete(
+        '${AppConstants.baseUrl}/v1/product',
+        data: {
+          'id': productId,
+        },
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Error deleting product: $e');
+      return false;
+    }
+  }
+
   //create new product
   Future<bool> createProduct({
     required FormData formData,
