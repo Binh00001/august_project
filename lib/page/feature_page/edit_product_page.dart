@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/blocs/delete_product/delete_product_bloc.dart';
+import 'package:flutter_project_august/blocs/delete_product/delete_product_event.dart';
+import 'package:flutter_project_august/blocs/delete_product/delete_product_state.dart';
 import 'package:flutter_project_august/blocs/update_product/update_product_bloc.dart';
 import 'package:flutter_project_august/blocs/update_product/update_product_event.dart';
 import 'package:flutter_project_august/blocs/update_product/update_product_state.dart';
@@ -62,8 +65,7 @@ class _EditProductPageState extends State<EditProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<FormState> _formKey =
-        GlobalKey<FormState>(); // Khai báo GlobalKey cho Form
+    final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
     return Scaffold(
       appBar: AppBar(
@@ -78,10 +80,9 @@ class _EditProductPageState extends State<EditProductPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: BlocConsumer<UpdateProductBloc, UpdateProductState>(
-          listener: (context, state) {
-            if (state is UpdateProductLoading) {
-              // Hiển thị một widget loading
+        child: BlocListener<DeleteProductBloc, DeleteProductState>(
+          listener: (context, state) async {
+            if (state is DeleteProductLoading) {
               showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -89,80 +90,187 @@ class _EditProductPageState extends State<EditProductPage> {
                   return const Center(child: CircularProgressIndicator());
                 },
               );
-            } else if (state is UpdateProductSuccess) {
-              // Tắt dialog loading nếu đang hiển thị
-              Navigator.pop(context);
-              // Hiển thị thông báo thành công
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Cập nhật sản phẩm thành công!")),
+            } else if (state is DeleteProductSuccess) {
+              Navigator.pop(
+                  context); // Dismiss the loading dialog if it's showing
+              await showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Xóa Sản Phẩm'),
+                    content: const Text("Sản phẩm đã được xóa thành công!"),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('OK'),
+                        onPressed: () =>
+                            Navigator.of(context).pop(), // Close the dialog
+                      ),
+                    ],
+                  );
+                },
               );
-              // Quay lại màn hình trước
               Navigator.pop(context);
-            } else if (state is UpdateProductFailure) {
-              // Tắt dialog loading nếu đang hiển thị
-              Navigator.pop(context);
-              // Hiển thị thông báo lỗi
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text("Lỗi cập nhật sản phẩm: ${state.error}")),
+            } else if (state is DeleteProductFailure) {
+              Navigator.pop(
+                  context); // Dismiss the loading dialog if it's showing
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Lỗi Xóa Sản Phẩm'),
+                    content: Text("Lỗi khi xóa sản phẩm: ${state.error}"),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('OK'),
+                        onPressed: () =>
+                            Navigator.of(context).pop(), // Close the dialog
+                      ),
+                    ],
+                  );
+                },
               );
             }
           },
-          builder: (context, state) {
-            return SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Tên sản phẩm',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Tên sản phẩm không được để trống';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    TextFormField(
-                      controller: _priceController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Giá tiền',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Giá tiền không được để trống';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    buildImagePickerRow(context),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            _updateProduct();
-                          }
-                        },
-                        child: const Text('Cập nhật sản phẩm'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
+          child: BlocConsumer<UpdateProductBloc, UpdateProductState>(
+            listener: (context, state) {
+              if (state is UpdateProductLoading) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                );
+              } else if (state is UpdateProductSuccess) {
+                Navigator.pop(context); // Close the loading dialog if open
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text("Cập nhật sản phẩm thành công!")),
+                );
+                Navigator.pop(context);
+              } else if (state is UpdateProductFailure) {
+                Navigator.pop(context); // Close the loading dialog if open
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text("Lỗi cập nhật sản phẩm: ${state.error}")),
+                );
+              }
+            },
+            builder: (context, state) {
+              // Existing builder code
+              return buildUI(_formKey, context);
+            },
+          ),
         ),
       ),
+    );
+  }
+
+  SingleChildScrollView buildUI(
+      GlobalKey<FormState> _formKey, BuildContext context) {
+    return SingleChildScrollView(
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Tên sản phẩm',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Tên sản phẩm không được để trống';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _priceController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Giá tiền',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Giá tiền không được để trống';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+            buildImagePickerRow(context),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: AppColors.onError,
+                    backgroundColor:
+                        AppColors.lightRed, // Set the text color to white
+                  ),
+                  onPressed: () {
+                    _showDeleteConfirmationDialog();
+                    // Add your delete action or function call here
+                  },
+                  child: const Text('Xoá sản phẩm'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _updateProduct();
+                    }
+                  },
+                  child: const Text('Cập nhật sản phẩm'),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cảnh báo'),
+          content: const Text(
+              'Sản phẩm bị xoá sẽ không thể khôi phục, bạn có muốn tiếp tục?'),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: AppColors.error, // White text color
+              ),
+              child: const Text('Tiếp tục'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Perform the delete operation here
+                BlocProvider.of<DeleteProductBloc>(context)
+                    .add(DeleteProduct(widget.product.id));
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black,
+                backgroundColor: Colors.grey[300], // Black text color
+              ),
+              child: const Text('Không'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
