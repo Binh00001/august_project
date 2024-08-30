@@ -1,7 +1,12 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/blocs/cart/cart_bloc.dart';
 import 'package:flutter_project_august/blocs/cart/cart_event.dart';
+import 'package:flutter_project_august/blocs/change_password/change_password_bloc.dart';
+import 'package:flutter_project_august/blocs/change_password/change_password_event.dart';
+import 'package:flutter_project_august/blocs/change_password/change_password_state.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/login_page/login_screen.dart';
@@ -38,64 +43,116 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final TextEditingController newPasswordController = TextEditingController();
     final TextEditingController confirmPasswordController =
         TextEditingController();
+    final GlobalKey<FormState> _formKey =
+        GlobalKey<FormState>(); // Create a global key for the form
 
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Đổi mật khẩu'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: currentPasswordController,
-                obscureText: true,
-                decoration:
-                    const InputDecoration(labelText: 'Mật khẩu hiện tại'),
+      barrierDismissible: false, // Prevent dialog from closing on tap outside
+      builder: (BuildContext dialogContext) {
+        return BlocListener<ChangePasswordBloc, ChangePasswordState>(
+          listener: (context, state) {
+            if (state is ChangePasswordSuccess) {
+              Navigator.pop(dialogContext); // Close the change password dialog
+              _showResultDialog(dialogContext, 'Thành công',
+                  'Mật khẩu đã được thay đổi thành công!');
+            } else if (state is ChangePasswordFailure) {
+              // Navigator.pop(dialogContext); // Close the change password dialog
+              _showResultDialog(dialogContext, 'Thất bại', state.error);
+            }
+          },
+          child: AlertDialog(
+            title: const Text('Đổi mật khẩu'),
+            content: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: currentPasswordController,
+                    obscureText: true,
+                    decoration:
+                        const InputDecoration(labelText: 'Mật khẩu hiện tại'),
+                    validator: (value) => value != null && value.isNotEmpty
+                        ? null
+                        : 'Vui lòng nhập mật khẩu hiện tại',
+                  ),
+                  TextFormField(
+                    controller: newPasswordController,
+                    obscureText: true,
+                    decoration:
+                        const InputDecoration(labelText: 'Mật khẩu mới'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Vui lòng nhập mật khẩu mới';
+                      }
+                      if (value.length < 6) {
+                        return 'Mật khẩu phải có ít nhất 6 ký tự';
+                      }
+                      if (value != confirmPasswordController.text) {
+                        return 'Mật khẩu xác nhận không khớp';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: confirmPasswordController,
+                    obscureText: true,
+                    decoration:
+                        const InputDecoration(labelText: 'Xác nhận mật khẩu'),
+                    validator: (value) => value == newPasswordController.text
+                        ? null
+                        : 'Mật khẩu xác nhận không khớp',
+                  ),
+                ],
               ),
-              TextField(
-                controller: newPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Mật khẩu mới'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Hủy'),
               ),
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                decoration:
-                    const InputDecoration(labelText: 'Xác nhận mật khẩu'),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    if (currentPasswordController.text !=
+                        newPasswordController.text) {
+                      BlocProvider.of<ChangePasswordBloc>(dialogContext).add(
+                          ChangePasswordRequested(
+                              oldPassword: currentPasswordController.text,
+                              newPassword: newPasswordController.text));
+                    } else {
+                      _showResultDialog(context, "Thất bại",
+                          "Mật khẩu mới phải khác mật khẩu cũ");
+                    }
+                  }
+                },
+                child: const Text('Xác nhận'),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Hủy'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (newPasswordController.text ==
-                    confirmPasswordController.text) {
-                  // Implement the logic for changing the password here
-                  print('Password change logic to be implemented');
-                  Navigator.pop(context);
-                } else {
-                  // Show an error message if the passwords do not match
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Mật khẩu xác nhận không khớp!'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              child: const Text('Xác nhận'),
-            ),
-          ],
         );
       },
     );
+  }
+
+  void _showResultDialog(BuildContext context, String title, String message) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the result dialog
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        });
   }
 
   @override
@@ -110,12 +167,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: Padding(
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildHeader(),
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,8 +245,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

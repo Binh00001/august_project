@@ -6,6 +6,28 @@ class UserRepo {
 
   UserRepo({required this.dio});
 
+  // Method to change password
+  // Method to change password that returns HTTP status code
+  Future<int> changePassword(String oldPassword, String newPassword) async {
+    var passwordData = {
+      "oldPassword": oldPassword,
+      "newPassword": newPassword,
+    };
+
+    try {
+      Response response = await dio.patch(
+        '${AppConstants.baseUrl}/v1/user', // Make sure your endpoint is correct
+        data: passwordData,
+      );
+      // Directly return the status code from the HTTP response
+      return response.statusCode ?? 0; // Returns 0 if statusCode is null
+    } on DioException catch (e) {
+      // Return a specific status code on error or default to a custom one if none is provided
+      return e.response?.statusCode ??
+          400; // Using 400 as a generic client error status
+    }
+  }
+
   Future<void> createNewStaff({
     required String username,
     required String password,

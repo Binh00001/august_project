@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/blocs/assign_staff/assign_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/cart/cart_bloc.dart';
+import 'package:flutter_project_august/blocs/change_password/change_password_bloc.dart';
 import 'package:flutter_project_august/blocs/create_category/create_category_bloc.dart';
 import 'package:flutter_project_august/blocs/create_order/create_order_bloc.dart';
 import 'package:flutter_project_august/blocs/create_origin/create_origin_bloc.dart';
@@ -136,6 +137,11 @@ class MyApp extends StatelessWidget {
               productRepo: context.read<ProductRepo>(),
             ),
           ),
+          BlocProvider<ChangePasswordBloc>(
+            create: (context) => ChangePasswordBloc(
+              repo: context.read<UserRepo>(),
+            ),
+          ),
           BlocProvider<UserBloc>(
             create: (context) => UserBloc(
               userRepo: context.read<UserRepo>(),
@@ -192,6 +198,7 @@ class MyApp extends StatelessWidget {
           BlocProvider<PrintInvoiceImageBloc>(
             create: (context) => PrintInvoiceImageBloc(),
           ),
+
           // Include other BlocProviders if needed
         ],
         child: MaterialApp(
