@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  static const Color backgroundChart = Color(0xFF2D4261);
+  static const Color highChart = Color(0xFF44C5FC);
+  static const Color lowChart = Color(0xFF69EFAF);
+
   static const Color primary =
       Color(0xFF864AF9); // Màu hồng hơi tím, khá sáng, dùng làm màu chính
   static const Color onPrimary = Color(

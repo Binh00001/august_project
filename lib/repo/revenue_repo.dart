@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_project_august/models/revenue_model.dart';
 import 'package:flutter_project_august/utill/app_constants.dart';
 
 class RevenueRepo {
@@ -7,7 +8,7 @@ class RevenueRepo {
   RevenueRepo({required this.dio});
 
   // Method to fetch revenue data
-  Future<dynamic> fetchRevenueData(int year) async {
+  Future<List<Revenue>> fetchRevenueData(int year) async {
     try {
       // Send a GET request to fetch revenue data
       Response response = await dio.get(
@@ -16,7 +17,8 @@ class RevenueRepo {
       );
 
       if (response.statusCode == 200) {
-        return response.data; // Return data if the request is successful
+        List<dynamic> revenueList = response.data['data']['revenues'];
+        return revenueList.map((json) => Revenue.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load data: ${response.statusCode}');
       }
