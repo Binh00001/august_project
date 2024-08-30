@@ -6,6 +6,7 @@ import 'package:flutter_project_august/blocs/get_revenue/revenue_event.dart';
 import 'package:flutter_project_august/blocs/get_revenue/revenue_state.dart';
 import 'package:flutter_project_august/models/revenue_model.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
+import 'package:intl/intl.dart';
 
 class RevenuePage extends StatefulWidget {
   @override
@@ -47,13 +48,15 @@ class _RevenuePageState extends State<RevenuePage> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                const Text("Doanh thu năm:      "),
+                const Text("Doanh thu năm:"),
+                const SizedBox(
+                  width: 20,
+                ),
                 SizedBox(width: 80, child: _buildYearDropdown()),
               ],
             ),
           ),
           // Within the RevenuePage class, inside the BlocBuilder or wherever the state is handled:
-
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
@@ -63,21 +66,39 @@ class _RevenuePageState extends State<RevenuePage> {
                 borderRadius:
                     BorderRadius.circular(8), // Sets the border radius to 8
               ),
-              child: BlocBuilder<RevenueBloc, RevenueState>(
-                builder: (context, state) {
-                  if (state is RevenueLoaded) {
-                    // Ensure that there are at least 6 revenues, if not, take as many as there are
-                    List<Revenue> firstSixRevenues = state.revenues.length > 6
-                        ? state.revenues.sublist(0, 6)
-                        : state.revenues;
-                    return RevenueBarChart(revenues: firstSixRevenues);
-                  } else if (state is RevenueLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  return const Center(
-                    child: Text('Chọn năm cần kiểm tra doanh thu.'),
-                  );
-                },
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      'Nửa đầu năm', // Title
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors
+                            .white, // Assuming a light theme; adjust color as needed
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  BlocBuilder<RevenueBloc, RevenueState>(
+                    builder: (context, state) {
+                      if (state is RevenueLoaded) {
+                        // Ensure that there are at least 6 revenues, if not, take as many as there are
+                        List<Revenue> firstSixRevenues =
+                            state.revenues.length > 6
+                                ? state.revenues.sublist(0, 6)
+                                : state.revenues;
+                        return RevenueBarChart(revenues: firstSixRevenues);
+                      } else if (state is RevenueLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      return const Center(
+                        child: Text('Chọn năm cần kiểm tra doanh thu.'),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),
@@ -90,21 +111,71 @@ class _RevenuePageState extends State<RevenuePage> {
                 borderRadius:
                     BorderRadius.circular(8), // Sets the border radius to 8
               ),
-              child: BlocBuilder<RevenueBloc, RevenueState>(
-                builder: (context, state) {
-                  if (state is RevenueLoaded) {
-                    // Ensure that there are at least 6 revenues, if not, take as many as there are
-                    List<Revenue> firstSixRevenues = state.revenues.length > 6
-                        ? state.revenues.sublist(6, 12)
-                        : state.revenues;
-                    return RevenueBarChart(revenues: firstSixRevenues);
-                  } else if (state is RevenueLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  return const Center(
-                    child: Text('Chọn năm cần kiểm tra doanh thu.'),
-                  );
-                },
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      'Nửa cuối năm', // Title
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors
+                            .white, // Assuming a light theme; adjust color as needed
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  BlocBuilder<RevenueBloc, RevenueState>(
+                    builder: (context, state) {
+                      if (state is RevenueLoaded) {
+                        // Ensure that there are at least 6 revenues, if not, take as many as there are
+                        List<Revenue> firstSixRevenues =
+                            state.revenues.length > 6
+                                ? state.revenues.sublist(6, 12)
+                                : state.revenues;
+                        return RevenueBarChart(revenues: firstSixRevenues);
+                      } else if (state is RevenueLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      return const Center(
+                        child: Text('Chọn năm cần kiểm tra doanh thu.'),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: BlocBuilder<RevenueBloc, RevenueState>(
+                  builder: (context, state) {
+                    if (state is RevenueLoaded) {
+                      // Calculate total revenue by summing all revenues
+                      final totalRevenue = state.revenues.fold<int>(
+                        0,
+                        (sum, item) => sum + item.revenue,
+                      );
+                      // Format the revenue using NumberFormat
+                      final formattedRevenue = NumberFormat('#,##0', 'en_US')
+                          .format(
+                              totalRevenue); // Formats the number with commas
+                      return Text(
+                        'Tổng doanh thu: $formattedRevenue VND', // Append USD to the formatted number
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      );
+                    } else {
+                      return const SizedBox(); // Show nothing or a placeholder
+                    }
+                  },
+                ),
               ),
             ),
           )
