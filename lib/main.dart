@@ -22,6 +22,7 @@ import 'package:flutter_project_august/blocs/mark_paid_order/mark_paid_bloc.dart
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/task/task_bloc.dart';
+import 'package:flutter_project_august/blocs/update_category/update_category_bloc.dart';
 import 'package:flutter_project_august/blocs/update_product/update_product_bloc.dart';
 import 'package:flutter_project_august/database/local_database.dart';
 
@@ -119,6 +120,11 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<CategoryBloc>(
             create: (context) => CategoryBloc(
+              categoryRepo: context.read<CategoryRepo>(),
+            ),
+          ),
+          BlocProvider<UpdateCategoryBloc>(
+            create: (context) => UpdateCategoryBloc(
               categoryRepo: context.read<CategoryRepo>(),
             ),
           ),

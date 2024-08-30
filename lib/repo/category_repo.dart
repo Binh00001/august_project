@@ -7,9 +7,7 @@ class CategoryRepo {
 
   CategoryRepo({required this.dio});
 
-  Future<bool> createCategory({
-    required String name,
-  }) async {
+  Future<bool> createCategory({required String name}) async {
     try {
       final response = await dio.post(
         '${AppConstants.baseUrl}/v1/category',
@@ -19,10 +17,8 @@ class CategoryRepo {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Successfully created the category
         return true;
       } else {
-        // Handle different status codes as needed
         return false;
       }
     } catch (e) {
@@ -42,7 +38,6 @@ class CategoryRepo {
       );
 
       if (response.statusCode == 200) {
-        // Parse the data from the response
         List<dynamic> data = response.data['data']['docs'];
         return data.map((category) => Category.fromJson(category)).toList();
       } else {
@@ -52,6 +47,27 @@ class CategoryRepo {
     } on DioException catch (e) {
       throw Exception(
           'Failed to connect to the API: ${e.response?.data ?? e.message}');
+    }
+  }
+
+  Future<bool> updateCategory(String id, String name) async {
+    try {
+      final response = await dio.patch(
+        '${AppConstants.baseUrl}/v1/category',
+        data: {
+          'id': id,
+          'name': name,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Error updating category: $e');
+      return false;
     }
   }
 }
