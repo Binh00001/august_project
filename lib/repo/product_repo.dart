@@ -5,6 +5,24 @@ class ProductRepo {
   final Dio dio;
 
   ProductRepo({required this.dio});
+
+  // Update product
+  Future<bool> updateProduct({required FormData formData}) async {
+    try {
+      Response response = await dio.patch(
+        '${AppConstants.baseUrl}/v1/product',
+        data: formData,
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
   //create new product
   Future<bool> createProduct({
     required FormData formData,

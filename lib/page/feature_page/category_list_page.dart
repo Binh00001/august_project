@@ -33,18 +33,20 @@ class _CategoryListPageState extends State<CategoryListPage> {
           if (state is CategoryLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is CategoryLoaded) {
-            return ListView.builder(
-              itemCount: state.categories.length,
-              itemBuilder: (context, index) {
-                var category = state.categories[index];
-                return ListTile(
-                  title: Text(category.name),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () => _showEditDialog(context, category),
-                  ),
-                );
-              },
+            return Container(
+              child: ListView.builder(
+                itemCount: state.categories.length,
+                itemBuilder: (context, index) {
+                  var category = state.categories[index];
+                  return ListTile(
+                    title: Text(category.name),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _showEditDialog(context, category),
+                    ),
+                  );
+                },
+              ),
             );
           } else if (state is CategoryError) {
             return Center(child: Text('Error: ${state.message}'));
