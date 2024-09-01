@@ -36,16 +36,16 @@ class _DebtScreenState extends State<DebtScreen> {
     try {
       if (widget.user != AppConstants.defaultUser) {
         setState(() {});
-        if (widget.user.role == 'admin') {
-          // Fetch the list of schools only if the user is an admin
-          BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
-          // Fetch Debt without specifying a school
-          BlocProvider.of<DebtBloc>(context).add(FetchDebt());
-        } else if (widget.user.role == 'user') {
+        if (widget.user.role == 'user') {
           // If the user is a regular user, fetch the debt for their school
           BlocProvider.of<DebtBloc>(context).add(FetchDebt(
             schoolId: widget.user.schoolId,
           ));
+        } else {
+          // Fetch the list of schools only if the user is an admin
+          BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
+          // Fetch Debt without specifying a school
+          BlocProvider.of<DebtBloc>(context).add(FetchDebt());
         }
       } else {
         print('User is null');

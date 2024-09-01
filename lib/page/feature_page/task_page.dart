@@ -39,6 +39,8 @@ class _TaskPageState extends State<TaskPage> {
 
   void _loadTask() {
     DateTime now = DateTime.now();
+    print(now);
+    print(now.millisecondsSinceEpoch);
     // Dispatch the event to fetch tasks for today
     context.read<TaskBloc>().add(FetchTasks(date: now.millisecondsSinceEpoch));
   }
