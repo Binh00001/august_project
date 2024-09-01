@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/assets_widget/school_dropdown.dart';
 import 'package:flutter_project_august/blocs/get_order/get_order_bloc.dart';
 import 'package:flutter_project_august/blocs/get_order/get_order_event.dart';
 import 'package:flutter_project_august/blocs/get_order/get_order_state.dart';
@@ -93,34 +94,18 @@ class _OrderListPageState extends State<OrderListPage> {
                   if (state is SchoolLoading) {
                     return const CircularProgressIndicator();
                   } else if (state is SchoolLoaded) {
-                    return DropdownButtonFormField<String>(
-                      value: selectedSchoolId,
+                    return SchoolDropdown(
+                      selectedSchoolId: selectedSchoolId,
                       onChanged: (String? newValue) {
                         setState(() {
                           selectedSchoolId =
                               newValue; // Update the selected school ID
-                          fetchOrdersIfPossible(context);
+                          fetchOrdersIfPossible(
+                              context); // Gọi hàm để thực hiện các tác vụ tiếp theo
                         });
                       },
-                      decoration: InputDecoration(
-                        labelText: 'Chọn trường học',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      items: [
-                        const DropdownMenuItem<String>(
-                          value: null, // Null value for "All"
-                          child: Text("Tất cả"),
-                        ),
-                        ...state.schools
-                            .map<DropdownMenuItem<String>>((School school) {
-                          return DropdownMenuItem<String>(
-                            value: school.id,
-                            child: Text(school.name),
-                          );
-                        }).toList(),
-                      ],
+                      schools: state
+                          .schools, // Giả sử rằng state.schools là danh sách các trường học bạn muốn hiển thị
                     );
                   } else if (state is SchoolError) {
                     return Text('Error: ${state.message}');

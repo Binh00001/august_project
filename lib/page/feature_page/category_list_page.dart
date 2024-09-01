@@ -75,132 +75,137 @@ class _CategoryListPageState extends State<CategoryListPage> {
         }
       },
       child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Danh mục sản phẩm'),
-            centerTitle: true,
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.onPrimary,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  // Add your logic here for when the button is pressed
-                  openCreateNewCategoryDialog(context);
-                },
-              ),
-            ],
-          ),
-          body: BlocBuilder<CategoryBloc, CategoryState>(
-            builder: (context, state) {
-              if (state is CategoryLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is CategoryLoaded) {
-                if (state.categories.isEmpty) {
-                  // If the category list is empty, show only the "Create New Category" button
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 4.0),
-                    child: GestureDetector(
-                      onTap: () => openCreateNewCategoryDialog(context),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.circular(4.0), // Rounded corners
-                          border: Border.all(color: Colors.grey), // Gray border
-                        ),
-                        child: const Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 16.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text("Tạo danh mục mới"),
-                                SizedBox(
-                                    width:
-                                        8), // Add some spacing between text and icon
-                                Icon(Icons.add),
-                              ],
-                            ),
+        appBar: AppBar(
+          title: const Text('Danh mục sản phẩm'),
+          centerTitle: true,
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                // Add your logic here for when the button is pressed
+                openCreateNewCategoryDialog(context);
+              },
+            ),
+          ],
+        ),
+        body: BlocBuilder<CategoryBloc, CategoryState>(
+          builder: (context, state) {
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 4.0),
+                  child: GestureDetector(
+                    onTap: () => openCreateNewCategoryDialog(context),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color:
+                            Colors.green, // Set the background color to green
+                        borderRadius:
+                            BorderRadius.circular(4.0), // Rounded corners
+                        border: Border.all(color: Colors.grey), // Gray border
+                      ),
+                      child: const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add, color: Colors.white),
+
+                              SizedBox(
+                                  width:
+                                      8), // Add some spacing between text and icon
+                              Text(
+                                "Tạo danh mục mới",
+                                style: TextStyle(
+                                    color: Colors
+                                        .white), // Set text color to white
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                  );
-                } else {
-                  // If there are categories, display the list
-                  return listCategory(state);
-                }
-              } else if (state is CategoryError) {
-                return Center(child: Text('Error: ${state.message}'));
-              }
-              return Container(); // empty container for unhandled states
-            },
-          )),
+                  ),
+                ),
+                Expanded(
+                  child: _buildCategoryList(state),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
     );
+  }
+
+  Widget _buildCategoryList(CategoryState state) {
+    if (state is CategoryLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (state is CategoryLoaded) {
+      if (state.categories.isEmpty) {
+        return const Center(child: Text("Chưa có danh mục nào"));
+      } else {
+        return listCategory(
+            state); // Assuming listCategory is a method that returns a widget displaying the categories
+      }
+    } else if (state is CategoryError) {
+      return Center(child: Text('Error: ${state.message}'));
+    } else {
+      return Container(); // Empty container for unhandled states
+    }
   }
 
   ListView listCategory(CategoryLoaded state) {
     return ListView.builder(
       itemCount: state.categories.length +
-          1, // Increase itemCount by 1 to include the button
+          1, // Increase the item count by 1 for the SizedBox
       itemBuilder: (context, index) {
-        if (index == 0) {
-          // Add a button at the start of the list
+        if (index == state.categories.length) {
+          // If it's the last item, return a SizedBox
+          return const SizedBox(
+            height: 80,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(child: Text("-- Hết --")),
+              ],
+            ),
+          );
+        } else {
+          // Otherwise, return the category item
+          var category = state.categories[index];
           return Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-            child: GestureDetector(
-              onTap: () => {openCreateNewCategoryDialog(context)},
-              child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4.0), // Rounded corners
-                    border: Border.all(color: Colors.grey), // Gray border
-                  ),
-                  child: const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [Text("Tạo danh mục mới"), Icon(Icons.add)],
-                      ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4.0),
+                border: Border.all(color: Colors.grey),
+              ),
+              child: ListTile(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12.0),
+                      child: Text(category.name),
                     ),
-                  )),
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      onPressed: () => _showEditDialog(context, category),
+                    ),
+                  ],
+                ),
+              ),
             ),
           );
         }
-
-        var category = state
-            .categories[index - 1]; // Adjust the index to access the categories
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 16.0, vertical: 4.0), // Space between items
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4.0), // Rounded corners
-              border: Border.all(color: Colors.grey), // Gray border
-            ),
-            child: ListTile(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12.0),
-                    child: Text(category.name),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.settings),
-                    onPressed: () => _showEditDialog(context, category),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
       },
     );
   }

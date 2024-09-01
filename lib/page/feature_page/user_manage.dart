@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/assets_widget/school_dropdown.dart';
 import 'package:flutter_project_august/blocs/create_user/create_user_bloc.dart';
 import 'package:flutter_project_august/blocs/create_user/create_user_event.dart';
 import 'package:flutter_project_august/blocs/create_user/create_user_state.dart';
@@ -116,34 +117,19 @@ class _UserManagePageState extends State<UserManagePage> {
                     if (state is SchoolLoading) {
                       return const CircularProgressIndicator();
                     } else if (state is SchoolLoaded) {
-                      return DropdownButtonFormField<String>(
-                        value: selectedSchoolId,
+                      return SchoolDropdown(
+                        selectedSchoolId:
+                            selectedSchoolId, // Giữ giá trị ID trường học hiện tại
                         onChanged: (String? newValue) {
                           setState(() {
                             selectedSchoolId =
-                                newValue; // Update the selected school ID
-                            _loadUser(selectedSchoolId);
+                                newValue; // Cập nhật ID trường học đã chọn
+                            _loadUser(
+                                selectedSchoolId); // Gọi hàm tải dữ liệu người dùng dựa trên trường học đã chọn
                           });
                         },
-                        decoration: InputDecoration(
-                          labelText: 'Chọn trường học',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        items: [
-                          const DropdownMenuItem<String>(
-                            value: null, // Null value for "All"
-                            child: Text("Tất cả"),
-                          ),
-                          ...state.schools
-                              .map<DropdownMenuItem<String>>((School school) {
-                            return DropdownMenuItem<String>(
-                              value: school.id,
-                              child: Text(school.name),
-                            );
-                          }).toList(),
-                        ],
+                        schools: state
+                            .schools, // Danh sách các trường học từ trạng thái
                       );
                     } else if (state is SchoolError) {
                       return Text('Error: ${state.message}');
@@ -418,49 +404,42 @@ class _UserItemState extends State<UserItem> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          isExpanded = !isExpanded;
-        });
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.grey, // Set the border color to gray
-            width: 1.0, // Set the border width
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8), // Consistent bottom margin
+      decoration: BoxDecoration(
+        border: Border.all(),
+        borderRadius:
+            const BorderRadius.all(Radius.circular(8)), // Rounded corners
+      ),
+      child: ExpansionTile(
+        initiallyExpanded: false, // Start with the tile collapsed
+        title: Text(
+          '${widget.index + 1}. ${widget.user.username}',
+          style: const TextStyle(
+            overflow: TextOverflow.ellipsis, // Handle long names gracefully
           ),
-          borderRadius:
-              BorderRadius.circular(4.0), // Set the border radius to 4
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text('${widget.index + 1}.'),
-                  const SizedBox(width: 8),
-                  Text(widget.user.username),
-                ],
+        children: <Widget>[
+          ListTile(
+            title: const Text('Tên người dùng'),
+            subtitle: Text(
+              widget.user.name,
+              style: const TextStyle(
+                overflow: TextOverflow.ellipsis, // Prevent overflow
               ),
-              if (isExpanded)
-                Padding(
-                  padding: const EdgeInsets.only(left: 20.0, top: 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Tên người dùng: ${widget.user.name}'),
-                      Text(
-                          'Tên trường: ${_getSchoolName(widget.user.schoolId)}'),
-                    ],
-                  ),
-                ),
-            ],
+            ),
           ),
-        ),
+          ListTile(
+            title: const Text('Tên trường'),
+            subtitle: Text(
+              _getSchoolName(widget.user.schoolId) ??
+                  "", // Get the school name by ID
+              style: const TextStyle(
+                overflow: TextOverflow.ellipsis, // Prevent overflow
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

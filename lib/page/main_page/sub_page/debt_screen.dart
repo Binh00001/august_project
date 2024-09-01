@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/assets_widget/school_dropdown.dart';
 import 'package:flutter_project_august/blocs/get_debt/get_debt_bloc.dart';
 import 'package:flutter_project_august/blocs/get_debt/get_debt_event.dart';
 import 'package:flutter_project_august/blocs/get_debt/get_debt_state.dart';
@@ -169,33 +170,18 @@ class _DebtScreenState extends State<DebtScreen> {
                   if (state is SchoolLoading) {
                     return const CircularProgressIndicator();
                   } else if (state is SchoolLoaded) {
-                    return DropdownButtonFormField<String>(
-                      value: selectedSchoolId,
+                    return SchoolDropdown(
+                      selectedSchoolId: selectedSchoolId,
                       onChanged: (String? newValue) {
                         setState(() {
-                          selectedSchoolId = newValue;
-                          fetchDebtIfPossible(context);
+                          selectedSchoolId =
+                              newValue; // Cập nhật ID trường học đã chọn
+                          fetchDebtIfPossible(
+                              context); // Thực hiện hàm lấy dữ liệu nợ nếu có
                         });
                       },
-                      decoration: InputDecoration(
-                        labelText: 'Chọn trường học',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      items: [
-                        const DropdownMenuItem<String>(
-                          value: null,
-                          child: Text("Tất cả"),
-                        ),
-                        ...state.schools
-                            .map<DropdownMenuItem<String>>((School school) {
-                          return DropdownMenuItem<String>(
-                            value: school.id,
-                            child: Text(school.name),
-                          );
-                        }).toList(),
-                      ],
+                      schools: state
+                          .schools, // Danh sách các trường học từ trạng thái
                     );
                   } else if (state is SchoolError) {
                     return Text('Error: ${state.message}');

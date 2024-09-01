@@ -72,18 +72,36 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
               if (index == schools.length) {
                 return const SizedBox(height: 240);
               }
-              return ExpansionTile(
-                title: Text('${index + 1}. ${schools[index].name}'),
-                children: <Widget>[
-                  ListTile(
-                    title: const Text('Địa chỉ'),
-                    subtitle: Text(schools[index].address ?? 'Không có'),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                    border: Border.all(),
+                    borderRadius: const BorderRadius.all(Radius.circular(8))),
+                child: ExpansionTile(
+                  title: Text(
+                    '${index + 1}. ${schools[index].name}',
+                    style: const TextStyle(
+                      overflow: TextOverflow
+                          .ellipsis, // Automatically add ellipses if text is too long
+                    ),
                   ),
-                  ListTile(
-                    title: const Text('Điện thoại'),
-                    subtitle: Text(schools[index].phoneNumber ?? 'Không có'),
-                  ),
-                ],
+                  children: <Widget>[
+                    ListTile(
+                      title: const Text('Địa chỉ'),
+                      subtitle: Text(
+                        schools[index].address ?? 'Không có',
+                        style: const TextStyle(
+                          overflow: TextOverflow
+                              .ellipsis, // Automatically add ellipses if text is too long
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text('Điện thoại'),
+                      subtitle: Text(schools[index].phoneNumber ?? 'Không có'),
+                    ),
+                  ],
+                ),
               );
             },
           ),

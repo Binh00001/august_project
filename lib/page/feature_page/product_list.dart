@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/assets_widget/category_dropdown.dart';
 import 'package:flutter_project_august/assets_widget/product_widget.dart';
 import 'package:flutter_project_august/blocs/cart/cart_bloc.dart';
 import 'package:flutter_project_august/blocs/cart/cart_event.dart';
@@ -233,26 +234,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 if (state is CategoryLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is CategoryLoaded) {
-                  return DropdownButtonFormField<String>(
-                    alignment: Alignment.bottomCenter,
-                    menuMaxHeight: 240,
-                    decoration: const InputDecoration(
-                      labelText: 'Danh mục',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: selectedCategory,
-                    items: state.categories
-                        .map((cat) => DropdownMenuItem<String>(
-                              value: cat.id,
-                              child: Text(cat.name),
-                            ))
-                        .toList(),
+                  return CustomDropdown(
+                    items: state.categories,
+                    selectedValue: selectedCategory,
                     onChanged: (value) {
                       setState(() {
                         selectedCategory = value;
-                        _resetProducts(); // Reset the products list when a new category is selected
+                        // Additional logic
+                        _resetProducts();
                       });
                     },
+                    labelText: 'Danh mục',
                   );
                 } else if (state is CategoryError) {
                   return Column(
