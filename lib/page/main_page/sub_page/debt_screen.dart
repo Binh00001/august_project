@@ -58,10 +58,13 @@ class _DebtScreenState extends State<DebtScreen> {
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: isStartDate
+          ? (_startDate ?? DateTime.now())
+          : (_endDate ?? DateTime.now()),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
+
     if (picked != null) {
       // Adjust the picked date to be at noon
       DateTime noonDate =
@@ -74,12 +77,17 @@ class _DebtScreenState extends State<DebtScreen> {
             _endDate = null;
             _dateError = 'Ngày kết thúc phải sau ngày bắt đầu';
           }
+          // If no end date selected, automatically set it to today at noon
+          if (_endDate == null) {
+            _endDate = DateTime.now();
+            _endDate = DateTime(
+                _endDate!.year, _endDate!.month, _endDate!.day, 12, 0, 0);
+          }
         } else {
           if (_startDate != null && noonDate.isBefore(_startDate!)) {
             _dateError = 'Ngày kết thúc phải sau ngày bắt đầu';
             return;
           }
-          _dateError = "";
           _endDate = noonDate;
         }
 
