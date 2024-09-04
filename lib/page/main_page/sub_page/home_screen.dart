@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/order_list.dart';
+import 'package:flutter_project_august/page/feature_page/printer_page.dart';
 import 'package:flutter_project_august/page/feature_page/product_list.dart';
 import 'package:flutter_project_august/page/feature_page/revenue_page.dart';
 import 'package:flutter_project_august/page/feature_page/statistic_page.dart';
@@ -159,10 +160,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
-                        child: SizedBox(
-                      width: 10,
-                    )),
+                    Expanded(
+                      child: FeatureContainer(
+                        primaryColor: const Color(0xFF1ABCF3),
+                        iconColor: const Color(0xFF1ABCF3),
+                        icon: Icons.print,
+                        title: 'Cài đặt máy in',
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => PrinterSettingsPage()),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ],

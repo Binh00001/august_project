@@ -11,6 +11,7 @@ class _PrinterSettingsPageState extends State<PrinterSettingsPage> {
   final _ipAddressController = TextEditingController();
   final _portController = TextEditingController();
   final _scaleController = TextEditingController();
+  bool _isLoading = true; // Biến phụ để theo dõi trạng thái đang tải
 
   @override
   void initState() {
@@ -25,6 +26,9 @@ class _PrinterSettingsPageState extends State<PrinterSettingsPage> {
     _portController.text = (prefs.getInt('_printerPort') ?? 9100).toString();
     _scaleController.text =
         (prefs.getDouble('_printerScale') ?? 1.8).toString();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> setPrinterIP(String newIP) async {
@@ -51,45 +55,50 @@ class _PrinterSettingsPageState extends State<PrinterSettingsPage> {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _ipAddressController,
-              decoration: const InputDecoration(labelText: 'Địa chi IP'),
-            ),
-            TextField(
-              controller: _portController,
-              decoration: const InputDecoration(labelText: 'Cổng'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _scaleController,
-              decoration: const InputDecoration(labelText: 'Tỉ lệ in'),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  // Dismiss the keyboard by removing focus from any focused element
-                  FocusScope.of(context).unfocus();
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : buildSettingForm(context),
+    );
+  }
 
-                  setPrinterIP(_ipAddressController.text);
-                  setPrinterPort(int.parse(_portController.text));
-                  setPrinterScale(double.parse(_scaleController.text));
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Cập nhật thành công!'),
-                  ));
-                },
-                child: const Text('Cập nhật cài đặt'),
-              ),
+  Padding buildSettingForm(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _ipAddressController,
+            decoration: const InputDecoration(labelText: 'Địa chi IP'),
+          ),
+          TextField(
+            controller: _portController,
+            decoration: const InputDecoration(labelText: 'Cổng'),
+            keyboardType: TextInputType.number,
+          ),
+          TextField(
+            controller: _scaleController,
+            decoration: const InputDecoration(labelText: 'Tỉ lệ in'),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+          const SizedBox(height: 20),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                // Dismiss the keyboard by removing focus from any focused element
+                FocusScope.of(context).unfocus();
+
+                setPrinterIP(_ipAddressController.text);
+                setPrinterPort(int.parse(_portController.text));
+                setPrinterScale(double.parse(_scaleController.text));
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('Cập nhật thành công!'),
+                ));
+              },
+              child: const Text('Cập nhật cài đặt'),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
