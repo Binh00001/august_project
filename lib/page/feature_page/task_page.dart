@@ -24,7 +24,6 @@ class TaskPage extends StatefulWidget {
 }
 
 class _TaskPageState extends State<TaskPage> {
-  User? _user;
   @override
   void initState() {
     super.initState();
@@ -182,6 +181,7 @@ class _TaskPageState extends State<TaskPage> {
                   const Icon(Icons.person_4, color: AppColors.onSuccess),
                   Text(
                     task.staff!.name, // Assuming 'staff' has a 'name' field
+                    // "name",
                     style: const TextStyle(
                       color: Colors.black,
                       fontSize: 14,
@@ -189,7 +189,7 @@ class _TaskPageState extends State<TaskPage> {
                   ),
                 ]
               ] else if (widget.user.role == 'staff' && task.staff != null) ...[
-                if (task.staff!.id == _user!.id) ...[
+                if (task.staff!.id == widget.user.id) ...[
                   Row(
                     children: [
                       const Icon(Icons.person_4, color: Colors.blue),
