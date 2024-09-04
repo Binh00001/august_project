@@ -10,7 +10,6 @@ import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_e
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_state.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/order_model.dart';
-import 'package:flutter_project_august/page/feature_page/order_list.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:intl/intl.dart';
 import 'package:screenshot/screenshot.dart';
@@ -31,6 +30,13 @@ class OrderDetailsPage extends StatefulWidget {
 
 class _OrderDetailsPageState extends State<OrderDetailsPage> {
   ScreenshotController screenshotController = ScreenshotController();
+  String payStatus = "await";
+
+  @override
+  void initState() {
+    super.initState();
+    payStatus = widget.order.payStatus; // Khởi tạo giá trị ban đầu từ đơn hàng
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,11 +111,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     colorIconDialog: Colors.green,
                     titleDialog: "Đã đánh dấu thanh toán",
                   ),
-                );
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => OrderListPage()),
-                );
+                ).then((_) {
+                  setState(() {
+                    payStatus = 'paid'; // Cập nhật biến phụ
+                  });
+                });
               } else if (state is MarkOrderPaidFailure) {
                 // Close loading dialog before showing error dialog
                 Navigator.pop(context);
@@ -163,11 +169,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        // Only show "Mark as Paid" button if order status is "pending" and user is "admin"
-                        if (widget.order.payStatus == "pending")
+                        if (payStatus == "pending")
                           ElevatedButton(
                             onPressed: () {
-                              // Action when the "Mark as Paid" button is pressed
                               context
                                   .read<MarkOrderBloc>()
                                   .add(MarkOrderAsPaidEvent(widget.order.id));
@@ -178,10 +182,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                             ),
                             child: const Text('Đánh dấu đã thanh toán'),
                           ),
-                        // Always show "Print Order" button
                         ElevatedButton(
                           onPressed: () {
-                            // Action when the "Print Order" button is pressed
                             _captureInvoiceImageThenPrint(widget.order);
                           },
                           style: ElevatedButton.styleFrom(
