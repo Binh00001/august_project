@@ -9,7 +9,6 @@ import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/order_model.dart';
-import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/order_detail.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
@@ -37,10 +36,10 @@ class _OrderListPageState extends State<OrderListPage> {
 
     // Set _startDate and _endDate to today's date
     DateTime now = DateTime.now();
-    _startDate = DateTime(now.year, now.month, now.day);
-    _endDate = DateTime(now.year, now.month, now.day)
-        .add(const Duration(days: 1))
-        .subtract(const Duration(microseconds: 1));
+    _startDate =
+        DateTime(now.year, now.month, now.day, 12); // Noon of the current day
+    _endDate = DateTime(now.year, now.month, now.day, 23, 59, 59, 999,
+        999); // Just before midnight of the next day
   }
 
   Future<void> _loadUserInfo() async {
@@ -271,19 +270,25 @@ class _OrderListPageState extends State<OrderListPage> {
       lastDate: DateTime(2101),
     );
     if (picked != null) {
+      // Adjust the picked date to be at noon
+      DateTime noonDate =
+          DateTime(picked.year, picked.month, picked.day, 12, 0, 0);
       setState(() {
         if (isStartDate) {
-          _startDate = picked;
+          _startDate = noonDate;
+          // Ensure the end date is after the start date
           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
             _endDate = null;
           }
         } else {
-          if (_startDate != null && picked.isBefore(_startDate!)) {
-            return;
+          // Set end date also to noon, ensuring it is not before the start date
+          if (_startDate != null && noonDate.isBefore(_startDate!)) {
+            return; // Return early if end date is before start date
           }
-          _endDate = picked;
+          _endDate = noonDate;
         }
 
+        // Check if both dates are selected before fetching data
         if (_startDate != null && _endDate != null) {
           fetchOrdersIfPossible(context);
         }
