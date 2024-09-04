@@ -21,7 +21,8 @@ class _HistoryPageState extends State<HistoryPage> {
   void initState() {
     super.initState();
     // Set default date to today
-    selectedDate = DateTime.now();
+    DateTime now = DateTime.now();
+    selectedDate = DateTime(now.year, now.month, now.day, 12, 0, 0);
 
     _fetchTasksForSelectedDate();
   }
@@ -42,9 +43,11 @@ class _HistoryPageState extends State<HistoryPage> {
     );
 
     if (pickedDate != null && pickedDate != selectedDate) {
-      print('date time now $pickedDate');
+      // Adjust pickedDate to be at noon of the selected day
+      DateTime noonDate =
+          DateTime(pickedDate.year, pickedDate.month, pickedDate.day, 12, 0, 0);
       setState(() {
-        selectedDate = pickedDate;
+        selectedDate = noonDate;
       });
       _fetchTasksForSelectedDate();
     }
