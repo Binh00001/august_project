@@ -7,7 +7,6 @@ import 'package:flutter_project_august/blocs/get_debt/get_debt_state.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
-import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/utill/app_constants.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
@@ -64,20 +63,24 @@ class _DebtScreenState extends State<DebtScreen> {
       lastDate: DateTime(2101),
     );
     if (picked != null) {
+      // Adjust the picked date to be at noon
+      DateTime noonDate =
+          DateTime(picked.year, picked.month, picked.day, 12, 0, 0);
       setState(() {
         if (isStartDate) {
-          _startDate = picked;
+          _startDate = noonDate;
+          // Ensure the end date is after the start date and also at noon if already set
           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
             _endDate = null;
             _dateError = 'Ngày kết thúc phải sau ngày bắt đầu';
           }
         } else {
-          if (_startDate != null && picked.isBefore(_startDate!)) {
+          if (_startDate != null && noonDate.isBefore(_startDate!)) {
             _dateError = 'Ngày kết thúc phải sau ngày bắt đầu';
             return;
           }
           _dateError = "";
-          _endDate = picked;
+          _endDate = noonDate;
         }
 
         // Check if both dates are selected before fetching data
