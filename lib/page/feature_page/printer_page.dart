@@ -13,6 +13,10 @@ class _PrinterSettingsPageState extends State<PrinterSettingsPage> {
   final _scaleController = TextEditingController();
   bool _isLoading = true; // Biến phụ để theo dõi trạng thái đang tải
 
+  String _initialIPAddress = "";
+  int _initialPort = 0;
+  double _initialScale = 0.0;
+
   @override
   void initState() {
     super.initState();
@@ -21,11 +25,14 @@ class _PrinterSettingsPageState extends State<PrinterSettingsPage> {
 
   Future<void> loadSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    _ipAddressController.text =
-        prefs.getString('_printerIPAddress') ?? "192.168.1.219";
-    _portController.text = (prefs.getInt('_printerPort') ?? 9100).toString();
-    _scaleController.text =
-        (prefs.getDouble('_printerScale') ?? 1.8).toString();
+    _initialIPAddress = prefs.getString('_printerIPAddress') ?? "192.168.1.219";
+    _initialPort = prefs.getInt('_printerPort') ?? 9100;
+    _initialScale = prefs.getDouble('_printerScale') ?? 1.8;
+
+    _ipAddressController.text = _initialIPAddress;
+    _portController.text = _initialPort.toString();
+    _scaleController.text = _initialScale.toString();
+
     setState(() {
       _isLoading = false;
     });
@@ -44,6 +51,26 @@ class _PrinterSettingsPageState extends State<PrinterSettingsPage> {
   Future<void> setPrinterScale(double newScale) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('_printerScale', newScale);
+  }
+
+  bool _hasChanged = false;
+
+  void checkForChanges() {
+    if (_ipAddressController.text != _initialIPAddress ||
+        int.parse(_portController.text) != _initialPort ||
+        double.parse(_scaleController.text) != _initialScale) {
+      if (!_hasChanged) {
+        setState(() {
+          _hasChanged = true;
+        });
+      }
+    } else {
+      if (_hasChanged) {
+        setState(() {
+          _hasChanged = false;
+        });
+      }
+    }
   }
 
   @override
@@ -70,34 +97,46 @@ class _PrinterSettingsPageState extends State<PrinterSettingsPage> {
           TextField(
             controller: _ipAddressController,
             decoration: const InputDecoration(labelText: 'Địa chi IP'),
+            onChanged: (value) => checkForChanges(),
           ),
           TextField(
             controller: _portController,
             decoration: const InputDecoration(labelText: 'Cổng'),
+            onChanged: (value) => checkForChanges(),
             keyboardType: TextInputType.number,
           ),
           TextField(
             controller: _scaleController,
             decoration: const InputDecoration(labelText: 'Tỉ lệ in'),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (value) => checkForChanges(),
           ),
           const SizedBox(height: 20),
-          Center(
-            child: ElevatedButton(
-              onPressed: () {
-                // Dismiss the keyboard by removing focus from any focused element
-                FocusScope.of(context).unfocus();
-
-                setPrinterIP(_ipAddressController.text);
-                setPrinterPort(int.parse(_portController.text));
-                setPrinterScale(double.parse(_scaleController.text));
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  content: Text('Cập nhật thành công!'),
-                ));
-              },
-              child: const Text('Cập nhật cài đặt'),
+          if (_hasChanged) // Only show this button if there are changes
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+                  setPrinterIP(_ipAddressController.text);
+                  setPrinterPort(int.parse(_portController.text));
+                  setPrinterScale(double.parse(_scaleController.text));
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Cập nhật thành công!'),
+                  ));
+                  // Reset the _hasChanged after update
+                  setState(() {
+                    _hasChanged = false;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
+                child: const Text(
+                  'Cập nhật cài đặt',
+                  style: TextStyle(color: AppColors.onPrimary),
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );
