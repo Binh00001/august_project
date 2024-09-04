@@ -18,19 +18,18 @@ class _StatisticPageState extends State<StatisticPage> {
   DateTime? _endDate;
 
   @override
-  @override
   void initState() {
     super.initState();
 
-    // Get today's date at midnight
+    // Get today's date at noon
     DateTime now = DateTime.now();
-    DateTime today = DateTime(now.year, now.month, now.day);
+    DateTime todayAtNoon = DateTime(now.year, now.month, now.day, 12, 0, 0);
 
-    // Set _endDate to the end of today
-    _endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    // Set _endDate to the end of today but at noon
+    _endDate = todayAtNoon;
 
-    // Set _startDate to 30 days before today
-    _startDate = today.subtract(const Duration(days: 30));
+    // Set _startDate to 30 days before today but also at noon
+    _startDate = todayAtNoon.subtract(const Duration(days: 30));
 
     // Correctly use _startDate and _endDate for fetching statistics
     BlocProvider.of<StatisticBloc>(context).add(FetchStatistic(
@@ -53,7 +52,14 @@ class _StatisticPageState extends State<StatisticPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            buildSelectStartAndEnd(context),
+            Column(
+              children: [
+                buildSelectStartAndEnd(context),
+                const SizedBox(
+                  height: 8,
+                )
+              ],
+            ),
             Expanded(
               // Makes the SingleChildScrollView take up the remaining space
               child: buildStatisticalContent(),
@@ -112,23 +118,31 @@ class _StatisticPageState extends State<StatisticPage> {
       {required bool isStart}) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate:
-          isStart ? _startDate ?? DateTime.now() : _endDate ?? DateTime.now(),
+      initialDate: isStart
+          ? (_startDate ?? DateTime.now())
+          : (_endDate ?? DateTime.now()),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
+
     if (picked != null) {
+      // Adjust the picked date to be at noon
+      DateTime noonDate =
+          DateTime(picked.year, picked.month, picked.day, 12, 0, 0);
+
       setState(() {
         if (isStart) {
-          _startDate = picked;
+          _startDate = noonDate;
+          // Reset end date if it's before the start date
           if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-            _endDate = null; // Reset end date if it's before the start date
+            _endDate = null;
           }
         } else {
-          if (_startDate != null && picked.isBefore(_startDate!)) {
-            return; // Prevent setting an end date before the start date
+          // Prevent setting an end date before the start date
+          if (_startDate != null && noonDate.isBefore(_startDate!)) {
+            return;
           }
-          _endDate = picked;
+          _endDate = noonDate;
         }
       });
 
