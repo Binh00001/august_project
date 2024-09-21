@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/assets_widget/school_dropdown.dart';
+import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
+import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
 import 'package:flutter_project_august/blocs/task/task_bloc.dart';
 import 'package:flutter_project_august/blocs/task/task_state.dart';
 import 'package:flutter_project_august/blocs/task/task_event.dart';
 import 'package:flutter_project_august/models/task_model.dart';
+import 'package:flutter_project_august/utill/app_constants.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:intl/intl.dart';
 
@@ -16,7 +20,7 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   late DateTime selectedDate;
-
+  String? selectedSchoolId;
   @override
   void initState() {
     super.initState();
@@ -32,6 +36,14 @@ class _HistoryPageState extends State<HistoryPage> {
     // context
     //     .read<TaskBloc>()
     //     .add(FetchTasks(date: selectedDate.millisecondsSinceEpoch));
+    if (selectedSchoolId != null && selectedSchoolId != "") {
+      context.read<TaskBloc>().add(FetchTasks(
+          date: selectedDate.millisecondsSinceEpoch,
+          schoolId: selectedSchoolId!));
+    } else {
+      context.read<TaskBloc>().add(
+          FetchTasks(date: selectedDate.millisecondsSinceEpoch, schoolId: ""));
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -70,47 +82,141 @@ class _HistoryPageState extends State<HistoryPage> {
       ),
       body: Column(
         children: [
-          GestureDetector(
-            onTap: () => {_selectDate(context)},
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Ngày: ${DateFormat('dd/MM/yyyy').format(selectedDate)}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
+          const SizedBox(
+            height: 8,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Ngày: ${DateFormat('dd/MM/yyyy').format(selectedDate)}',
+                    style: const TextStyle(fontSize: 16),
                   ),
-                  const Icon(Icons.calendar_today),
-                ],
-              ),
+                ),
+                const Icon(Icons.calendar_today),
+              ],
             ),
           ),
-          Expanded(
-            child: BlocBuilder<TaskBloc, TaskState>(
+          const SizedBox(
+            height: 12,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: BlocBuilder<SchoolBloc, SchoolState>(
               builder: (context, state) {
-                if (state is TaskLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is TaskLoaded) {
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: state.tasks
-                          .map((task) => _buildTaskItem(task))
-                          .toList(),
-                    ),
+                if (state is SchoolLoading) {
+                  return const CircularProgressIndicator();
+                } else if (state is SchoolLoaded) {
+                  return SchoolDropdown(
+                    selectedSchoolId: selectedSchoolId,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedSchoolId = newValue;
+                        if (selectedSchoolId != null) {
+                          //fetch task only if a school is selected
+                          _fetchTasksForSelectedDate();
+                        }
+                      });
+                    },
+                    schools: state.schools,
                   );
-                } else if (state is TaskError) {
-                  return Center(
-                    child: Text('Lỗi: ${state.message}'),
-                  );
+                } else if (state is SchoolError) {
+                  return Text('Error: ${state.message}');
                 } else {
-                  return const Center(child: Text('Không có nhiệm vụ nào.'));
+                  return const Text("Không có dữ liệu trường học");
                 }
               },
             ),
           ),
+          selectedSchoolId == null
+              ? const Expanded(
+                  child: Center(
+                    child: Text('Hãy chọn trường để xem chi tiết'),
+                  ),
+                )
+              : BlocBuilder<TaskBloc, TaskState>(
+                  builder: (context, state) {
+                    if (state is TaskLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (state is TaskLoaded) {
+                      // Check if staff is different from default
+                      bool isStaffDifferent =
+                          state.staff != AppConstants.defaultStaff;
+                      return Column(
+                        children: [
+                          // Always display the staff info
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 12,
+                              left: 8,
+                              right: 8,
+                              bottom: 8,
+                            ),
+                            child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0, horizontal: 16.0),
+                                decoration: BoxDecoration(
+                                  color: isStaffDifferent
+                                      ? AppColors.primary.withOpacity(
+                                          0.3) // Original background when staff is assigned
+                                      : Colors.red.withOpacity(
+                                          0.3), // Red background for "Phân công nhân viên"
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      isStaffDifferent
+                                          ? 'Nhân viên: ${state.staff.name}' // Display staff's name
+                                          : 'Chưa phân công', // Default text if no staff assigned
+                                      style: const TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+
+                                    // Check if the current user is an admin
+                                  ],
+                                )),
+                          ),
+
+                          // Task List Display or Empty Message
+                          state.tasks.isEmpty
+                              ? const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child:
+                                        Text('Không có hàng hoá nào cần mua.'),
+                                  ),
+                                )
+                              : SingleChildScrollView(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: Column(
+                                    children: state.tasks
+                                        .map((task) => _buildTaskItem(task))
+                                        .toList(),
+                                  ),
+                                ),
+                        ],
+                      );
+                    } else if (state is TaskError) {
+                      return Center(
+                        child: Text('Lỗi: ${state.message}'),
+                      );
+                    } else {
+                      return const Center(
+                        child: Text('Không có nhiệm vụ nào.'),
+                      );
+                    }
+                  },
+                )
         ],
       ),
     );
@@ -145,29 +251,6 @@ class _HistoryPageState extends State<HistoryPage> {
                   fontSize: 20,
                 ),
               ),
-            ],
-          ),
-          Column(
-            children: [
-              if (task.staff == null)
-                const Text(
-                  'Chưa phân công',
-                  style: TextStyle(
-                    color: Colors.red, // Red text color
-                    fontSize: 16, // Font size
-                    fontWeight: FontWeight.bold, // Bold text
-                  ),
-                )
-              else ...[
-                const Icon(Icons.person_4, color: AppColors.onSuccess),
-                Text(
-                  task.staff!.name, // Assuming 'staff' has a 'name' field
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                  ),
-                ),
-              ]
             ],
           ),
         ],
