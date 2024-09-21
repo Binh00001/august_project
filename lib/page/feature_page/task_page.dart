@@ -301,7 +301,7 @@ class _TaskPageState extends State<TaskPage> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: SizedBox(
-                          height: 400, // Set maximum height to 500px
+                          height: 240,
                           child: ListView.builder(
                             shrinkWrap: true,
                             physics:

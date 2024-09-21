@@ -4,6 +4,9 @@ import 'package:flutter_project_august/assets_widget/school_dropdown.dart';
 import 'package:flutter_project_august/blocs/create_user/create_user_bloc.dart';
 import 'package:flutter_project_august/blocs/create_user/create_user_event.dart';
 import 'package:flutter_project_august/blocs/create_user/create_user_state.dart';
+import 'package:flutter_project_august/blocs/delete_user_or_staff/delete_user_bloc.dart';
+import 'package:flutter_project_august/blocs/delete_user_or_staff/delete_user_event.dart';
+import 'package:flutter_project_august/blocs/delete_user_or_staff/delete_user_state.dart';
 import 'package:flutter_project_august/blocs/get_all_user/get_all_user_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_user/get_all_user_event.dart';
 import 'package:flutter_project_august/blocs/get_all_user/get_all_user_state.dart';
@@ -63,41 +66,55 @@ class _UserManagePageState extends State<UserManagePage> {
       child: BlocListener<CreateUserBloc, CreateUserState>(
         listener: (context, state) {
           if (state is CreateUserSuccess) {
-            // Show success notification
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                   content: Text('Người dùng đã được tạo thành công!')),
             );
-            // Optionally reload users after a new user is created
             setState(() {
               selectedSchoolId = null;
             });
             _loadUser(null);
           } else if (state is CreateUserError) {
-            // Show error notification
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Lỗi: ${state.message}')),
             );
           }
         },
-        child: Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+        child: BlocListener<UserDeleteBloc, UserDeleteState>(
+          listener: (context, state) {
+            if (state is UserDeleteSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Người dùng đã bị xoá thành công!')),
+              );
+              // Optionally reload users after a user is deleted
+              _loadUser(selectedSchoolId);
+            } else if (state is UserDeleteFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text('Lỗi khi xoá người dùng: ${state.error}')),
+              );
+            }
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              title: const Text(
+                'Người dùng',
+                style: TextStyle(fontSize: 20),
+              ),
+              centerTitle: true,
             ),
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.onPrimary,
-            title: const Text(
-              'Người dùng',
-              style: TextStyle(fontSize: 20),
-            ),
-            centerTitle: true,
+            floatingActionButton: addNewUserFloatButton(),
+            body: listUser(),
           ),
-          floatingActionButton: addNewUserFloatButton(),
-          body: listUser(),
         ),
       ),
     );
@@ -444,7 +461,7 @@ class _UserItemState extends State<UserItem> {
             child: GestureDetector(
               onTap: () {
                 // Handle the tap action here, e.g., show the delete confirmation dialog
-                _showDeleteConfirmationDialog(context);
+                _showDeleteConfirmationDialog(context, widget.user.id);
               },
               child: Container(
                 padding:
@@ -472,7 +489,7 @@ class _UserItemState extends State<UserItem> {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context) {
+  void _showDeleteConfirmationDialog(BuildContext context, String userId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -489,8 +506,8 @@ class _UserItemState extends State<UserItem> {
               child: const Text('Tiếp tục'),
               onPressed: () {
                 Navigator.of(context).pop();
-                // Perform the delete operation here
-                // widget.onDelete(widget.user); // Call delete function
+                BlocProvider.of<UserDeleteBloc>(context)
+                    .add(DeleteUserEvent(userId: userId));
               },
             ),
             TextButton(

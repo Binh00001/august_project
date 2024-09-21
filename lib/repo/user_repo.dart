@@ -78,6 +78,20 @@ class UserRepo {
     }
   }
 
+  Future<void> deleteUser(String userId) async {
+    try {
+      final response = await dio.delete(
+        '${AppConstants.baseUrl}/v1/user/$userId',
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete user');
+      }
+    } on DioException catch (e) {
+      throw Exception('Error deleting user: ${e.response?.data ?? e.message}');
+    }
+  }
+
   Future<List<dynamic>> getUsersByRoleAndSchool(
       String role, String? schoolId, int page) async {
     try {
