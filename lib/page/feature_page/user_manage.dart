@@ -439,8 +439,73 @@ class _UserItemState extends State<UserItem> {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GestureDetector(
+              onTap: () {
+                // Handle the tap action here, e.g., show the delete confirmation dialog
+                _showDeleteConfirmationDialog(context);
+              },
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.red, // Red background
+                  borderRadius: BorderRadius.circular(4), // Rounded corners
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Xoá người dùng',
+                      style: TextStyle(
+                        color: Colors.white, // White text color
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cảnh báo'),
+          content: const Text(
+              'Người dùng bị xoá sẽ không thể khôi phục, bạn có muốn tiếp tục?'),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white, // White text color
+                backgroundColor: Colors.red, // Red background for danger
+              ),
+              child: const Text('Tiếp tục'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Perform the delete operation here
+                // widget.onDelete(widget.user); // Call delete function
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black, // Black text color
+                backgroundColor: Colors.grey[300], // Grey background for cancel
+              ),
+              child: const Text('Không'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
