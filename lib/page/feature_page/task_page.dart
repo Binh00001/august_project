@@ -74,22 +74,22 @@ class _TaskPageState extends State<TaskPage> {
         centerTitle: true,
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
-        actions: [
-          if (widget.user.role == 'admin')
-            IconButton(
-              icon: const Icon(Icons.history),
-              onPressed: () async {
-                // Navigate to the history page
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        const HistoryPage(), // Replace with your history page
-                  ),
-                );
-                _loadTask();
-              },
-            ),
-        ],
+        // actions: [
+        //   if (widget.user.role == 'admin')
+        //     IconButton(
+        //       icon: const Icon(Icons.history),
+        //       onPressed: () async {
+        //         // Navigate to the history page
+        //         await Navigator.of(context).push(
+        //           MaterialPageRoute(
+        //             builder: (context) =>
+        //                 const HistoryPage(), // Replace with your history page
+        //           ),
+        //         );
+        //         _loadTask();
+        //       },
+        //     ),
+        // ],
       ),
       body: Column(
         children: [
