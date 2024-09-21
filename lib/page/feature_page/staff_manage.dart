@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/blocs/create_staff/create_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/create_staff/create_staff_event.dart';
 import 'package:flutter_project_august/blocs/create_staff/create_staff_state.dart';
+import 'package:flutter_project_august/blocs/delete_user_or_staff/delete_user_bloc.dart';
+import 'package:flutter_project_august/blocs/delete_user_or_staff/delete_user_event.dart';
+import 'package:flutter_project_august/blocs/delete_user_or_staff/delete_user_state.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_event.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_state.dart';
@@ -30,82 +33,95 @@ class _StaffManagePageState extends State<StaffManagePage> {
     return BlocListener<CreateStaffBloc, CreateStaffState>(
       listener: (context, state) {
         if (state is CreateStaffSuccess) {
-          // Show success notification
           _loadStaff(null);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Người dùng đã được tạo thành công!')),
           );
         } else if (state is CreateStaffError) {
-          // Show error notification
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Lỗi: Không tạo được tài khoản')),
           );
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
-          title: const Text(
-            'Nhân viên',
-            style: TextStyle(fontSize: 20),
-          ),
-          centerTitle: true,
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: _addNewStaff,
-          label: const Text(
-            'Thêm Nhân Viên',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
+      child: BlocListener<UserDeleteBloc, UserDeleteState>(
+        listener: (context, state) {
+          if (state is UserDeleteSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Người dùng đã bị xoá thành công!')),
+            );
+            // Optionally reload the staff list after a user is deleted
+            _loadStaff(null);
+          } else if (state is UserDeleteFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Lỗi khi xoá người dùng: ${state.error}')),
+            );
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.onPrimary,
+            title: const Text(
+              'Nhân viên',
+              style: TextStyle(fontSize: 20),
+            ),
+            centerTitle: true,
           ),
-          icon: const Icon(Icons.add),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          backgroundColor: Colors.green,
-          foregroundColor: Colors.white,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              Expanded(
-                child: BlocBuilder<StaffBloc, StaffState>(
-                  builder: (context, state) {
-                    if (state is StaffLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state is StaffLoaded) {
-                      return ListView.builder(
-                        itemCount: state.staff.length,
-                        itemBuilder: (context, index) {
-                          final user = state.staff[index];
-                          return StaffItem(
-                            user: user,
-                            index: index,
-                          );
-                        },
-                      );
-                    } else if (state is StaffError) {
-                      return const Center(
-                          child: Text('Tải thông tin thất bại'));
-                    } else {
-                      return const Center(child: Text('Không có người dùng'));
-                    }
-                  },
-                ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: _addNewStaff,
+            label: const Text(
+              'Thêm Nhân Viên',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
-            ],
+            ),
+            icon: const Icon(Icons.add),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                Expanded(
+                  child: BlocBuilder<StaffBloc, StaffState>(
+                    builder: (context, state) {
+                      if (state is StaffLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is StaffLoaded) {
+                        return ListView.builder(
+                          itemCount: state.staff.length,
+                          itemBuilder: (context, index) {
+                            final user = state.staff[index];
+                            return StaffItem(
+                              user: user,
+                              index: index,
+                            );
+                          },
+                        );
+                      } else if (state is StaffError) {
+                        return const Center(
+                            child: Text('Tải thông tin thất bại'));
+                      } else {
+                        return const Center(child: Text('Không có người dùng'));
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -311,7 +327,7 @@ class _StaffItemState extends State<StaffItem> {
             child: GestureDetector(
               onTap: () {
                 // Handle the tap action here, e.g., show the delete confirmation dialog
-                _showDeleteConfirmationDialog(context);
+                _showDeleteConfirmationDialog(context, widget.user.id);
               },
               child: Container(
                 padding:
@@ -339,7 +355,7 @@ class _StaffItemState extends State<StaffItem> {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context) {
+  void _showDeleteConfirmationDialog(BuildContext context, String staffId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -356,8 +372,8 @@ class _StaffItemState extends State<StaffItem> {
               child: const Text('Tiếp tục'),
               onPressed: () {
                 Navigator.of(context).pop();
-                // Perform the delete operation here
-                // widget.onDelete(widget.user); // Call delete function
+                BlocProvider.of<UserDeleteBloc>(context)
+                    .add(DeleteUserEvent(userId: staffId));
               },
             ),
             TextButton(
