@@ -59,13 +59,17 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       id: json['id'] ?? "",
-      userName: json['user']['name'] ?? "",
-      userId: json['user']['id'] ?? "",
+      userName: json['user'] != null
+          ? json['user']['name'] ?? ""
+          : "người dùng đã bị xoá",
+      userId: json['user'] != null
+          ? json['user']['id'] ?? ""
+          : "người dùng đã bị xoá",
       orderItems: (json['orderItems'] as List)
           .map((item) => OrderItem.fromJson(item))
           .toList(),
-      schoolId: json['school']['id'] ?? "",
-      schoolName: json['school']['name'] ?? "",
+      schoolId: json['school']?['id'] ?? "",
+      schoolName: json['school']?['name'] ?? "",
       totalAmount: json['total_amount'] ?? "",
       status: json['status'] ?? "",
       payStatus: json['pay_status'] ?? "",

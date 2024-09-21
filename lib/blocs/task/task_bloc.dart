@@ -17,9 +17,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       final tasks = await orderRepo.getTasks(event.date, event.schoolId);
       final staff =
           await orderRepo.getAssignedStaff(event.date, event.schoolId);
-
       if (staff != null) {
-        print(staff.name);
         emit(TaskLoaded(tasks: tasks, staff: staff));
       } else {
         emit(TaskLoaded(tasks: tasks, staff: AppConstants.defaultStaff));

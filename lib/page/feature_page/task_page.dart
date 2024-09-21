@@ -153,7 +153,6 @@ class _TaskPageState extends State<TaskPage> {
                           // Check if staff is different from default
                           bool isStaffDifferent =
                               state.staff != AppConstants.defaultStaff;
-
                           return Column(
                             children: [
                               // Always display the staff info
@@ -165,48 +164,53 @@ class _TaskPageState extends State<TaskPage> {
                                   bottom: 8,
                                 ),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 8.0, horizontal: 16.0),
-                                  decoration: BoxDecoration(
-                                    color: isStaffDifferent
-                                        ? AppColors.primary.withOpacity(
-                                            0.3) // Original background when staff is assigned
-                                        : Colors.red.withOpacity(
-                                            0.3), // Red background for "Phân công nhân viên"
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        isStaffDifferent
-                                            ? 'Nhân viên: ${state.staff.name}' // Display staff's name
-                                            : 'Phân công nhân viên', // Default text if no staff assigned
-                                        style: const TextStyle(
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.bold,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 16.0),
+                                    decoration: BoxDecoration(
+                                      color: isStaffDifferent
+                                          ? AppColors.primary.withOpacity(
+                                              0.3) // Original background when staff is assigned
+                                          : Colors.red.withOpacity(
+                                              0.3), // Red background for "Phân công nhân viên"
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          isStaffDifferent
+                                              ? 'Nhân viên: ${state.staff.name}' // Display staff's name
+                                              : 'Chưa phân công', // Default text if no staff assigned
+                                          style: const TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                            Icons.settings), // Settings icon
-                                        onPressed: () {
-                                          // Implement settings action here
-                                          _showAssignStaffDialog(
-                                              context, selectedSchoolId!);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
+
+                                        // Check if the current user is an admin
+                                        if (widget.user.role == 'admin')
+                                          IconButton(
+                                            icon: const Icon(Icons
+                                                .settings), // Settings icon
+                                            onPressed: () {
+                                              // Implement settings action here
+                                              _showAssignStaffDialog(
+                                                  context, selectedSchoolId!);
+                                            },
+                                          ),
+                                      ],
+                                    )),
                               ),
 
                               // Task List Display or Empty Message
                               state.tasks.isEmpty
                                   ? const Center(
-                                      child: Text(
-                                          'Không có hàng hoá nào cần mua.'),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Text(
+                                            'Không có hàng hoá nào cần mua.'),
+                                      ),
                                     )
                                   : SingleChildScrollView(
                                       padding: const EdgeInsets.symmetric(
