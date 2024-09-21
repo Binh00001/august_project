@@ -89,7 +89,9 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
                     ListTile(
                       title: const Text('Địa chỉ'),
                       subtitle: Text(
-                        schools[index].address ?? 'Không có',
+                        schools[index].address != "null"
+                            ? schools[index].address!
+                            : 'Không có',
                         style: const TextStyle(
                           overflow: TextOverflow
                               .ellipsis, // Automatically add ellipses if text is too long
