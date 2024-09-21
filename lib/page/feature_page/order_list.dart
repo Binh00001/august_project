@@ -46,12 +46,12 @@ class _OrderListPageState extends State<OrderListPage> {
     _user = await SharedPreferencesHelper.getUserInfo();
     setState(() {
       if (_user != null) {
-        if (_user!.role == 'admin') {
-          // Fetch list of schools for admin users
-          BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
-        } else if (_user!.role == 'user') {
+        // Fetch list of schools for admin users
+        if (_user!.role == 'user') {
           // If the user is a regular user, use their school ID
           selectedSchoolId = _user!.schoolId;
+        } else {
+          BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
         }
         // Fetch orders for today
         fetchOrdersIfPossible(context);

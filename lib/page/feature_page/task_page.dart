@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_project_august/assets_widget/school_dropdown.dart';
 import 'package:flutter_project_august/blocs/assign_staff/assign_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/assign_staff/assign_staff_event.dart';
 import 'package:flutter_project_august/blocs/assign_staff/assign_staff_state.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_event.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_state.dart';
+import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
+import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
+import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
 import 'package:flutter_project_august/blocs/task/task_bloc.dart';
 import 'package:flutter_project_august/blocs/task/task_state.dart';
 import 'package:flutter_project_august/blocs/task/task_event.dart';
+import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/models/task_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/history_task.dart';
@@ -24,12 +29,15 @@ class TaskPage extends StatefulWidget {
 }
 
 class _TaskPageState extends State<TaskPage> {
+  late School selectedSchool;
+  String? selectedSchoolId;
   @override
   void initState() {
     super.initState();
     _loadStaff();
     // Get today's date in milliseconds since epoch
     _loadTask();
+    BlocProvider.of<SchoolBloc>(context).add(GetAllSchoolsEvent());
   }
 
   void _loadStaff() {
@@ -41,7 +49,10 @@ class _TaskPageState extends State<TaskPage> {
     // Set to noon of the current day
     DateTime noon = DateTime(now.year, now.month, now.day, 12, 0, 0);
     // Dispatch the event to fetch tasks for the middle of the day
-    context.read<TaskBloc>().add(FetchTasks(date: noon.millisecondsSinceEpoch));
+    if (selectedSchoolId != null && selectedSchoolId != "") {
+      context.read<TaskBloc>().add(FetchTasks(
+          date: noon.millisecondsSinceEpoch, schoolId: selectedSchoolId!));
+    }
   }
 
   @override
@@ -75,44 +86,78 @@ class _TaskPageState extends State<TaskPage> {
             ),
         ],
       ),
-      body: BlocListener<AssignStaffBloc, AssignStaffState>(
-        listener: (context, state) {
-          if (state is AssignStaffSuccess) {
-            _loadTask();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Chỉ định thành công!')),
-            );
-          } else if (state is AssignStaffFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Lỗi: ${state.error}')),
-            );
-          }
-        },
-        child: BlocBuilder<TaskBloc, TaskState>(
-          builder: (context, state) {
-            if (state is TaskLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is TaskLoaded) {
-              if (state.tasks.isEmpty) {
-                return const Center(
-                    child: Text('Không có hàng hoá nào cần mua.'));
+      body: Column(
+        children: [
+          const SizedBox(
+            height: 16,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: BlocBuilder<SchoolBloc, SchoolState>(
+              builder: (context, state) {
+                if (state is SchoolLoading) {
+                  return const CircularProgressIndicator();
+                } else if (state is SchoolLoaded) {
+                  return SchoolDropdown(
+                    selectedSchoolId: selectedSchoolId,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedSchoolId = newValue;
+                        //fetch task
+                        _loadTask();
+                      });
+                    },
+                    schools: state.schools,
+                  );
+                } else if (state is SchoolError) {
+                  return Text('Error: ${state.message}');
+                } else {
+                  return const Text("Không có dữ liệu trường học");
+                }
+              },
+            ),
+          ),
+          BlocListener<AssignStaffBloc, AssignStaffState>(
+            listener: (context, state) {
+              if (state is AssignStaffSuccess) {
+                _loadTask();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Chỉ định thành công!')),
+                );
+              } else if (state is AssignStaffFailure) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Lỗi: ${state.error}')),
+                );
               }
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children:
-                      state.tasks.map((task) => _buildTaskItem(task)).toList(),
-                ),
-              );
-            } else if (state is TaskError) {
-              return Center(
-                child: Text('Lỗi: ${state.message}'),
-              );
-            } else {
-              return const Center(child: Text('Không có nhiệm vụ nào.'));
-            }
-          },
-        ),
+            },
+            child: BlocBuilder<TaskBloc, TaskState>(
+              builder: (context, state) {
+                if (state is TaskLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is TaskLoaded) {
+                  if (state.tasks.isEmpty) {
+                    return const Center(
+                        child: Text('Không có hàng hoá nào cần mua.'));
+                  }
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: state.tasks
+                          .map((task) => _buildTaskItem(task))
+                          .toList(),
+                    ),
+                  );
+                } else if (state is TaskError) {
+                  return Center(
+                    child: Text('Lỗi: ${state.message}'),
+                  );
+                } else {
+                  return const Center(child: Text('Không có nhiệm vụ nào.'));
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

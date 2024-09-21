@@ -49,10 +49,10 @@ class OrderRepo {
     }
   }
 
-  Future<List<Task>> getTasks(int date) async {
+  Future<List<Task>> getTasks(int date, String schoolId) async {
     try {
       final response = await dio.get(
-        '${AppConstants.baseUrl}/v1/order/buy',
+        '${AppConstants.baseUrl}/v1/order/buy?schoolId=${schoolId}',
         queryParameters: {'date': date},
       );
       // Parse the response data into a list of BuyTask objects

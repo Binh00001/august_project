@@ -13,7 +13,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   Future<void> _onFetchTasks(FetchTasks event, Emitter<TaskState> emit) async {
     emit(TaskLoading());
     try {
-      final tasks = await orderRepo.getTasks(event.date);
+      final tasks = await orderRepo.getTasks(event.date, event.schoolId);
       emit(TaskLoaded(tasks: tasks));
     } catch (e) {
       emit(TaskError(message: e.toString()));

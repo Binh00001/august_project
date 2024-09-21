@@ -29,9 +29,9 @@ class _HistoryPageState extends State<HistoryPage> {
 
   void _fetchTasksForSelectedDate() {
     // Dispatch the event to fetch tasks for the selected date
-    context
-        .read<TaskBloc>()
-        .add(FetchTasks(date: selectedDate.millisecondsSinceEpoch));
+    // context
+    //     .read<TaskBloc>()
+    //     .add(FetchTasks(date: selectedDate.millisecondsSinceEpoch));
   }
 
   Future<void> _selectDate(BuildContext context) async {

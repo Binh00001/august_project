@@ -9,9 +9,9 @@ abstract class TaskEvent extends Equatable {
 
 class FetchTasks extends TaskEvent {
   final int date;
-
-  const FetchTasks({required this.date});
+  final String schoolId;
+  const FetchTasks({required this.date, required this.schoolId});
 
   @override
-  List<Object?> get props => [date];
+  List<Object?> get props => [date, schoolId];
 }
