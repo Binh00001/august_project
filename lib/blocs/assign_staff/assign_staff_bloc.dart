@@ -17,7 +17,7 @@ class AssignStaffBloc extends Bloc<AssignStaffEvent, AssignStaffState> {
   ) async {
     emit(AssignStaffLoading());
     try {
-      await orderRepo.assignStaffToTask(event.userId, event.productId);
+      await orderRepo.assignStaffToTask(event.userId, event.schoolId);
       emit(AssignStaffSuccess());
     } catch (e) {
       emit(AssignStaffFailure(e.toString()));

@@ -28,13 +28,13 @@ class OrderRepo {
     }
   }
 
-  Future<bool> assignStaffToTask(String userId, String productId) async {
+  Future<bool> assignStaffToTask(String userId, String schoolId) async {
     try {
       final response = await dio.post(
-        '${AppConstants.baseUrl}/v1/staff-assignment',
+        '${AppConstants.baseUrl}/v1/user/assign',
         data: {
           "userId": userId,
-          "productId": productId,
+          "schoolId": schoolId,
         },
       );
 

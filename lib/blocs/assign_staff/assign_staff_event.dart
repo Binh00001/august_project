@@ -10,10 +10,10 @@ abstract class AssignStaffEvent extends Equatable {
 
 class AssignStaffToTaskEvent extends AssignStaffEvent {
   final String userId;
-  final String productId;
+  final String schoolId;
 
-  const AssignStaffToTaskEvent({required this.userId, required this.productId});
+  const AssignStaffToTaskEvent({required this.userId, required this.schoolId});
 
   @override
-  List<Object> get props => [userId, productId];
+  List<Object> get props => [userId, schoolId];
 }

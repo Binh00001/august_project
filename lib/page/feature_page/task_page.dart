@@ -193,7 +193,8 @@ class _TaskPageState extends State<TaskPage> {
                                             Icons.settings), // Settings icon
                                         onPressed: () {
                                           // Implement settings action here
-                                          _showAssignStaffDialog(context);
+                                          _showAssignStaffDialog(
+                                              context, selectedSchoolId!);
                                         },
                                       ),
                                     ],
@@ -270,7 +271,7 @@ class _TaskPageState extends State<TaskPage> {
     );
   }
 
-  void _showAssignStaffDialog(BuildContext context) {
+  void _showAssignStaffDialog(BuildContext context, String schoolId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -341,11 +342,11 @@ class _TaskPageState extends State<TaskPage> {
                                   ),
                                   onTap: () {
                                     // Assign the selected staff to the task
-                                    // BlocProvider.of<AssignStaffBloc>(context)
-                                    //     .add(
-                                    //   AssignStaffToTaskEvent(
-                                    //       userId: staff.id, scho),
-                                    // );
+                                    BlocProvider.of<AssignStaffBloc>(context)
+                                        .add(
+                                      AssignStaffToTaskEvent(
+                                          userId: staff.id, schoolId: schoolId),
+                                    );
                                     Navigator.of(context)
                                         .pop(); // Close the dialog
                                   },
