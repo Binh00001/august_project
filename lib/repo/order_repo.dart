@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_project_august/models/order_model.dart'; // Assuming Order model exists
+import 'package:flutter_project_august/models/staff_model.dart';
 import 'package:flutter_project_august/models/task_model.dart';
 import 'package:flutter_project_august/utill/app_constants.dart';
 
@@ -52,7 +53,7 @@ class OrderRepo {
   Future<List<Task>> getTasks(int date, String schoolId) async {
     try {
       final response = await dio.get(
-        '${AppConstants.baseUrl}/v1/order/buy?schoolId=${schoolId}',
+        '${AppConstants.baseUrl}/v1/order/buy?schoolId=$schoolId',
         queryParameters: {'date': date},
       );
       // Parse the response data into a list of BuyTask objects
@@ -63,6 +64,29 @@ class OrderRepo {
       return tasks;
     } catch (e) {
       print('Error fetching tasks: $e');
+      rethrow; // Re-throw the error after logging it
+    }
+  }
+
+  Future<Staff?> getAssignedStaff(int date, String schoolId) async {
+    try {
+      final response = await dio.get(
+        '${AppConstants.baseUrl}/v1/order/buy?schoolId=$schoolId',
+        queryParameters: {'date': date},
+      );
+
+      // Check if userAssigned exists in the response
+      if (response.data['data']['userAssigned'] != null) {
+        // Parse userAssigned into a Staff object
+        Staff staff = Staff.fromJson(
+            response.data['data']['userAssigned'] as Map<String, dynamic>);
+        return staff;
+      } else {
+        // Return null if userAssigned is null
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching assigned staff: $e');
       rethrow; // Re-throw the error after logging it
     }
   }

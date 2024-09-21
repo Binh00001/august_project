@@ -1,3 +1,4 @@
+import 'package:flutter_project_august/models/staff_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 
 class AppConstants {
@@ -6,4 +7,5 @@ class AppConstants {
   static const String loginUri = "/v1/auth/login";
   static User defaultUser = User(
       id: "", username: "", name: "", role: "", schoolId: "", schoolName: "");
+  static Staff defaultStaff = Staff(id: "", username: "", name: "", role: "");
 }

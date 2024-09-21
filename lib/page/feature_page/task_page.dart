@@ -16,6 +16,7 @@ import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/models/task_model.dart';
 import 'package:flutter_project_august/models/user_model.dart';
 import 'package:flutter_project_august/page/feature_page/history_task.dart';
+import 'package:flutter_project_august/utill/app_constants.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 
 import '../../blocs/get_all_staff/get_all_staff_bloc.dart';
@@ -52,6 +53,10 @@ class _TaskPageState extends State<TaskPage> {
     if (selectedSchoolId != null && selectedSchoolId != "") {
       context.read<TaskBloc>().add(FetchTasks(
           date: noon.millisecondsSinceEpoch, schoolId: selectedSchoolId!));
+    } else {
+      context
+          .read<TaskBloc>()
+          .add(FetchTasks(date: noon.millisecondsSinceEpoch, schoolId: ""));
     }
   }
 
@@ -103,8 +108,10 @@ class _TaskPageState extends State<TaskPage> {
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedSchoolId = newValue;
-                        //fetch task
-                        _loadTask();
+                        if (selectedSchoolId != null) {
+                          //fetch task only if a school is selected
+                          _loadTask();
+                        }
                       });
                     },
                     schools: state.schools,
@@ -118,45 +125,110 @@ class _TaskPageState extends State<TaskPage> {
             ),
           ),
           BlocListener<AssignStaffBloc, AssignStaffState>(
-            listener: (context, state) {
-              if (state is AssignStaffSuccess) {
-                _loadTask();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Chỉ định thành công!')),
-                );
-              } else if (state is AssignStaffFailure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Lỗi: ${state.error}')),
-                );
-              }
-            },
-            child: BlocBuilder<TaskBloc, TaskState>(
-              builder: (context, state) {
-                if (state is TaskLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is TaskLoaded) {
-                  if (state.tasks.isEmpty) {
-                    return const Center(
-                        child: Text('Không có hàng hoá nào cần mua.'));
-                  }
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: state.tasks
-                          .map((task) => _buildTaskItem(task))
-                          .toList(),
-                    ),
+              listener: (context, state) {
+                if (state is AssignStaffSuccess) {
+                  _loadTask();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Chỉ định thành công!')),
                   );
-                } else if (state is TaskError) {
-                  return Center(
-                    child: Text('Lỗi: ${state.message}'),
+                } else if (state is AssignStaffFailure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Lỗi: ${state.error}')),
                   );
-                } else {
-                  return const Center(child: Text('Không có nhiệm vụ nào.'));
                 }
               },
-            ),
-          ),
+              child: selectedSchoolId == null
+                  ? const Expanded(
+                      child: Center(
+                        child: Text('Hãy chọn trường để xem chi tiết'),
+                      ),
+                    )
+                  : BlocBuilder<TaskBloc, TaskState>(
+                      builder: (context, state) {
+                        if (state is TaskLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (state is TaskLoaded) {
+                          // Check if staff is different from default
+                          bool isStaffDifferent =
+                              state.staff != AppConstants.defaultStaff;
+
+                          return Column(
+                            children: [
+                              // Always display the staff info
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 12,
+                                  left: 8,
+                                  right: 8,
+                                  bottom: 8,
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 16.0),
+                                  decoration: BoxDecoration(
+                                    color: isStaffDifferent
+                                        ? AppColors.primary.withOpacity(
+                                            0.3) // Original background when staff is assigned
+                                        : Colors.red.withOpacity(
+                                            0.3), // Red background for "Phân công nhân viên"
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        isStaffDifferent
+                                            ? 'Nhân viên: ${state.staff.name}' // Display staff's name
+                                            : 'Phân công nhân viên', // Default text if no staff assigned
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                            Icons.settings), // Settings icon
+                                        onPressed: () {
+                                          // Implement settings action here
+                                          _showAssignStaffDialog(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // Task List Display or Empty Message
+                              state.tasks.isEmpty
+                                  ? const Center(
+                                      child: Text(
+                                          'Không có hàng hoá nào cần mua.'),
+                                    )
+                                  : SingleChildScrollView(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0),
+                                      child: Column(
+                                        children: state.tasks
+                                            .map((task) => _buildTaskItem(task))
+                                            .toList(),
+                                      ),
+                                    ),
+                            ],
+                          );
+                        } else if (state is TaskError) {
+                          return Center(
+                            child: Text('Lỗi: ${state.message}'),
+                          );
+                        } else {
+                          return const Center(
+                            child: Text('Không có nhiệm vụ nào.'),
+                          );
+                        }
+                      },
+                    ))
         ],
       ),
     );
@@ -193,84 +265,12 @@ class _TaskPageState extends State<TaskPage> {
               ),
             ],
           ),
-          Column(
-            children: [
-              if (widget.user.role == 'admin') ...[
-                if (task.staff == null)
-                  GestureDetector(
-                    onTap: () {
-                      _showAssignStaffDialog(context, task);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0,
-                          vertical: 4.0), // Padding inside the container
-                      decoration: BoxDecoration(
-                        color: AppColors.lightRed, // Background color
-                        border: Border.all(
-                            color: Colors.red, width: 1.0), // Red border
-                        borderRadius:
-                            BorderRadius.circular(4.0), // Rounded corners
-                      ),
-                      child: const Text(
-                        'Phân công', // The text inside the container
-                        style: TextStyle(
-                          color: Colors.white, // White text color
-                          fontSize: 14.0, // Font size
-                          fontWeight: FontWeight.bold, // Bold text
-                        ),
-                      ),
-                    ),
-                  )
-                else ...[
-                  const Icon(Icons.person_4, color: AppColors.onSuccess),
-                  Text(
-                    task.staff!.name, // Assuming 'staff' has a 'name' field
-                    // "name",
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 14,
-                    ),
-                  ),
-                ]
-              ] else if (widget.user.role == 'staff' && task.staff != null) ...[
-                if (task.staff!.id == widget.user.id) ...[
-                  Row(
-                    children: [
-                      const Icon(Icons.person_4, color: Colors.blue),
-                      Text(
-                        task.staff!.name, // Assuming 'staff' has a 'name' field
-                        style: const TextStyle(
-                          color: Colors.blue, // Highlighted text color
-                          fontSize: 16, // Slightly larger font size
-                          fontWeight: FontWeight.bold, // Bold text
-                        ),
-                      ),
-                    ],
-                  ), // Highlighted icon
-                ] else ...[
-                  Row(
-                    children: [
-                      const Icon(Icons.person_4, color: AppColors.onSuccess),
-                      Text(
-                        task.staff!.name,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ]
-              ]
-            ],
-          ),
         ],
       ),
     );
   }
 
-  void _showAssignStaffDialog(BuildContext context, Task task) {
+  void _showAssignStaffDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -341,11 +341,11 @@ class _TaskPageState extends State<TaskPage> {
                                   ),
                                   onTap: () {
                                     // Assign the selected staff to the task
-                                    BlocProvider.of<AssignStaffBloc>(context)
-                                        .add(
-                                      AssignStaffToTaskEvent(
-                                          userId: staff.id, productId: task.id),
-                                    );
+                                    // BlocProvider.of<AssignStaffBloc>(context)
+                                    //     .add(
+                                    //   AssignStaffToTaskEvent(
+                                    //       userId: staff.id, scho),
+                                    // );
                                     Navigator.of(context)
                                         .pop(); // Close the dialog
                                   },
