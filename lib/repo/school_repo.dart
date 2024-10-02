@@ -20,6 +20,21 @@ class SchoolRepo {
     }
   }
 
+  Future<void> deleteSchool(String schoolId) async {
+    try {
+      final response = await dio.delete(
+        '${AppConstants.baseUrl}/v1/school/$schoolId',
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to delete school');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+          'Error deleting school: ${e.response?.data ?? e.message}');
+    }
+  }
+
   Future<List<Map<String, String>>> getAllSchools(
       int page, int pageSize) async {
     try {
@@ -30,6 +45,7 @@ class SchoolRepo {
       if (response.statusCode == 200) {
         // If the server did return a 200 OK response, parse the JSON.
         List<dynamic> docs = response.data['data']['docs'];
+        print(docs);
         return docs.map((doc) {
           return Map.from(doc).map((key, value) =>
               MapEntry<String, String>(key.toString(), value.toString()));

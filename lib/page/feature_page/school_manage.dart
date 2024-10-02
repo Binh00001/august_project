@@ -3,11 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/blocs/create_school/create_school_bloc.dart';
 import 'package:flutter_project_august/blocs/create_school/create_school_event.dart';
 import 'package:flutter_project_august/blocs/create_school/create_school_state.dart';
+import 'package:flutter_project_august/blocs/delete_school/delete_school_bloc.dart';
+import 'package:flutter_project_august/blocs/delete_school/delete_school_event.dart';
+import 'package:flutter_project_august/blocs/delete_school/delete_school_state.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
 import 'package:flutter_project_august/models/school_model.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
+import 'package:flutter/services.dart';
 
 class SchoolManageScreen extends StatefulWidget {
   const SchoolManageScreen({super.key});
@@ -63,6 +67,23 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
               }
             },
           ),
+          BlocListener<SchoolDeleteBloc, SchoolDeleteState>(
+            listener: (context, state) {
+              if (state is SchoolDeleteLoading) {
+                _showLoadingDialog(); // Show a loading indicator while deletion is in progress
+              } else if (state is SchoolDeleteSuccess) {
+                Navigator.of(context).pop(); // Dismiss loading dialog if any
+                _showMessageDialog(
+                    'Thành công', 'Trường đã được xoá thành công.');
+                BlocProvider.of<SchoolBloc>(context)
+                    .add(GetAllSchoolsEvent()); // Refresh the list
+              } else if (state is SchoolDeleteFailure) {
+                Navigator.of(context).pop(); // Dismiss loading dialog if any
+                _showMessageDialog(
+                    'Thất bại', state.error); // Show error message
+              }
+            },
+          ),
         ],
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -75,8 +96,9 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
               return Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
-                    border: Border.all(),
-                    borderRadius: const BorderRadius.all(Radius.circular(8))),
+                  border: Border.all(),
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                ),
                 child: ExpansionTile(
                   title: Text(
                     '${index + 1}. ${schools[index].name}',
@@ -100,7 +122,42 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
                     ),
                     ListTile(
                       title: const Text('Điện thoại'),
-                      subtitle: Text(schools[index].phoneNumber ?? 'Không có'),
+                      subtitle: Text(
+                        schools[index].phoneNumber != "null"
+                            ? schools[index].phoneNumber!
+                            : 'Không có',
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          // Handle the delete action here, e.g., show delete confirmation dialog
+                          _showDeleteConfirmationDialog(
+                              context, schools[index].id);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color:
+                                Colors.red, // Red background for delete button
+                            borderRadius:
+                                BorderRadius.circular(4), // Rounded corners
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Xoá trường',
+                                style: TextStyle(
+                                  color: Colors.white, // White text color
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -125,6 +182,43 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
       ),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context, String schoolId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cảnh báo'),
+          content: const Text(
+              'Trường bị xoá sẽ không thể khôi phục, bạn có muốn tiếp tục?'),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white, // White text color
+                backgroundColor: Colors.red, // Red background for danger
+              ),
+              child: const Text('Tiếp tục'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                BlocProvider.of<SchoolDeleteBloc>(context)
+                    .add(DeleteSchoolEvent(schoolId: schoolId));
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black, // Black text color
+                backgroundColor: Colors.grey[300], // Grey background for cancel
+              ),
+              child: const Text('Không'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -199,6 +293,9 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
                           ),
                         ),
                         onChanged: (value) => address = value,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(50),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
@@ -221,6 +318,10 @@ class _SchoolManageScreenState extends State<SchoolManageScreen> {
                           ),
                         ),
                         onChanged: (value) => phoneNumber = value,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(
+                              10), // Limit to 10 characters
+                        ],
                       ),
                     ],
                   ),

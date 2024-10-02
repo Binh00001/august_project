@@ -20,8 +20,8 @@ class School {
     return School(
       id: json['id'] ?? "",
       name: json['name'] ?? "",
-      address: json['address'],
-      phoneNumber: json['phoneNumber'],
+      address: json['address'] ?? "",
+      phoneNumber: json['contact_number'] ?? "",
     );
   }
 
@@ -31,7 +31,7 @@ class School {
       'id': id,
       'name': name,
       'address': address,
-      'phoneNumber': phoneNumber,
+      'contact_number': phoneNumber,
     };
   }
 }

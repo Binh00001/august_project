@@ -12,6 +12,8 @@ import 'package:flutter_project_august/blocs/create_school/create_school_bloc.da
 import 'package:flutter_project_august/blocs/create_staff/create_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/create_user/create_user_bloc.dart';
 import 'package:flutter_project_august/blocs/delete_product/delete_product_bloc.dart';
+import 'package:flutter_project_august/blocs/delete_school/delete_school_bloc.dart';
+import 'package:flutter_project_august/blocs/delete_school/delete_school_event.dart';
 import 'package:flutter_project_august/blocs/delete_user_or_staff/delete_user_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_user/get_all_user_bloc.dart';
@@ -121,6 +123,11 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<CreateSchoolBloc>(
             create: (context) => CreateSchoolBloc(
+              schoolRepo: context.read<SchoolRepo>(),
+            ),
+          ),
+          BlocProvider<SchoolDeleteBloc>(
+            create: (context) => SchoolDeleteBloc(
               schoolRepo: context.read<SchoolRepo>(),
             ),
           ),
