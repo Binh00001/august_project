@@ -42,6 +42,8 @@ dependencies:
   http_parser: ^4.0.2
   fl_chart: ^0.69.0
   dropdown_button2: ^2.3.9
+  # flutter_esc_pos_utils: ^1.0.1
+  flutter_pos_printer_platform_image_3: ^1.2.0
 
 dev_dependencies:
   flutter_test:

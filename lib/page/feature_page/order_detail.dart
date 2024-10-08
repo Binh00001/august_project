@@ -8,6 +8,9 @@ import 'package:flutter_project_august/blocs/mark_paid_order/mark_paid_state.dar
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_bloc.dart';
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_event.dart';
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_state.dart';
+import 'package:flutter_project_august/blocs/print_invoice_usb/print_invoice_image_usb_bloc.dart';
+import 'package:flutter_project_august/blocs/print_invoice_usb/print_invoice_image_usb_event.dart';
+import 'package:flutter_project_august/blocs/print_invoice_usb/print_invoice_image_usb_state.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
 import 'package:flutter_project_august/models/order_model.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
@@ -83,6 +86,45 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                     iconDialog: Icons.error_rounded,
                     colorIconDialog: Colors.red,
                     titleDialog: state.errorMessage,
+                  ),
+                );
+              }
+            },
+          ),
+          BlocListener<UsbPrintImageBloc, UsbPrintImageState>(
+            listener: (context, state) {
+              if (state is UsbPrintImageLoading) {
+                // Show loading dialog for USB printing
+                showDialog(
+                  context: context,
+                  builder: (context) => const NotificationDialog(
+                    iconDialog: Icons.print_rounded,
+                    colorIconDialog: Colors.amber,
+                    titleDialog: "Đang in qua USB",
+                  ),
+                );
+              } else if (state is UsbPrintImagePrinted) {
+                // Close loading dialog before showing success dialog
+                Navigator.pop(context);
+                // Show success dialog
+                showDialog(
+                  context: context,
+                  builder: (context) => const NotificationDialog(
+                    iconDialog: Icons.check_circle,
+                    colorIconDialog: Colors.green,
+                    titleDialog: "In qua USB thành công",
+                  ),
+                );
+              } else if (state is UsbPrintImageError) {
+                // Close loading dialog before showing error dialog
+                Navigator.pop(context);
+                // Show error dialog
+                showDialog(
+                  context: context,
+                  builder: (context) => NotificationDialog(
+                    iconDialog: Icons.error_rounded,
+                    colorIconDialog: Colors.red,
+                    titleDialog: state.message,
                   ),
                 );
               }
@@ -215,7 +257,8 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       context: context,
     )
         .then((capturedImage) {
-      context.read<PrintInvoiceImageBloc>().add(PrintImage(capturedImage));
+      // context.read<PrintInvoiceImageBloc>().add(PrintImage(capturedImage));
+      context.read<UsbPrintImageBloc>().add(PrintUsbImage(capturedImage));
     });
   }
 

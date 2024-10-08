@@ -13,7 +13,6 @@ import 'package:flutter_project_august/blocs/create_staff/create_staff_bloc.dart
 import 'package:flutter_project_august/blocs/create_user/create_user_bloc.dart';
 import 'package:flutter_project_august/blocs/delete_product/delete_product_bloc.dart';
 import 'package:flutter_project_august/blocs/delete_school/delete_school_bloc.dart';
-import 'package:flutter_project_august/blocs/delete_school/delete_school_event.dart';
 import 'package:flutter_project_august/blocs/delete_user_or_staff/delete_user_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_staff/get_all_staff_bloc.dart';
 import 'package:flutter_project_august/blocs/get_all_user/get_all_user_bloc.dart';
@@ -25,6 +24,7 @@ import 'package:flutter_project_august/blocs/get_product/get_product_bloc.dart';
 import 'package:flutter_project_august/blocs/get_revenue/revenue_bloc.dart';
 import 'package:flutter_project_august/blocs/mark_paid_order/mark_paid_bloc.dart';
 import 'package:flutter_project_august/blocs/print_invoice/print_invoice_image_bloc.dart';
+import 'package:flutter_project_august/blocs/print_invoice_usb/print_invoice_image_usb_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_bloc.dart';
 import 'package:flutter_project_august/blocs/get_statistic/statistic_bloc.dart';
 import 'package:flutter_project_august/blocs/task/task_bloc.dart';
@@ -242,7 +242,9 @@ class MyApp extends StatelessWidget {
           BlocProvider<PrintInvoiceImageBloc>(
             create: (context) => PrintInvoiceImageBloc(),
           ),
-
+          BlocProvider<UsbPrintImageBloc>(
+            create: (context) => UsbPrintImageBloc(),
+          ),
           // Include other BlocProviders if needed
         ],
         child: MaterialApp(
