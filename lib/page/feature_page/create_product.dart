@@ -56,6 +56,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
     {'name': 'Gói', 'value': 'gói'},
     {'name': 'Chai', 'value': 'chai'},
     {'name': 'Hộp', 'value': 'hộp'},
+    {'name': 'Quả', 'value': 'quả'},
   ];
 
   @override

@@ -58,7 +58,7 @@ class UsbPrintImageBloc extends Bloc<UsbPrintImageEvent, UsbPrintImageState> {
       print(devices);
       // Kiểm tra nếu có thiết bị USB nào được tìm thấy
       if (devices.isEmpty) {
-        emit(const UsbPrintImageError("Không tìm thấy thiết bị USB nào"));
+        emit(const UsbPrintImageError("Không tìm thấy thiết bị USB"));
         return;
       }
       print(3);
