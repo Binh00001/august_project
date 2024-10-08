@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_project_august/database/share_preferences_helper.dart';
@@ -16,37 +14,38 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final AuthRepo authRepo =
-      AuthRepositoryImpl(Dio()); // Khai báo biến để giữ thể hiện của AuthRepo
-
-  // _LoginPageState()
-  //     : authRepo = AuthRepositoryImpl(Dio()); // Khởi tạo thể hiện của AuthRepo
-
+  final AuthRepo authRepo = AuthRepositoryImpl(Dio());
   final _formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  bool _isLoading = false; // Track loading state
+
   void _login() async {
+    setState(() {
+      _isLoading = true; // Show loading indicator
+    });
+
     var username = emailController.text.trim();
     var password = passwordController.text.trim();
     var result = await authRepo.signIn(username, password);
-    if (result["success"]) {
-      //lưu token
-      SharedPreferencesHelper.setApiTokenKey(result['data']['accessToken']);
-      // Save user information
-      var userData = result['data']['user'];
 
+    setState(() {
+      _isLoading = false; // Hide loading indicator
+    });
+
+    if (result["success"]) {
+      SharedPreferencesHelper.setApiTokenKey(result['data']['accessToken']);
+      var userData = result['data']['user'];
       User user = User.fromJson(userData);
       await SharedPreferencesHelper.setUserInfo(user);
-      //chuyển trang
-
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainPage()),
+        MaterialPageRoute(builder: (context) => const MainPage()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đăng nhập thất bại')),
+        const SnackBar(content: Text('Đăng nhập thất bại')),
       );
     }
   }
@@ -55,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Đăng Nhập"),
+        title: const Text("Đăng Nhập"),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
       ),
@@ -101,24 +100,21 @@ class _LoginPageState extends State<LoginPage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 16.0),
                 child: Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (!_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Hãy điền đầy đủ thông tin')),
-                        );
-                        return;
-                      }
-                      _login();
-                      // ScaffoldMessenger.of(context).showSnackBar(
-                      //   const SnackBar(
-                      //       content: Text('Sai tài khoản hoặc mật khẩu')),
-                      // );
-                      return;
-                    },
-                    child: const Text('Đăng nhập'),
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator() // Show loading indicator
+                      : ElevatedButton(
+                          onPressed: () {
+                            if (!_formKey.currentState!.validate()) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Hãy điền đầy đủ thông tin')),
+                              );
+                              return;
+                            }
+                            _login();
+                          },
+                          child: const Text('Đăng nhập'),
+                        ),
                 ),
               ),
             ],
