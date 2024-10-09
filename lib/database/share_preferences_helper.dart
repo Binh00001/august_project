@@ -12,6 +12,20 @@ class SharedPreferencesHelper {
   static const _printerPort = '_printerPort';
   static const _printerScale = '_printerScale';
 
+  static const _printerType = '_printerType';
+
+// Set printer type
+  static Future<void> setPrinterType(String type) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_printerType, type);
+  }
+
+// Get printer type
+  static Future<String> getPrinterType() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_printerType) ?? "usb";
+  }
+
   //set printer ip
   static Future<void> setPrinterIP(String newIP) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
