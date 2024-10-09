@@ -199,7 +199,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   subtitle:
                       Text('Số lượng: ${item.quantity} (${item.productUnit})'),
                   trailing: Text(
-                    '${NumberFormat('#,##0', 'vi_VN').format(num.parse(item.price))} đ',
+                    'Đơn giá: ${NumberFormat('#,##0', 'vi_VN').format(num.parse(item.price))} đ',
                     style: const TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
