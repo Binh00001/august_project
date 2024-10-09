@@ -137,6 +137,7 @@ class _StaffManagePageState extends State<StaffManagePage> {
         String? username;
         String? name;
         String? password;
+        String? confirmPassword;
 
         return AlertDialog(
           shape: RoundedRectangleBorder(
@@ -234,6 +235,40 @@ class _StaffManagePageState extends State<StaffManagePage> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Bắt buộc';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Xác nhận mật khẩu',
+                      hintText: 'Nhập lại mật khẩu',
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    obscureText: true,
+                    onChanged: (value) {
+                      confirmPassword = value;
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Bắt buộc';
+                      }
+                      if (value != password) {
+                        return 'Mật khẩu không khớp';
                       }
                       return null;
                     },
