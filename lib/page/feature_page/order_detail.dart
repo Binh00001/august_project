@@ -16,6 +16,7 @@ import 'package:flutter_project_august/models/order_model.dart';
 import 'package:flutter_project_august/utill/color-theme.dart';
 import 'package:intl/intl.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderDetailsPage extends StatefulWidget {
   final Order order;
@@ -34,11 +35,18 @@ class OrderDetailsPage extends StatefulWidget {
 class _OrderDetailsPageState extends State<OrderDetailsPage> {
   ScreenshotController screenshotController = ScreenshotController();
   String payStatus = "await";
+  String _printerType = "usb"; // Initial printer type
 
   @override
   void initState() {
     super.initState();
     payStatus = widget.order.payStatus; // Khởi tạo giá trị ban đầu từ đơn hàng
+    loadSettings();
+  }
+
+  Future<void> loadSettings() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _printerType = prefs.getString('_printerType') ?? "usb";
   }
 
   @override
@@ -61,7 +69,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                   builder: (context) => const NotificationDialog(
                     iconDialog: Icons.print_rounded,
                     colorIconDialog: Colors.amber,
-                    titleDialog: "Đang in hoá đơn",
+                    titleDialog: "Đang in hoá đơn qua Wifi",
                   ),
                 );
               } else if (state is PrintInvoiceImageSuccess) {
@@ -257,8 +265,11 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
       context: context,
     )
         .then((capturedImage) {
-      // context.read<PrintInvoiceImageBloc>().add(PrintImage(capturedImage));
-      context.read<UsbPrintImageBloc>().add(PrintUsbImage(capturedImage));
+      if (_printerType == "usb") {
+        context.read<UsbPrintImageBloc>().add(PrintUsbImage(capturedImage));
+      } else if (_printerType == "wifi") {
+        context.read<PrintInvoiceImageBloc>().add(PrintImage(capturedImage));
+      }
     });
   }
 
