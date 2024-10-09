@@ -228,12 +228,46 @@ class _UserManagePageState extends State<UserManagePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          title: const Text('Nhập Thông Tin Người Dùng'),
+          title: const Text('Thông Tin Người Dùng'),
           content: SingleChildScrollView(
             child: Form(
               key: _formKey,
               child: ListBody(
                 children: <Widget>[
+                  BlocBuilder<SchoolBloc, SchoolState>(
+                    builder: (context, state) {
+                      if (state is SchoolLoading) {
+                        return const CircularProgressIndicator();
+                      } else if (state is SchoolLoaded) {
+                        return DropdownButtonFormField<String>(
+                          value: selectedSchool,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedSchool = newValue;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'Chọn trường',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          items: state.schools
+                              .map<DropdownMenuItem<String>>((School school) {
+                            return DropdownMenuItem<String>(
+                              value: school.id,
+                              child: Text(school.name),
+                            );
+                          }).toList(),
+                        );
+                      } else if (state is SchoolError) {
+                        return Text('Error: ${state.message}');
+                      } else {
+                        return const Text("Không có dữ liệu trường học");
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Tên đăng nhập',
@@ -325,39 +359,38 @@ class _UserManagePageState extends State<UserManagePage> {
                     },
                   ),
                   const SizedBox(height: 8),
-                  BlocBuilder<SchoolBloc, SchoolState>(
-                    builder: (context, state) {
-                      if (state is SchoolLoading) {
-                        return const CircularProgressIndicator();
-                      } else if (state is SchoolLoaded) {
-                        return DropdownButtonFormField<String>(
-                          value: selectedSchool,
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              selectedSchool = newValue;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'Chọn trường',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          items: state.schools
-                              .map<DropdownMenuItem<String>>((School school) {
-                            return DropdownMenuItem<String>(
-                              value: school.id,
-                              child: Text(school.name),
-                            );
-                          }).toList(),
-                        );
-                      } else if (state is SchoolError) {
-                        return Text('Error: ${state.message}');
-                      } else {
-                        return const Text("Không có dữ liệu trường học");
+                  TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Xác nhận mật khẩu',
+                      hintText: 'Nhập lại mật khẩu',
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.blue, width: 2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    obscureText: true,
+                    onChanged: (value) {},
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Bắt buộc';
                       }
+                      if (value != password) {
+                        return 'Mật khẩu không khớp';
+                      }
+                      return null;
                     },
                   ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -381,7 +414,6 @@ class _UserManagePageState extends State<UserManagePage> {
                           schoolId: selectedSchool!,
                         ),
                       );
-
                   Navigator.of(context).pop();
                 }
               },
