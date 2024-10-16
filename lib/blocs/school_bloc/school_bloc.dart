@@ -1,6 +1,7 @@
 // school_bloc.dart
 
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_event.dart';
 import 'package:flutter_project_august/blocs/school_bloc/school_state.dart';
@@ -28,6 +29,7 @@ class SchoolBloc extends Bloc<SchoolEvent, SchoolState> {
         emit(SchoolLoaded(schoolList));
       }
     } catch (e) {
+      print(e);
       emit(SchoolError(e.toString()));
     }
   }

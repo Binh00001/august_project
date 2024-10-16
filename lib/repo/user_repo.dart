@@ -70,11 +70,26 @@ class UserRepo {
         },
       );
 
-      if (response.statusCode != 200) {
-        throw Exception('Failed to create user');
+      // Kiểm tra mã trạng thái và trả về thông báo phù hợp
+      if (response.statusCode == 400) {
+        throw Exception('Người dùng đã tồn tại');
+      } else if (response.statusCode == 500) {
+        throw Exception('Không thể tạo tài khoản. Hãy thử lại sau');
+      } else if (response.statusCode != 200) {
+        throw Exception('Lỗi không xác định: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      // Nếu có lỗi do Dio, trả về thông báo lỗi
+      if (e.response?.statusCode == 400) {
+        throw Exception('Người dùng đã tồn tại');
+      } else if (e.response?.statusCode == 500) {
+        throw Exception('Không thể tạo tài khoản. Hãy thử lại sau');
+      } else {
+        throw Exception('Lỗi không xác định: ${e.response?.statusCode}');
       }
     } catch (e) {
-      throw Exception('Error creating user: $e');
+      // Nếu có lỗi khác, trả về thông báo chung
+      throw Exception('Đã xảy ra lỗi: $e');
     }
   }
 

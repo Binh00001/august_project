@@ -45,7 +45,6 @@ class SchoolRepo {
       if (response.statusCode == 200) {
         // If the server did return a 200 OK response, parse the JSON.
         List<dynamic> docs = response.data['data']['docs'];
-        print(docs);
         return docs.map((doc) {
           return Map.from(doc).map((key, value) =>
               MapEntry<String, String>(key.toString(), value.toString()));

@@ -308,6 +308,10 @@ class _UserManagePageState extends State<UserManagePage> {
                       if (value == null || value.isEmpty) {
                         return 'Bắt buộc';
                       }
+                      // Cho phép chữ cái tiếng Việt, chữ số, dấu cách và không cho phép ký tự đặc biệt
+                      if (!RegExp(r'^[a-zA-ZÀ-ỹ0-9\s]+$').hasMatch(value)) {
+                        return 'Không được chứa ký tự đặc biệt';
+                      }
                       return null;
                     },
                   ),
@@ -337,6 +341,10 @@ class _UserManagePageState extends State<UserManagePage> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Bắt buộc';
+                      }
+                      // Cho phép chữ cái tiếng Việt, chữ số, dấu cách và không cho phép ký tự đặc biệt
+                      if (!RegExp(r'^[a-zA-ZÀ-ỹ0-9\s]+$').hasMatch(value)) {
+                        return 'Không được chứa ký tự đặc biệt';
                       }
                       return null;
                     },
@@ -368,6 +376,9 @@ class _UserManagePageState extends State<UserManagePage> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Bắt buộc';
+                      }
+                      if (value.length < 6) {
+                        return 'Mật khẩu phải có ít nhất 6 ký tự';
                       }
                       return null;
                     },
