@@ -39,7 +39,7 @@ class _StaffManagePageState extends State<StaffManagePage> {
           );
         } else if (state is CreateStaffError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Lỗi: Không tạo được tài khoản')),
+            SnackBar(content: Text('Lỗi: ${state.error}')),
           );
         }
       },
@@ -235,6 +235,9 @@ class _StaffManagePageState extends State<StaffManagePage> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Bắt buộc';
+                      }
+                      if (value.length < 6) {
+                        return 'Mật khẩu phải có ít nhất 6 ký tự';
                       }
                       return null;
                     },
