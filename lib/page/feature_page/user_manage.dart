@@ -256,9 +256,23 @@ class _UserManagePageState extends State<UserManagePage> {
                               .map<DropdownMenuItem<String>>((School school) {
                             return DropdownMenuItem<String>(
                               value: school.id,
-                              child: Text(school.name),
+                              child: Text(
+                                school.name,
+                                overflow:
+                                    TextOverflow.ellipsis, // Tránh tràn văn bản
+                              ),
                             );
                           }).toList(),
+                          selectedItemBuilder: (BuildContext context) {
+                            return state.schools.map<Widget>((School school) {
+                              return Text(
+                                school.name.length > 18
+                                    ? '${school.name.substring(0, 18)}...' // Ẩn bớt nếu tên quá dài
+                                    : school.name,
+                                overflow: TextOverflow.ellipsis,
+                              );
+                            }).toList();
+                          },
                         );
                       } else if (state is SchoolError) {
                         return Text('Error: ${state.message}');
