@@ -33,6 +33,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
   bool _hasMore = true;
   final List<Product> _products = []; // List to store loaded products
   final ScrollController _scrollController = ScrollController();
+  List<String> decimalUnits = [
+    'kg', // Kilogram
+    'g', // Gram
+    'l', // Lít
+    'ml', // Mililít
+    'm', // Mét
+    'cm', // Centimet
+  ];
 
   @override
   void initState() {
@@ -352,17 +360,34 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             'Số lượng:',
                             style: TextStyle(fontSize: 16),
                           ),
-                          InputQty(
-                            maxVal: 999,
-                            initVal: quantity,
-                            minVal: 1,
-                            steps: 1,
-                            onQtyChanged: (val) {
-                              setState(() {
-                                quantity = val;
-                              });
-                            },
-                          ),
+                          // Kiểm tra nếu product.unit thuộc vào mảng decimalUnits
+                          decimalUnits.contains(product.unit)
+                              ? InputQty.double(
+                                  maxVal:
+                                      999.0, // Giá trị tối đa dùng số thập phân
+                                  initVal: quantity
+                                      .toDouble(), // Chuyển quantity thành double
+                                  minVal:
+                                      0.1, // Giá trị tối thiểu là số thập phân
+                                  steps: 0.1, // Bước nhảy là số thập phân
+                                  onQtyChanged: (val) {
+                                    setState(() {
+                                      quantity = val
+                                          .toDouble(); // Cập nhật giá trị số thập phân
+                                    });
+                                  },
+                                )
+                              : InputQty.int(
+                                  maxVal: 999,
+                                  initVal: quantity,
+                                  minVal: 1,
+                                  steps: 1,
+                                  onQtyChanged: (val) {
+                                    setState(() {
+                                      quantity = val;
+                                    });
+                                  },
+                                ),
                         ],
                       ),
                       const SizedBox(height: 8.0),
@@ -377,6 +402,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             SnackBar(
                               content: Text(
                                   'Đã thêm $quantity ${product.name} vào giỏ hàng.'),
+                              duration: const Duration(
+                                  milliseconds:
+                                      500), // Set display time to 0.5 seconds
                             ),
                           );
                         },
