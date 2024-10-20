@@ -20,14 +20,57 @@ class CartPage extends StatelessWidget {
         if (state is CreateOrderSuccess) {
           // Optionally, clear the cart after creating the order
           BlocProvider.of<CartBloc>(context).add(ClearCart());
-          // Show a success message
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Đơn hàng đã được tạo thành công!')),
+
+          // Show success dialog
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Row(
+                  children: [
+                    Icon(Icons.check_circle,
+                        color: Colors.green), // Success icon
+                    SizedBox(width: 8), // Add spacing between icon and title
+                    Text('Thành công'), // Title of the dialog
+                  ],
+                ),
+                content: const Text(
+                    'Đơn hàng đã được tạo thành công!'), // Success message
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: const Text('Đóng'),
+                  ),
+                ],
+              );
+            },
           );
         } else if (state is CreateOrderFailure) {
-          // Show an error message
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Lỗi: ${state.error}')),
+          // Show error dialog
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Row(
+                  children: [
+                    Icon(Icons.error, color: Colors.red), // Error icon
+                    SizedBox(width: 8), // Add spacing between icon and title
+                    Text('Lỗi'), // Title of the dialog
+                  ],
+                ),
+                content: Text('Lỗi: ${state.error}'), // Error message
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close the dialog
+                    },
+                    child: const Text('Đóng'),
+                  ),
+                ],
+              );
+            },
           );
         }
       },
