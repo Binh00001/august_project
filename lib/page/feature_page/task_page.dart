@@ -109,7 +109,7 @@ class _TaskPageState extends State<TaskPage> {
                       setState(() {
                         selectedSchoolId = newValue;
                         if (selectedSchoolId != null) {
-                          //fetch task only if a school is selected
+                          // Fetch task only if a school is selected
                           _loadTask();
                         }
                       });
@@ -125,35 +125,37 @@ class _TaskPageState extends State<TaskPage> {
             ),
           ),
           BlocListener<AssignStaffBloc, AssignStaffState>(
-              listener: (context, state) {
-                if (state is AssignStaffSuccess) {
-                  _loadTask();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Chỉ định thành công!')),
-                  );
-                } else if (state is AssignStaffFailure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Lỗi: ${state.error}')),
-                  );
-                }
-              },
-              child: selectedSchoolId == null
-                  ? const Expanded(
-                      child: Center(
-                        child: Text('Hãy chọn trường để xem chi tiết'),
-                      ),
-                    )
-                  : BlocBuilder<TaskBloc, TaskState>(
-                      builder: (context, state) {
-                        if (state is TaskLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (state is TaskLoaded) {
-                          // Check if staff is different from default
-                          bool isStaffDifferent =
-                              state.staff != AppConstants.defaultStaff;
-                          return Column(
+            listener: (context, state) {
+              if (state is AssignStaffSuccess) {
+                _loadTask();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Chỉ định thành công!')),
+                );
+              } else if (state is AssignStaffFailure) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Lỗi: ${state.error}')),
+                );
+              }
+            },
+            child: selectedSchoolId == null
+                ? const Expanded(
+                    child: Center(
+                      child: Text('Hãy chọn trường để xem chi tiết'),
+                    ),
+                  )
+                : BlocBuilder<TaskBloc, TaskState>(
+                    builder: (context, state) {
+                      if (state is TaskLoading) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (state is TaskLoaded) {
+                        // Check if staff is different from default
+                        bool isStaffDifferent =
+                            state.staff != AppConstants.defaultStaff;
+                        return Expanded(
+                          // Wrap the task display in Expanded
+                          child: Column(
                             children: [
                               // Always display the staff info
                               Padding(
@@ -164,76 +166,99 @@ class _TaskPageState extends State<TaskPage> {
                                   bottom: 8,
                                 ),
                                 child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0, horizontal: 16.0),
-                                    decoration: BoxDecoration(
-                                      color: isStaffDifferent
-                                          ? AppColors.primary.withOpacity(
-                                              0.3) // Original background when staff is assigned
-                                          : Colors.red.withOpacity(
-                                              0.3), // Red background for "Phân công nhân viên"
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          isStaffDifferent
-                                              ? 'Nhân viên: ${state.staff.name}' // Display staff's name
-                                              : 'Chưa phân công', // Default text if no staff assigned
-                                          style: const TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 16.0),
+                                  decoration: BoxDecoration(
+                                    color: isStaffDifferent
+                                        ? AppColors.primary.withOpacity(
+                                            0.3) // Original background when staff is assigned
+                                        : Colors.red.withOpacity(
+                                            0.3), // Red background for "Phân công nhân viên"
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        isStaffDifferent
+                                            ? 'Nhân viên: ${state.staff.name}' // Display staff's name
+                                            : 'Chưa phân công', // Default text if no staff assigned
+                                        style: const TextStyle(
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.bold,
                                         ),
+                                      ),
 
-                                        // Check if the current user is an admin
-                                        if (widget.user.role == 'admin')
-                                          IconButton(
-                                            icon: const Icon(Icons
-                                                .settings), // Settings icon
-                                            onPressed: () {
-                                              // Implement settings action here
-                                              _showAssignStaffDialog(
-                                                  context, selectedSchoolId!);
-                                            },
-                                          ),
-                                      ],
-                                    )),
+                                      // Check if the current user is an admin
+                                      if (widget.user.role == 'admin')
+                                        IconButton(
+                                          icon: const Icon(
+                                              Icons.settings), // Settings icon
+                                          onPressed: () {
+                                            // Implement settings action here
+                                            _showAssignStaffDialog(
+                                                context, selectedSchoolId!);
+                                          },
+                                        ),
+                                    ],
+                                  ),
+                                ),
                               ),
 
-                              // Task List Display or Empty Message
-                              state.tasks.isEmpty
-                                  ? const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text(
-                                            'Không có hàng hoá nào cần mua.'),
+                              Expanded(
+                                child: state.tasks.isEmpty
+                                    ? const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Text(
+                                              'Không có hàng hoá nào cần mua.'),
+                                        ),
+                                      )
+                                    : ListView.builder(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0),
+                                        itemCount: state.tasks.length +
+                                            1, // Add one extra item for the "--- Hết ---" text
+                                        itemBuilder: (context, index) {
+                                          if (index == state.tasks.length) {
+                                            // This is the last item, show "--- Hết ---"
+                                            return const Center(
+                                              child: Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 0,
+                                                    vertical: 20),
+                                                child: Text(
+                                                  '--- Hết ---',
+                                                  style: TextStyle(
+                                                    fontSize: 16.0,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          return _buildTaskItem(state.tasks[
+                                              index]); // Build each task item
+                                        },
                                       ),
-                                    )
-                                  : SingleChildScrollView(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8.0),
-                                      child: Column(
-                                        children: state.tasks
-                                            .map((task) => _buildTaskItem(task))
-                                            .toList(),
-                                      ),
-                                    ),
+                              )
                             ],
-                          );
-                        } else if (state is TaskError) {
-                          return Center(
-                            child: Text('Lỗi: ${state.message}'),
-                          );
-                        } else {
-                          return const Center(
-                            child: Text('Không có nhiệm vụ nào.'),
-                          );
-                        }
-                      },
-                    ))
+                          ),
+                        );
+                      } else if (state is TaskError) {
+                        return Center(
+                          child: Text('Lỗi: ${state.message}'),
+                        );
+                      } else {
+                        return const Center(
+                          child: Text('Không có nhiệm vụ nào.'),
+                        );
+                      }
+                    },
+                  ),
+          ),
         ],
       ),
     );
