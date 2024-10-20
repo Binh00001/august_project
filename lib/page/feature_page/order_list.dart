@@ -134,6 +134,8 @@ class _OrderListPageState extends State<OrderListPage> {
                         itemBuilder: (context, index) {
                           final order = state.orders[index];
                           return Container(
+                            key: ValueKey(order
+                                .id), // Sử dụng giá trị duy nhất cho mỗi đơn hàng
                             padding: const EdgeInsets.all(8),
                             margin: const EdgeInsets.only(top: 8),
                             decoration: BoxDecoration(
