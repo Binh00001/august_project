@@ -368,8 +368,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                   initVal: quantity
                                       .toDouble(), // Chuyển quantity thành double
                                   minVal:
-                                      0.1, // Giá trị tối thiểu là số thập phân
-                                  steps: 0.5, // Bước nhảy là số thập phân
+                                      0, // Giá trị tối thiểu là số thập phân
+                                  steps: 0.1, // Bước nhảy là số thập phân
                                   onQtyChanged: (val) {
                                     setState(() {
                                       quantity = val
@@ -394,19 +394,33 @@ class _ProductListScreenState extends State<ProductListScreen> {
                       const SizedBox(height: 16.0),
                       GestureDetector(
                         onTap: () {
-                          BlocProvider.of<CartBloc>(context).add(
+                          if (quantity > 0) {
+                            // Nếu số lượng lớn hơn 0, thêm vào giỏ hàng
+                            BlocProvider.of<CartBloc>(context).add(
                               AddProductToCart(
-                                  product: product, quantity: quantity));
-                          Navigator.of(context).pop(); // Close the bottom sheet
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  'Đã thêm $quantity ${product.name} vào giỏ hàng.'),
-                              duration: const Duration(
-                                  milliseconds:
-                                      500), // Set display time to 0.5 seconds
-                            ),
-                          );
+                                  product: product, quantity: quantity),
+                            );
+                            Navigator.of(context).pop(); // Đóng BottomSheet
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Đã thêm $quantity${product.unit} ${product.name} vào giỏ hàng.',
+                                ),
+                                duration: const Duration(
+                                    milliseconds:
+                                        500), // Set display time to 0.5 seconds
+                              ),
+                            );
+                          } else {
+                            // Nếu số lượng bằng 0, hiển thị thông báo lỗi
+                            Navigator.of(context).pop(); // Đóng BottomSheet
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Số lượng phải lớn hơn 0.'),
+                                duration: Duration(milliseconds: 1000),
+                              ),
+                            );
+                          }
                         },
                         child: Container(
                           width: double.infinity,
