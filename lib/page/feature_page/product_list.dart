@@ -369,7 +369,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                       .toDouble(), // Chuyển quantity thành double
                                   minVal:
                                       0.1, // Giá trị tối thiểu là số thập phân
-                                  steps: 0.1, // Bước nhảy là số thập phân
+                                  steps: 0.5, // Bước nhảy là số thập phân
                                   onQtyChanged: (val) {
                                     setState(() {
                                       quantity = val
