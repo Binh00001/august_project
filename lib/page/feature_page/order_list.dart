@@ -26,7 +26,10 @@ class _OrderListPageState extends State<OrderListPage> {
   DateTime? _endDate;
   String? selectedSchoolId;
   User? _user;
-
+  int _currentPage = 1; // Trang hiện tại
+  int _totalPages = 1; // Tổng số trang
+  bool isLoadingMore = false;
+  List<Order> orders = [];
   @override
   void initState() {
     super.initState();
@@ -40,6 +43,14 @@ class _OrderListPageState extends State<OrderListPage> {
         DateTime(now.year, now.month, now.day, 12); // Noon of the current day
     _endDate = DateTime(now.year, now.month, now.day, 23, 59, 59, 999,
         999); // Just before midnight of the next day
+  }
+
+  void _loadMoreOrders(BuildContext context) {
+    if (_currentPage < _totalPages) {
+      _currentPage++;
+      isLoadingMore = true;
+      fetchOrdersIfPossible(context);
+    }
   }
 
   Future<void> _loadUserInfo() async {
@@ -99,6 +110,8 @@ class _OrderListPageState extends State<OrderListPage> {
                         setState(() {
                           selectedSchoolId =
                               newValue; // Update the selected school ID
+                          isLoadingMore = false;
+                          _currentPage = 1;
                           fetchOrdersIfPossible(
                               context); // Gọi hàm để thực hiện các tác vụ tiếp theo
                         });
@@ -117,10 +130,21 @@ class _OrderListPageState extends State<OrderListPage> {
             Expanded(
               child: BlocBuilder<GetOrderBloc, GetOrderState>(
                 builder: (context, state) {
-                  if (state is GetOrderLoading) {
+                  if (state is GetOrderLoading && _currentPage == 1) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is GetOrderLoaded) {
-                    if (state.orders.isEmpty) {
+                    // Cập nhật totalPages khi có kết quả mới từ API
+                    _totalPages = state.totalPage;
+
+                    // Nếu không phải đang tải thêm, reset danh sách hóa đơn
+                    if (!isLoadingMore) {
+                      orders = state.orders;
+                    } else {
+                      // Nếu đang tải thêm, nối thêm danh sách hóa đơn mới
+                      orders.addAll(state.orders);
+                    }
+
+                    if (orders.isEmpty) {
                       return const Center(
                         child: Text(
                           'Không có đơn',
@@ -130,66 +154,32 @@ class _OrderListPageState extends State<OrderListPage> {
                       );
                     } else {
                       return ListView.builder(
-                        itemCount: state.orders.length,
+                        itemCount: orders.length +
+                            (_currentPage < _totalPages
+                                ? 1
+                                : 0), // Thêm một phần tử nếu cần hiển thị nút "Xem thêm"
                         itemBuilder: (context, index) {
-                          final order = state.orders[index];
-                          return Container(
-                            key: ValueKey(order
-                                .id), // Sử dụng giá trị duy nhất cho mỗi đơn hàng
-                            padding: const EdgeInsets.all(8),
-                            margin: const EdgeInsets.only(top: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        order.userName,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      Text(order.schoolName),
-                                      Text(
-                                        order.payStatus == "pending"
-                                            ? "Chưa thanh toán"
-                                            : "Đã thanh toán",
-                                        style: TextStyle(
-                                          color: order.payStatus == "pending"
-                                              ? AppColors.error
-                                              : AppColors.onSuccess,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      Text(
-                                          'Số mặt hàng: ${order.orderItems.length}'),
-                                      Text(
-                                        'Tổng tiền: ${NumberFormat('#,##0', 'vi_VN').format(num.parse(order.totalAmount))} đ',
-                                        style: const TextStyle(
-                                          color: AppColors.lightRed,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                          if (index == orders.length &&
+                              _currentPage < _totalPages) {
+                            // Đây là phần tử cuối cùng, hiển thị nút "Xem thêm"
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton(
+                                onPressed: () => _loadMoreOrders(
+                                    context), // Gọi hàm để tải thêm trang
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor:
+                                      Colors.white, // Màu chữ trắng
                                 ),
-                                GestureDetector(
-                                  onTap: () => {_showOrderDetails(order)},
-                                  child: const Icon(Icons.arrow_forward_ios,
-                                      color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          );
+                                child: const Text('Tải thêm đơn hàng'),
+                              ),
+                            );
+                          }
+
+                          // Các phần tử khác là các đơn hàng
+                          final order = orders[index];
+                          return orderItem(order);
                         },
                       );
                     }
@@ -199,9 +189,65 @@ class _OrderListPageState extends State<OrderListPage> {
                   return Container(); // Default empty container
                 },
               ),
-            ),
+            )
           ],
         ),
+      ),
+    );
+  }
+
+  Container orderItem(Order order) {
+    return Container(
+      key: ValueKey(order.id), // Sử dụng giá trị duy nhất cho mỗi đơn hàng
+      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  order.userName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(order.schoolName),
+                Text(
+                  order.payStatus == "pending"
+                      ? "Chưa thanh toán"
+                      : "Đã thanh toán",
+                  style: TextStyle(
+                    color: order.payStatus == "pending"
+                        ? AppColors.error
+                        : AppColors.onSuccess,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                Text('Số mặt hàng: ${order.orderItems.length}'),
+                Text(
+                  'Tổng tiền: ${NumberFormat('#,##0', 'vi_VN').format(num.parse(order.totalAmount))} đ',
+                  style: const TextStyle(
+                    color: AppColors.lightRed,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: () => {_showOrderDetails(order)},
+            child: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+          ),
+        ],
       ),
     );
   }
@@ -253,14 +299,14 @@ class _OrderListPageState extends State<OrderListPage> {
   void fetchOrdersIfPossible(BuildContext context) {
     if (_startDate != null && _endDate != null) {
       BlocProvider.of<GetOrderBloc>(context).add(FetchOrders(
-          page: 1,
-          pageSize: 10,
+          page: _currentPage,
+          pageSize: 30,
           startDate: _startDate!.millisecondsSinceEpoch,
           endDate: _endDate!.millisecondsSinceEpoch,
           schoolId: selectedSchoolId));
     } else {
-      BlocProvider.of<GetOrderBloc>(context)
-          .add(FetchOrders(page: 1, pageSize: 10, schoolId: selectedSchoolId));
+      BlocProvider.of<GetOrderBloc>(context).add(FetchOrders(
+          page: _currentPage, pageSize: 30, schoolId: selectedSchoolId));
     }
   }
 
@@ -292,6 +338,10 @@ class _OrderListPageState extends State<OrderListPage> {
 
         // Check if both dates are selected before fetching data
         if (_startDate != null && _endDate != null) {
+          setState(() {
+            _currentPage = 1;
+            isLoadingMore = false;
+          });
           fetchOrdersIfPossible(context);
         }
       });
