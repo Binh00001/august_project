@@ -10,17 +10,29 @@ class GetOrderBloc extends Bloc<GetOrderEvent, GetOrderState> {
   GetOrderBloc({required this.orderRepo}) : super(GetOrderInitial()) {
     on<FetchOrders>((event, emit) async {
       emit(GetOrderLoading());
+
       try {
-        List<Order> orders = await orderRepo.getOrders(
+        // Lấy danh sách đơn hàng từ API
+        List<Order> newOrders = await orderRepo.getOrders(
           page: event.page,
           pageSize: event.pageSize,
           schoolId: event.schoolId,
           startDate: event.startDate,
           endDate: event.endDate,
         );
-        emit(GetOrderLoaded(orders));
+
+        int totalPages = await orderRepo.getTotalPages(
+          page: event.page,
+          pageSize: event.pageSize,
+          schoolId: event.schoolId,
+          startDate: event.startDate,
+          endDate: event.endDate,
+        );
+
+        emit(GetOrderLoaded(
+            newOrders, totalPages)); // Emit danh sách đã cập nhật
       } catch (e) {
-        emit(GetOrderError(e.toString()));
+        emit(GetOrderError(e.toString())); // Emit lỗi nếu có
       }
     });
   }

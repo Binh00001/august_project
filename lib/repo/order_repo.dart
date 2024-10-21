@@ -137,7 +137,39 @@ class OrderRepo {
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data['data']['docs'];
+        int totalPage = response.data['data']['paging']['totalPages'];
         return data.map((order) => Order.fromJson(order)).toList();
+      } else {
+        throw Exception(
+            'Failed to load orders with status code: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      throw Exception(
+          'Failed to connect to the API: ${e.response?.data ?? e.message}');
+    }
+  }
+
+  Future<int> getTotalPages({
+    required int page,
+    required int pageSize,
+    String? schoolId,
+    int? startDate,
+    int? endDate,
+  }) async {
+    try {
+      final response = await dio.get(
+        '${AppConstants.baseUrl}/v1/order',
+        queryParameters: _buildQueryParameters(
+            page: page,
+            pageSize: pageSize,
+            schoolId: schoolId,
+            startDate: startDate,
+            endDate: endDate),
+      );
+
+      if (response.statusCode == 200) {
+        int totalPage = response.data['data']['paging']['totalPages'];
+        return totalPage;
       } else {
         throw Exception(
             'Failed to load orders with status code: ${response.statusCode}');
